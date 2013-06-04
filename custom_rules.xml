@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+<target name="-post-compile">
+	<path id="project.all.jars.path">
+		<!-- include something-->
+		<!-- <pathelement path="libs/samsung_ble_sdk_200.jar"/> -->
+	</path>
+	<echo level="info">To be packaged jar: ${toString:project.all.jars.path}</echo>
+</target>
+<target name="run-activity">
+	<exec executable="${adb}" failonerror="true">
+		<arg line="${adb.device.arg}" />
+		<arg line="shell am start" />
+		<arg line="-c android.intent.category.LAUNCHER -a android.intent.action.MAIN" />
+		<arg line="-n ${run.package}/${run.activity} ${run.parameters}" />
+	</exec>
+</target>
+</project>
+

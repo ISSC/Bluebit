@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">Bluebit</string>
+	<string name="text_scan">Scan</string>
+	<string name="text_stop_scan">Stop Scan</string>
+	<string name="text_empty_list">This list is empty</string>
 </resources>

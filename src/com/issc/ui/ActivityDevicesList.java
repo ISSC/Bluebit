@@ -27,6 +27,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,9 +35,11 @@ public class ActivityDevicesList extends Activity {
     private ListView mListView;
     private Button mBtnScan;
     private BroadcastReceiver mReceiver;
-    private BaseAdapter mAdapter;
 
-    private List<Target> mDevices;
+    private BaseAdapter mAdapter;
+    private List<Map<String, Object>> mDevices;
+    private final String sName = "_name";
+    private final String sAddr = "_address";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +48,23 @@ public class ActivityDevicesList extends Activity {
 
         mBtnScan = (Button) findViewById(R.id.btn_scan);
         mListView = (ListView) findViewById(R.id.devices_list);
-
         mReceiver = new ActionReceiver();
 
-        mDevices = new ArrayList<Target>();
-        mAdapter = new ArrayAdapter(this,
-                android.R.layout.simple_list_item_1, mDevices);
+        initAdapter();
+    }
+
+    private void initAdapter() {
+        String[] from = {sName, sAddr};
+        int[] to = {R.id.row_title, R.id.row_description};
+
+        mDevices = new ArrayList<Map<String, Object>>();
+        mAdapter = new SimpleAdapter(
+                    this,
+                    mDevices,
+                    R.layout.row_device,
+                    from,
+                    to
+                );
 
         mListView.setAdapter(mAdapter);
         mListView.setEmptyView(findViewById(R.id.empty));
@@ -106,10 +120,11 @@ public class ActivityDevicesList extends Activity {
 
     private void appendDevice(BluetoothDevice device) {
         if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-            Target t = new Target(device);
-            mDevices.add(t);
+            Map<String, Object> record = new HashMap<String, Object>();
+            record.put(sName, device.getName());
+            record.put(sAddr, device.getAddress());
+            mDevices.add(record);
             mAdapter.notifyDataSetChanged();
-            Log.d(t.toString());
         }
     }
 
@@ -131,22 +146,6 @@ public class ActivityDevicesList extends Activity {
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 stopDiscovery();
             }
-        }
-    }
-
-    private class Target {
-        BluetoothDevice iDevice;
-
-        Target(BluetoothDevice device) {
-            iDevice = device;
-        }
-
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(iDevice.getName());
-            sb.append("(" + iDevice.getBluetoothClass().toString() + ")");
-            sb.append("  " + iDevice.getAddress());
-            return sb.toString();
         }
     }
 }

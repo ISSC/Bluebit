@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<dimen name="large_gutter">20dip</dimen>
+	<dimen name="default_gutter">10dip</dimen>
+	<dimen name="small_gutter">5dip</dimen>
+
+	<dimen name="home_btn_min_height">100dip</dimen>
+
+	<dimen name="top_btn_min_height">30dip</dimen>
+	<dimen name="top_btn_min_width">100dip</dimen>
+</resources>

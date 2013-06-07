@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="row_text">
+		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+		<item name="android:scrollHorizontally">true</item>
+		<item name="android:ellipsize">marquee</item>
+		<item name="android:fadingEdge">horizontal</item>
+		<item name="android:marqueeRepeatLimit">marquee_forever</item>
+	</style>
+
+	<style name="row_text_small">
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+		<item name="android:scrollHorizontally">true</item>
+		<item name="android:ellipsize">marquee</item>
+		<item name="android:fadingEdge">horizontal</item>
+		<item name="android:marqueeRepeatLimit">marquee_forever</item>
+	</style>
+
+	<style name="main_info">
+		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+		<item name="android:ellipsize">marquee</item>
+		<item name="android:fadingEdge">horizontal</item>
+		<item name="android:marqueeRepeatLimit">marquee_forever</item>
+	</style>
+
+	<style name="hint">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+		<item name="android:ellipsize">marquee</item>
+		<item name="android:fadingEdge">horizontal</item>
+		<item name="android:marqueeRepeatLimit">marquee_forever</item>
+	</style>
+</resources>

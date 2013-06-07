@@ -3,5 +3,6 @@
 	<string name="app_name">Bluebit</string>
 	<string name="text_scan">Scan</string>
 	<string name="text_stop_scan">Stop Scan</string>
+	<string name="text_scanning">Scanning</string>
 	<string name="text_empty_list">This list is empty</string>
 </resources>

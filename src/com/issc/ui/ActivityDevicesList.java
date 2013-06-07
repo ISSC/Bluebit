@@ -13,10 +13,13 @@ import java.util.Map;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -37,10 +40,14 @@ public class ActivityDevicesList extends Activity {
     private Button mBtnScan;
     private BroadcastReceiver mReceiver;
 
+    private ProgressDialog mScanningDialog;
+
     private BaseAdapter mAdapter;
     private List<Map<String, Object>> mDevices;
-    private final String sName = "_name";
-    private final String sAddr = "_address";
+    private final static String sName = "_name";
+    private final static String sAddr = "_address";
+
+    private final static int SCAN_DIALOG = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,18 +112,38 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
+    @Override
+    protected Dialog onCreateDialog(int id, Bundle args) {
+        if (id == SCAN_DIALOG) {
+            mScanningDialog = new ProgressDialog(this);
+            mScanningDialog.setMessage(this.getString(R.string.text_scanning));
+            mScanningDialog.setOnCancelListener(new Dialog.OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    stopDiscovery();
+                }
+            });
+            return mScanningDialog;
+        }
+        return null;
+    }
+
+    @Override
+    protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
+        if (id == SCAN_DIALOG) {
+        }
+    }
+
     private void startDiscovery() {
         Log.d("Scanning Devices");
         mDevices.clear();
         mAdapter.notifyDataSetChanged();
+        showDialog(SCAN_DIALOG);
         Util.startDiscovery();
-        mBtnScan.setText(R.string.text_stop_scan);
     }
 
     private void stopDiscovery() {
         Log.d("Stop scanning");
         Util.stopDiscovery();
-        mBtnScan.setText(R.string.text_scan);
     }
 
     private void onFoundDevice(BluetoothDevice device) {
@@ -167,7 +194,7 @@ public class ActivityDevicesList extends Activity {
                     intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 onFoundDevice(device);
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                stopDiscovery();
+                mScanningDialog.cancel();
             }
         }
     }

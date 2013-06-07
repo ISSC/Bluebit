@@ -7,6 +7,7 @@ import com.issc.util.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -118,14 +119,36 @@ public class ActivityDevicesList extends Activity {
         mBtnScan.setText(R.string.text_scan);
     }
 
-    private void appendDevice(BluetoothDevice device) {
+    private void onFoundDevice(BluetoothDevice device) {
         if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-            Map<String, Object> record = new HashMap<String, Object>();
-            record.put(sName, device.getName());
-            record.put(sAddr, device.getAddress());
-            mDevices.add(record);
-            mAdapter.notifyDataSetChanged();
+            if (isInList(mDevices, device)) {
+                Log.d(device.getName() + " already be in list, skip it");
+            } else {
+                appendDevice(device);
+            }
         }
+    }
+
+    private boolean isInList(List<Map<String, Object>> list, BluetoothDevice device) {
+        synchronized(list) {
+            Iterator<Map<String, Object>> it = list.iterator();
+            while(it.hasNext()) {
+                Map<String, Object> item = it.next();
+                if (item.get(sAddr).toString().equals(device.getAddress())) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    private void appendDevice(BluetoothDevice device) {
+        Map<String, Object> record = new HashMap<String, Object>();
+        record.put(sName, device.getName());
+        record.put(sAddr, device.getAddress());
+        mDevices.add(record);
+        mAdapter.notifyDataSetChanged();
     }
 
     private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
@@ -142,7 +165,7 @@ public class ActivityDevicesList extends Activity {
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 BluetoothDevice device =
                     intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                appendDevice(device);
+                onFoundDevice(device);
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 stopDiscovery();
             }

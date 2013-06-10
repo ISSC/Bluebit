@@ -1,13 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	android:stretchColumns="1"
 	>
-	<TextView
+	<TableRow
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:text="Detail Activity"
-		/>
-</LinearLayout>
+		android:layout_height="match_parent"
+		>
+		<TextView
+			style="@style/detail_key"
+			android:text="@string/detail_name"
+			android:padding="@dimen/small_gutter"
+			/>
+		<TextView
+			style="@style/detail_value"
+			android:id="@+id/detail_name"
+			android:padding="@dimen/small_gutter"
+			/>
+	</TableRow>
+
+	<TableRow
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		>
+		<TextView
+			style="@style/detail_key"
+			android:text="@string/detail_addr"
+			android:padding="@dimen/small_gutter"
+			/>
+		<TextView
+			style="@style/detail_value"
+			android:id="@+id/detail_addr"
+			android:padding="@dimen/small_gutter"
+			/>
+	</TableRow>
+
+	<TableRow
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		>
+		<TextView
+			style="@style/detail_key"
+			android:text="@string/detail_device_class"
+			android:padding="@dimen/small_gutter"
+			/>
+		<TextView
+			style="@style/detail_value"
+			android:id="@+id/detail_device_class"
+			android:padding="@dimen/small_gutter"
+			/>
+	</TableRow>
+
+	<TableRow
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		>
+		<TextView
+			style="@style/detail_key"
+			android:text="@string/detail_uuids"
+			android:padding="@dimen/small_gutter"
+			/>
+		<TextView
+			style="@style/detail_value"
+			android:id="@+id/detail_uuids"
+			android:padding="@dimen/small_gutter"
+			/>
+	</TableRow>
+</TableLayout>
 

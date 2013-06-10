@@ -8,4 +8,21 @@
 
 	<string name="device_menu_title">Bluetooth Device</string>
 	<string name="device_menu_detail">Detail information</string>
+
+	<string name="detail_name">Name</string>
+	<string name="detail_addr">Address</string>
+	<string name="detail_uuids">Uuids</string>
+	<string name="detail_device_class">Device Class</string>
+
+	<string name="device_class_audiovideo">Audio Video</string>
+	<string name="device_class_computer">Computer</string>
+	<string name="device_class_health">Health</string>
+	<string name="device_class_imaging">Imaging</string>
+	<string name="device_class_misc">Miscellaneous</string>
+	<string name="device_class_networking">Networking</string>
+	<string name="device_class_peripheral">Peripheral</string>
+	<string name="device_class_phone">Phone</string>
+	<string name="device_class_toy">Toy</string>
+	<string name="device_class_uncategorized">Uncategorized</string>
+	<string name="device_class_wearable">Wearable</string>
 </resources>

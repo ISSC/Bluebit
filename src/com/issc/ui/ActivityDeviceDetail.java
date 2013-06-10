@@ -4,18 +4,32 @@ package com.issc.ui;
 import com.issc.Bluebit;
 import com.issc.R;
 import com.issc.util.Log;
+import com.issc.util.Util;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.ParcelUuid;
 import android.view.View;
+import android.widget.TextView;
 
 public class ActivityDeviceDetail extends Activity {
+    TextView mName;
+    TextView mAddr;
+    TextView mDeviceClass;
+    TextView mUuids;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_detail);
+
+        mName  = (TextView) findViewById(R.id.detail_name);
+        mAddr  = (TextView) findViewById(R.id.detail_addr);
+        mUuids = (TextView) findViewById(R.id.detail_uuids);
+        mDeviceClass = (TextView) findViewById(R.id.detail_device_class);
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
@@ -28,5 +42,32 @@ public class ActivityDeviceDetail extends Activity {
     }
 
     private void init(BluetoothDevice device) {
+        mName.setText(device.getName());
+        mAddr.setText(device.getAddress());
+        setDeviceClass(device);
+
+        // it starts from API Level 15, disable it temporary.
+        //ParcelUuid[] uuids = device.getUuids();
+        //StringBuilder sb = new StringBuilder();
+        //for (int i = 0; (uuids != null && i < uuids.length); i++) {
+        //    sb.append(uuids[i].toString());
+        //}
+        //mUuids.setText(sb.toString());
+    }
+
+    private void setDeviceClass(BluetoothDevice device) {
+        BluetoothClass clazz = device.getBluetoothClass();
+        if (clazz == null) {
+            Log.e("No Bluetooth Class");
+            mDeviceClass.setText("None");
+        } else {
+            int major = clazz.getMajorDeviceClass();
+            int res = Util.getDeviceClassRes(major);
+            if (res == -1) {
+                mDeviceClass.setText("Unknown");
+            } else {
+                mDeviceClass.setText(res);
+            }
+        }
     }
 }

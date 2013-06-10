@@ -29,4 +29,12 @@
 		<item name="android:fadingEdge">horizontal</item>
 		<item name="android:marqueeRepeatLimit">marquee_forever</item>
 	</style>
+
+	<style name="detail_key">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+	<style name="detail_value">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+	</style>
 </resources>

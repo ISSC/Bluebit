@@ -43,9 +43,11 @@ public class ActivityDevicesList extends Activity {
     private ProgressDialog mScanningDialog;
 
     private BaseAdapter mAdapter;
-    private List<Map<String, Object>> mDevices;
+    private List<Map<String, Object>> mRecords;
+    private List<BluetoothDevice> mDevices;
     private final static String sName = "_name";
     private final static String sAddr = "_address";
+    private final static String sSavedDevices = "_devices_info_in_bundle";
 
     private final static int SCAN_DIALOG = 1;
 
@@ -65,10 +67,11 @@ public class ActivityDevicesList extends Activity {
         String[] from = {sName, sAddr};
         int[] to = {R.id.row_title, R.id.row_description};
 
-        mDevices = new ArrayList<Map<String, Object>>();
+        mRecords = new ArrayList<Map<String, Object>>();
+        mDevices = new ArrayList<BluetoothDevice>();
         mAdapter = new SimpleAdapter(
                     this,
-                    mDevices,
+                    mRecords,
                     R.layout.row_device,
                     from,
                     to
@@ -97,6 +100,30 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle b) {
+        super.onSaveInstanceState(b);
+        ArrayList<BluetoothDevice> devices;
+        /* cache scanned results if Activity being rotated */
+        if (mDevices.size() > 0) {
+            devices = new ArrayList<BluetoothDevice>(mDevices);
+            b.putParcelableArrayList(sSavedDevices, devices);
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle b) {
+        super.onRestoreInstanceState(b);
+        ArrayList<BluetoothDevice> devices;
+        /* restore scanned results if any */
+        devices = b.getParcelableArrayList(sSavedDevices);
+        if (devices != null) {
+            for (int i = 0; i < devices.size(); i++) {
+                appendDevice(devices.get(i));
+            }
+        }
     }
 
     public void onClickBtnScan(View v) {
@@ -135,6 +162,7 @@ public class ActivityDevicesList extends Activity {
 
     private void startDiscovery() {
         Log.d("Scanning Devices");
+        mRecords.clear();
         mDevices.clear();
         mAdapter.notifyDataSetChanged();
         showDialog(SCAN_DIALOG);
@@ -148,7 +176,7 @@ public class ActivityDevicesList extends Activity {
 
     private void onFoundDevice(BluetoothDevice device) {
         if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-            if (isInList(mDevices, device)) {
+            if (isInList(mRecords, device)) {
                 Log.d(device.getName() + " already be in list, skip it");
             } else {
                 appendDevice(device);
@@ -174,7 +202,8 @@ public class ActivityDevicesList extends Activity {
         Map<String, Object> record = new HashMap<String, Object>();
         record.put(sName, device.getName());
         record.put(sAddr, device.getAddress());
-        mDevices.add(record);
+        mRecords.add(record);
+        mDevices.add(device);
         mAdapter.notifyDataSetChanged();
     }
 

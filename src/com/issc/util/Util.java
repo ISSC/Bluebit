@@ -5,8 +5,11 @@ import com.issc.Bluebit;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+
+import java.util.Set;
 
 public final class Util {
 
@@ -57,6 +60,15 @@ public final class Util {
         }
 
         return false;
+    }
+
+    public static Set<BluetoothDevice> getBondedDevices() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null && adapter.isEnabled()) {
+            return adapter.getBondedDevices();
+        }
+
+        return null;
     }
 }
 

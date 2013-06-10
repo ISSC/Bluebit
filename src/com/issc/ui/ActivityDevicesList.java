@@ -79,6 +79,8 @@ public class ActivityDevicesList extends Activity {
 
         mListView.setAdapter(mAdapter);
         mListView.setEmptyView(findViewById(R.id.empty));
+
+        appendBondedDevices();
     }
 
     @Override
@@ -164,14 +166,27 @@ public class ActivityDevicesList extends Activity {
         Log.d("Scanning Devices");
         mRecords.clear();
         mDevices.clear();
-        mAdapter.notifyDataSetChanged();
         showDialog(SCAN_DIALOG);
+
+        appendBondedDevices();
+        mAdapter.notifyDataSetChanged();
         Util.startDiscovery();
     }
 
     private void stopDiscovery() {
         Log.d("Stop scanning");
         Util.stopDiscovery();
+    }
+
+    private void appendBondedDevices() {
+        Set<BluetoothDevice> bonded = Util.getBondedDevices();
+        if (bonded != null) {
+            Iterator<BluetoothDevice> it = bonded.iterator();
+            while(it.hasNext()) {
+                appendDevice(it.next());
+            }
+        }
+
     }
 
     private void onFoundDevice(BluetoothDevice device) {

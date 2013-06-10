@@ -2,6 +2,7 @@
 
 package com.issc.ui;
 
+import com.issc.Bluebit;
 import com.issc.util.Log;
 import com.issc.util.Util;
 
@@ -23,6 +24,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -51,6 +56,8 @@ public class ActivityDevicesList extends Activity {
 
     private final static int SCAN_DIALOG = 1;
 
+    private final static int MENU_DETAIL = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +67,8 @@ public class ActivityDevicesList extends Activity {
         mListView = (ListView) findViewById(R.id.devices_list);
         mReceiver = new ActionReceiver();
 
+        mListView.setOnItemClickListener(new ItemClickListener());
+        registerForContextMenu(mListView);
         initAdapter();
     }
 
@@ -162,6 +171,31 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu,
+                                        View v,
+                                        ContextMenuInfo info) {
+        super.onCreateContextMenu(menu, v, info);
+        if (v == mListView) {
+            menu.setHeaderTitle(R.string.device_menu_title);
+            menu.add(0, MENU_DETAIL, Menu.NONE, R.string.device_menu_detail);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info =
+            (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int pos = info.position;
+        int id = item.getItemId();
+        if (id == MENU_DETAIL) {
+            Intent i = new Intent(this, ActivityDeviceDetail.class);
+            i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
+            startActivity(i);
+        }
+        return true;
+    }
+
     private void startDiscovery() {
         Log.d("Scanning Devices");
         mRecords.clear();
@@ -222,11 +256,15 @@ public class ActivityDevicesList extends Activity {
         mAdapter.notifyDataSetChanged();
     }
 
-    private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
+    class ItemClickListener implements OnItemClickListener {
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        public void onItemClick(AdapterView<?> parent,
+                                    View view,
+                                    int position,
+                                    long id) {
+            view.showContextMenu();
         }
-    };
+    }
 
     class ActionReceiver extends BroadcastReceiver {
         @Override

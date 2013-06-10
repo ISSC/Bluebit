@@ -9,6 +9,8 @@ public final class Bluebit {
 
     public final static String TAG = "Bluebit";
 
+    public final static String CHOSEN_DEVICE = "the_device_been_choosen";
+
     private Bluebit() {
         // Hide constructor since you should
         // never instantiate me.

@@ -34,6 +34,9 @@ public final class Util {
     public static boolean startDiscovery() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null && adapter.isEnabled()) {
+            // according to documentation, it is highly recommendation
+            // to cancel ongoing discovery before start new one.
+            adapter.cancelDiscovery();
             return adapter.startDiscovery();
         }
         return false;

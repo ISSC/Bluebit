@@ -1,6 +1,7 @@
 // vim: et sw=4 sts=4 tabstop=4
 package com.issc.ui;
 
+import com.issc.R;
 import com.issc.util.Log;
 
 import android.app.Activity;

@@ -3,6 +3,7 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
+import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
 

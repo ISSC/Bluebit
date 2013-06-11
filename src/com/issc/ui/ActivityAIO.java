@@ -1,10 +1,12 @@
 // vim: et sw=4 sts=4 tabstop=4
 package com.issc.ui;
 
+import com.issc.Bluebit;
 import com.issc.R;
 import com.issc.util.Log;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -18,6 +20,16 @@ public class ActivityAIO extends Activity {
 
     public void onClickBtn(View v) {
         Intent i = new Intent(this, ActivityDevicesList.class);
-        startActivity(i);
+        startActivityForResult(i, Bluebit.REQ_CHOOSE_DEVICE);
+    }
+
+    @Override
+    protected void onActivityResult(int request, int result, Intent data) {
+        if (request == Bluebit.REQ_CHOOSE_DEVICE) {
+            if (result == Activity.RESULT_OK) {
+                BluetoothDevice bd = data.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
+                Log.d("Chosen the device:" + bd.getName());
+            }
+        }
     }
 }

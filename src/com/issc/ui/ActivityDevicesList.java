@@ -58,6 +58,7 @@ public class ActivityDevicesList extends Activity {
     private final static int SCAN_DIALOG = 1;
 
     private final static int MENU_DETAIL = 0;
+    private final static int MENU_CHOOSE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,6 +181,7 @@ public class ActivityDevicesList extends Activity {
         if (v == mListView) {
             menu.setHeaderTitle(R.string.device_menu_title);
             menu.add(0, MENU_DETAIL, Menu.NONE, R.string.device_menu_detail);
+            menu.add(0, MENU_CHOOSE, Menu.NONE, R.string.device_menu_choose);
         }
     }
 
@@ -193,6 +195,11 @@ public class ActivityDevicesList extends Activity {
             Intent i = new Intent(this, ActivityDeviceDetail.class);
             i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
             startActivity(i);
+        } else if (id == MENU_CHOOSE) {
+            Intent r = new Intent();
+            r.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
+            this.setResult(Activity.RESULT_OK, r);
+            finish();
         }
         return true;
     }

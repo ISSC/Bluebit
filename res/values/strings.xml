@@ -7,6 +7,7 @@
 	<string name="text_empty_list">This list is empty</string>
 
 	<string name="device_menu_title">Bluetooth Device</string>
+	<string name="device_menu_choose">Choose this device</string>
 	<string name="device_menu_detail">Detail information</string>
 
 	<string name="detail_name">Name</string>

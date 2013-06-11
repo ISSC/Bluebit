@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<integer name="seekbar_max">255</integer>
+	<integer name="seekbar_progress">5</integer>
+</resources>

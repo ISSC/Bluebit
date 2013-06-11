@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ToggleButton;
 
 public class ActivityAIO extends Activity {
     @Override
@@ -31,5 +32,10 @@ public class ActivityAIO extends Activity {
                 Log.d("Chosen the device:" + bd.getName());
             }
         }
+    }
+
+    public void onToggleClicked(View v) {
+        ToggleButton toggle = (ToggleButton)v;
+        Log.d("is checked:" + toggle.isChecked());
     }
 }

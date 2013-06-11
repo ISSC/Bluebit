@@ -156,7 +156,7 @@ public class ActivityDevicesList extends Activity {
     protected Dialog onCreateDialog(int id, Bundle args) {
         if (id == SCAN_DIALOG) {
             mScanningDialog = new ProgressDialog(this);
-            mScanningDialog.setMessage(this.getString(R.string.text_scanning));
+            mScanningDialog.setMessage(this.getString(R.string.scanning));
             mScanningDialog.setOnCancelListener(new Dialog.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
                     stopDiscovery();

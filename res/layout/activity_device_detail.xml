@@ -1,56 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:stretchColumns="1"
+	android:orientation="vertical"
 	>
-	<TableRow
+	<ListView
+		android:id="@android:id/list"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
 		>
-		<TextView
-			style="@style/detail_key"
-			android:text="@string/detail_name"
-			android:padding="@dimen/small_gutter"
-			/>
-		<TextView
-			style="@style/detail_value"
-			android:id="@+id/detail_name"
-			android:padding="@dimen/small_gutter"
-			/>
-	</TableRow>
+	</ListView>
 
-	<TableRow
+	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="wrap_content"
+		style="@android:style/ButtonBar"
 		>
-		<TextView
-			style="@style/detail_key"
-			android:text="@string/detail_addr"
-			android:padding="@dimen/small_gutter"
+		<Button
+			android:id="@+id/btn_more_detail"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="@string/more"
+			android:onClick="onClickBtnMore"
 			/>
-		<TextView
-			style="@style/detail_value"
-			android:id="@+id/detail_addr"
-			android:padding="@dimen/small_gutter"
-			/>
-	</TableRow>
+	</LinearLayout>
 
-	<TableRow
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		>
-		<TextView
-			style="@style/detail_key"
-			android:text="@string/detail_device_class"
-			android:padding="@dimen/small_gutter"
-			/>
-		<TextView
-			style="@style/detail_value"
-			android:id="@+id/detail_device_class"
-			android:padding="@dimen/small_gutter"
-			/>
-	</TableRow>
-
-</TableLayout>
+</LinearLayout>
 

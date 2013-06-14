@@ -46,6 +46,7 @@ public final class Util {
         if (adapter != null && adapter.isEnabled()) {
             // according to documentation, it is highly recommendation
             // to cancel ongoing discovery before start new one.
+            // FIXME: on S4, cancel discovery cause one more DISCOVERY_FINISHED
             adapter.cancelDiscovery();
             return adapter.startDiscovery();
         }

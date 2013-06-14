@@ -19,6 +19,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -41,6 +42,10 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
+
 public class ActivityDevicesList extends Activity {
     private ListView mListView;
     private Button mBtnScan;
@@ -60,6 +65,9 @@ public class ActivityDevicesList extends Activity {
     private final static int MENU_DETAIL = 0;
     private final static int MENU_CHOOSE = 1;
 
+    BluetoothGatt mGatt;
+    BluetoothGattCallback mCallback;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +79,10 @@ public class ActivityDevicesList extends Activity {
 
         mListView.setOnItemClickListener(new ItemClickListener());
         registerForContextMenu(mListView);
+
+        mCallback = new GattCallback();
+        GattServiceListener listener = new GattServiceListener();
+        BluetoothGattAdapter.getProfileProxy(this, listener, BluetoothGattAdapter.GATT);
         initAdapter();
     }
 
@@ -90,8 +102,6 @@ public class ActivityDevicesList extends Activity {
 
         mListView.setAdapter(mAdapter);
         mListView.setEmptyView(findViewById(R.id.empty));
-
-        appendBondedDevices();
     }
 
     @Override
@@ -141,11 +151,7 @@ public class ActivityDevicesList extends Activity {
 
     public void onClickBtnScan(View v) {
         if (Util.isBluetoothEnabled()) {
-            if (Util.isDiscovering()) {
-                stopDiscovery();
-            } else {
-                startDiscovery();
-            }
+            startDiscovery();
         } else {
             Log.d("Trying to enable Bluetooth");
             Util.enableBluetooth(this, 0);
@@ -210,14 +216,22 @@ public class ActivityDevicesList extends Activity {
         mDevices.clear();
         showDialog(SCAN_DIALOG);
 
-        appendBondedDevices();
         mAdapter.notifyDataSetChanged();
-        Util.startDiscovery();
+
+        if (mGatt != null) {
+            mGatt.startScan();
+        } else {
+            Log.e("No Gatt instance");
+        }
     }
 
     private void stopDiscovery() {
         Log.d("Stop scanning");
-        Util.stopDiscovery();
+        if (mGatt != null) {
+            mGatt.stopScan();
+        } else {
+            Log.e("No Gatt instance");
+        }
     }
 
     private void appendBondedDevices() {
@@ -261,7 +275,11 @@ public class ActivityDevicesList extends Activity {
         record.put(sAddr, device.getAddress());
         mRecords.add(record);
         mDevices.add(device);
-        mAdapter.notifyDataSetChanged();
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     class ItemClickListener implements OnItemClickListener {
@@ -286,6 +304,28 @@ public class ActivityDevicesList extends Activity {
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 mScanningDialog.cancel();
             }
+        }
+    }
+
+    class GattServiceListener implements BluetoothProfile.ServiceListener {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            if (profile == BluetoothGattAdapter.GATT) {
+                mGatt = (BluetoothGatt) proxy;
+                mGatt.registerApp(mCallback);
+            }
+        }
+
+        public void onServiceDisconnected(int profile) {
+            if (profile == BluetoothGattAdapter.GATT) {
+                mGatt.unregisterApp();
+            }
+        }
+    }
+
+    class GattCallback extends BluetoothGattCallback {
+        @Override
+        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
+            onFoundDevice(device);
         }
     }
 }

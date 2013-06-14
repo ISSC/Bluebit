@@ -19,7 +19,6 @@ public class ActivityDeviceDetail extends Activity {
     TextView mName;
     TextView mAddr;
     TextView mDeviceClass;
-    TextView mUuids;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,7 +27,6 @@ public class ActivityDeviceDetail extends Activity {
 
         mName  = (TextView) findViewById(R.id.detail_name);
         mAddr  = (TextView) findViewById(R.id.detail_addr);
-        mUuids = (TextView) findViewById(R.id.detail_uuids);
         mDeviceClass = (TextView) findViewById(R.id.detail_device_class);
 
         Intent intent = getIntent();
@@ -45,14 +43,6 @@ public class ActivityDeviceDetail extends Activity {
         mName.setText(device.getName());
         mAddr.setText(device.getAddress());
         setDeviceClass(device);
-
-        // it starts from API Level 15, disable it temporary.
-        //ParcelUuid[] uuids = device.getUuids();
-        //StringBuilder sb = new StringBuilder();
-        //for (int i = 0; (uuids != null && i < uuids.length); i++) {
-        //    sb.append(uuids[i].toString());
-        //}
-        //mUuids.setText(sb.toString());
     }
 
     private void setDeviceClass(BluetoothDevice device) {

@@ -52,20 +52,5 @@
 			/>
 	</TableRow>
 
-	<TableRow
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		>
-		<TextView
-			style="@style/detail_key"
-			android:text="@string/detail_uuids"
-			android:padding="@dimen/small_gutter"
-			/>
-		<TextView
-			style="@style/detail_value"
-			android:id="@+id/detail_uuids"
-			android:padding="@dimen/small_gutter"
-			/>
-	</TableRow>
 </TableLayout>
 

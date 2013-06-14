@@ -22,18 +22,18 @@ public final class Util {
     private final static Map<Integer, BtClass> sMap
                             = new HashMap<Integer, BtClass>();
 
+    private final static BluetoothAdapter sAdapter
+                            = BluetoothAdapter.getDefaultAdapter();
     private Util() {
         // this is just a helper class.
     }
 
     public static boolean isBluetoothSupported() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        return (adapter!= null);
+        return (sAdapter!= null);
     }
 
     public static boolean isBluetoothEnabled() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        return (adapter != null) && (adapter.isEnabled());
+        return (sAdapter != null) && (sAdapter.isEnabled());
     }
 
     public static void enableBluetooth(Activity act, int code) {
@@ -42,38 +42,34 @@ public final class Util {
     }
 
     public static boolean startDiscovery() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null && adapter.isEnabled()) {
+        if (isBluetoothEnabled()) {
             // according to documentation, it is highly recommendation
             // to cancel ongoing discovery before start new one.
             // FIXME: on S4, cancel discovery cause one more DISCOVERY_FINISHED
-            adapter.cancelDiscovery();
-            return adapter.startDiscovery();
+            sAdapter.cancelDiscovery();
+            return sAdapter.startDiscovery();
         }
         return false;
     }
 
     public static boolean stopDiscovery() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null && adapter.isEnabled()) {
-            return adapter.cancelDiscovery();
+        if (isBluetoothEnabled()) {
+            return sAdapter.cancelDiscovery();
         }
         return false;
     }
 
     public static boolean isDiscovering() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null && adapter.isEnabled()) {
-            return adapter.isDiscovering();
+        if (isBluetoothEnabled()) {
+            return sAdapter.isDiscovering();
         }
 
         return false;
     }
 
     public static Set<BluetoothDevice> getBondedDevices() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null && adapter.isEnabled()) {
-            return adapter.getBondedDevices();
+        if (isBluetoothEnabled()) {
+            return sAdapter.getBondedDevices();
         }
 
         return null;

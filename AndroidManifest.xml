@@ -11,7 +11,8 @@
 		android:icon="@drawable/logo"
 		android:theme="@android:style/Theme.Holo.Light"
 		>
-		<activity android:name=".ui.ActivityAIO"
+
+		<activity android:name=".ui.ActivityDevicesList"
 			android:label="@string/app_name"
 			>
 			<intent-filter>
@@ -20,13 +21,8 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".ui.ActivityDevicesList">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-			</intent-filter>
-		</activity>
-
 		<activity android:name=".ui.ActivityDeviceDetail" />
+		<activity android:name=".ui.ActivityAIO" />
 
 	</application>
 </manifest>

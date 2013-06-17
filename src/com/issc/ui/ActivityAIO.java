@@ -2,6 +2,7 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
+import com.issc.data.BLEDevice;
 import com.issc.R;
 import com.issc.util.Log;
 
@@ -28,8 +29,8 @@ public class ActivityAIO extends Activity {
     protected void onActivityResult(int request, int result, Intent data) {
         if (request == Bluebit.REQ_CHOOSE_DEVICE) {
             if (result == Activity.RESULT_OK) {
-                BluetoothDevice bd = data.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-                Log.d("Chosen the device:" + bd.getName());
+                BLEDevice bd = data.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
+                Log.d("Chosen the device:" + bd.getDevice().getName());
             }
         }
     }

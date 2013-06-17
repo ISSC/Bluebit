@@ -3,6 +3,7 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
+import com.issc.data.BLEDevice;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -57,7 +58,7 @@ public class ActivityDevicesList extends Activity implements
 
     private BaseAdapter mAdapter;
     private List<Map<String, Object>> mRecords;
-    private List<BluetoothDevice> mDevices;
+    private List<BLEDevice> mDevices;
     private final static String sName = "_name";
     private final static String sAddr = "_address";
     private final static String sSavedDevices = "_devices_info_in_bundle";
@@ -91,7 +92,7 @@ public class ActivityDevicesList extends Activity implements
         int[] to = {R.id.row_title, R.id.row_description};
 
         mRecords = new ArrayList<Map<String, Object>>();
-        mDevices = new ArrayList<BluetoothDevice>();
+        mDevices = new ArrayList<BLEDevice>();
         mAdapter = new SimpleAdapter(
                     this,
                     mRecords,
@@ -142,10 +143,10 @@ public class ActivityDevicesList extends Activity implements
     @Override
     protected void onSaveInstanceState(Bundle b) {
         super.onSaveInstanceState(b);
-        ArrayList<BluetoothDevice> devices;
+        ArrayList<BLEDevice> devices;
         /* cache scanned results if Activity being rotated */
         if (mDevices.size() > 0) {
-            devices = new ArrayList<BluetoothDevice>(mDevices);
+            devices = new ArrayList<BLEDevice>(mDevices);
             b.putParcelableArrayList(sSavedDevices, devices);
         }
     }
@@ -153,12 +154,12 @@ public class ActivityDevicesList extends Activity implements
     @Override
     protected void onRestoreInstanceState(Bundle b) {
         super.onRestoreInstanceState(b);
-        ArrayList<BluetoothDevice> devices;
+        ArrayList<BLEDevice> devices;
         /* restore scanned results if any */
         devices = b.getParcelableArrayList(sSavedDevices);
         if (devices != null) {
             for (int i = 0; i < devices.size(); i++) {
-                appendDevice(devices.get(i));
+                appendDevice(devices.get(i).getDevice());
             }
         }
     }
@@ -288,7 +289,7 @@ public class ActivityDevicesList extends Activity implements
         record.put(sName, device.getName());
         record.put(sAddr, device.getAddress());
         mRecords.add(record);
-        mDevices.add(device);
+        mDevices.add(new BLEDevice(device));
         this.runOnUiThread(new Runnable() {
             public void run() {
                 mAdapter.notifyDataSetChanged();

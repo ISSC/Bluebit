@@ -46,7 +46,9 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 
-public class ActivityDevicesList extends Activity {
+public class ActivityDevicesList extends Activity implements
+        BluetoothProfile.ServiceListener {
+
     private ListView mListView;
     private Button mBtnScan;
     private BroadcastReceiver mReceiver;
@@ -65,7 +67,6 @@ public class ActivityDevicesList extends Activity {
     private final static int MENU_DETAIL = 0;
     private final static int MENU_CHOOSE = 1;
 
-    private GattServiceListener mGattListener;
     private BluetoothGatt mGatt;
     private BluetoothGattCallback mCallback;
 
@@ -82,7 +83,6 @@ public class ActivityDevicesList extends Activity {
         registerForContextMenu(mListView);
 
         mCallback = new GattCallback();
-        mGattListener = new GattServiceListener();
         initAdapter();
     }
 
@@ -128,16 +128,15 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        BluetoothGattAdapter.getProfileProxy(this,
-                                                 mGattListener,
-                                                 BluetoothGattAdapter.GATT);
+        BluetoothGattAdapter.getProfileProxy(this, this,
+                BluetoothGattAdapter.GATT);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT,
-                                                   mGatt);
+                mGatt);
     }
 
     @Override
@@ -322,19 +321,19 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
-    class GattServiceListener implements BluetoothProfile.ServiceListener {
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (profile == BluetoothGattAdapter.GATT) {
-                mGatt = (BluetoothGatt) proxy;
-                mGatt.registerApp(mCallback);
-            }
+    @Override
+    public void onServiceConnected(int profile, BluetoothProfile proxy) {
+        if (profile == BluetoothGattAdapter.GATT) {
+            mGatt = (BluetoothGatt) proxy;
+            mGatt.registerApp(mCallback);
         }
+    }
 
-        public void onServiceDisconnected(int profile) {
-            if (profile == BluetoothGattAdapter.GATT) {
-                mGatt.unregisterApp();
-                mGatt = null;
-            }
+    @Override
+    public void onServiceDisconnected(int profile) {
+        if (profile == BluetoothGattAdapter.GATT) {
+            mGatt.unregisterApp();
+            mGatt = null;
         }
     }
 

@@ -22,6 +22,7 @@
 		</activity>
 
 		<activity android:name=".ui.ActivityDeviceDetail" />
+		<activity android:name=".ui.ActivityFunctionPicker" />
 		<activity android:name=".ui.ActivityAIO" />
 
 	</application>

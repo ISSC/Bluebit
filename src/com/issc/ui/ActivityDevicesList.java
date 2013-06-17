@@ -217,10 +217,9 @@ public class ActivityDevicesList extends Activity implements
             i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
             startActivity(i);
         } else if (id == MENU_CHOOSE) {
-            Intent r = new Intent();
-            r.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
-            this.setResult(Activity.RESULT_OK, r);
-            finish();
+            Intent i = new Intent(this, ActivityFunctionPicker.class);
+            i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
+            startActivity(i);
         }
         return true;
     }

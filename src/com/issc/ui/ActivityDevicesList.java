@@ -65,8 +65,9 @@ public class ActivityDevicesList extends Activity {
     private final static int MENU_DETAIL = 0;
     private final static int MENU_CHOOSE = 1;
 
-    BluetoothGatt mGatt;
-    BluetoothGattCallback mCallback;
+    private GattServiceListener mGattListener;
+    private BluetoothGatt mGatt;
+    private BluetoothGattCallback mCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +82,7 @@ public class ActivityDevicesList extends Activity {
         registerForContextMenu(mListView);
 
         mCallback = new GattCallback();
-        GattServiceListener listener = new GattServiceListener();
-        BluetoothGattAdapter.getProfileProxy(this, listener, BluetoothGattAdapter.GATT);
+        mGattListener = new GattServiceListener();
         initAdapter();
     }
 
@@ -123,6 +123,21 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BluetoothGattAdapter.getProfileProxy(this,
+                                                 mGattListener,
+                                                 BluetoothGattAdapter.GATT);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT,
+                                                   mGatt);
     }
 
     @Override
@@ -318,6 +333,7 @@ public class ActivityDevicesList extends Activity {
         public void onServiceDisconnected(int profile) {
             if (profile == BluetoothGattAdapter.GATT) {
                 mGatt.unregisterApp();
+                mGatt = null;
             }
         }
     }

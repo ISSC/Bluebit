@@ -103,7 +103,7 @@ public class FunctionAdapter extends BaseAdapter {
 
     private void addLighting(ArrayList<UuidMatcher> options) {
         UuidMatcher matcher = new UuidMatcher();
-        matcher.setTarget("com.issc.ui", "com.issc.ui.ActivityAIO");
+        matcher.setTarget("com.issc", "com.issc.ui.ActivityAIO");
         for (int i = 0; i < Bluebit.UUIDS_OF_LIGHTING.length; i++) {
             matcher.addRule(Bluebit.UUIDS_OF_LIGHTING[i]);
         }

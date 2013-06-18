@@ -14,25 +14,23 @@ import android.view.View;
 import android.widget.ToggleButton;
 
 public class ActivityAIO extends Activity {
+
+    private BluetoothDevice mDevice;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aio);
+
+        BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
+        mDevice = device.getDevice();
     }
 
     public void onClickBtn(View v) {
-        Intent i = new Intent(this, ActivityDevicesList.class);
-        startActivityForResult(i, Bluebit.REQ_CHOOSE_DEVICE);
     }
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
-        if (request == Bluebit.REQ_CHOOSE_DEVICE) {
-            if (result == Activity.RESULT_OK) {
-                BLEDevice bd = data.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-                Log.d("Chosen the device:" + bd.getDevice().getName());
-            }
-        }
     }
 
     public void onToggleClicked(View v) {

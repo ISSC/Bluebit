@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,6 +90,11 @@ public class FunctionAdapter extends BaseAdapter {
         desc.setText(handler.getDesc());
 
         return convertView;
+    }
+
+    public Intent createIntent(int pos) {
+        UuidMatcher target = (UuidMatcher)getItem(pos);
+        return target.createIntent();
     }
 
     private void initOptions(ArrayList<UuidMatcher> options) {

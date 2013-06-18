@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.view.View;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -170,6 +171,14 @@ public class ActivityFunctionPicker extends ListActivity
             mGatt.unregisterApp();
             mGatt = null;
         }
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int pos, long id) {
+        Intent i = mAdapter.createIntent(pos);
+        BLEDevice device = new BLEDevice(mDevice);
+        i.putExtra(Bluebit.CHOSEN_DEVICE, device);
+        startActivity(i);
     }
 
     class GattCallback extends BluetoothGattCallback {

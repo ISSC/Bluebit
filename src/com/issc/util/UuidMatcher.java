@@ -37,6 +37,12 @@ public class UuidMatcher {
         mActName = act;
     }
 
+    public Intent createIntent() {
+        Intent i = new Intent();
+        i.setClassName(mPkgName, mActName);
+        return i;
+    }
+
     public void setInfo(CharSequence title, CharSequence desc) {
         mTitle = title;
         mDesc  = desc;

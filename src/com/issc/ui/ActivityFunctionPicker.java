@@ -87,7 +87,7 @@ public class ActivityFunctionPicker extends ListActivity
     protected Dialog onCreateDialog(int id, Bundle args) {
         if (id == DISCOVERY_DIALOG) {
             mDiscoveringDialog = new ProgressDialog(this);
-            mDiscoveringDialog.setMessage(this.getString(R.string.scanning));
+            mDiscoveringDialog.setMessage(this.getString(R.string.discovering));
             mDiscoveringDialog.setOnCancelListener(new Dialog.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
                     stopDiscovery();

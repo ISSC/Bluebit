@@ -22,16 +22,19 @@ public class FunctionAdapter extends BaseAdapter {
     private final static int sLayoutRes = R.layout.row_detail;
     private final LayoutInflater mInflater;
 
+    private Context mContext;
+
     private ArrayList<UuidMatcher> mOptions;
     private ArrayList<UuidMatcher> mResults;
     private ArrayList<UUID> mUuids;
 
     public FunctionAdapter(Context context) {
         super();
+        mContext = context;
         mOptions  = new ArrayList<UuidMatcher>();
         mResults  = new ArrayList<UuidMatcher>();
         mUuids    = new ArrayList<UUID>();
-        mInflater = LayoutInflater.from(context);
+        mInflater = LayoutInflater.from(mContext);
 
         initOptions(mOptions);
     }
@@ -99,7 +102,8 @@ public class FunctionAdapter extends BaseAdapter {
             matcher.addRule(Bluebit.UUIDS_OF_LIGHTING[i]);
         }
 
-        matcher.setInfo("Lighting", "Control the light");
+        matcher.setInfo(mContext.getString(R.string.func_light),
+                mContext.getString(R.string.func_light_desc));
         options.add(matcher);
     }
 }

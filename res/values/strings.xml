@@ -10,6 +10,7 @@
 	<string name="stop_scan">Stop Scan</string>
 	<string name="scanning">Scanning</string>
 	<string name="discovering">Discovering</string>
+	<string name="connecting">Connecting</string>
 	<string name="empty_list">This list is empty</string>
 	<string name="empty_function">There is no corresponding function for this Device</string>
 	<string name="red">Red</string>

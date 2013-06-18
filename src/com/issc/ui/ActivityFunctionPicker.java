@@ -48,6 +48,8 @@ public class ActivityFunctionPicker extends ListActivity
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
 
+    private boolean mDiscovered = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,6 +138,7 @@ public class ActivityFunctionPicker extends ListActivity
 
     private void onDiscovered(BluetoothDevice device) {
         Log.d("on discovered:");
+        mDiscovered = true;
         if (mGatt != null) {
             List<BluetoothGattService> srvs = mGatt.getServices(device);
             Iterator<BluetoothGattService> it = srvs.iterator();
@@ -173,7 +176,9 @@ public class ActivityFunctionPicker extends ListActivity
 
         @Override
         public void onAppRegistered(int status) {
-            startDiscovery();
+            if (!mDiscovered) {
+                startDiscovery();
+            }
         }
 
         @Override

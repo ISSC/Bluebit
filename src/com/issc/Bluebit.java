@@ -19,4 +19,17 @@ public final class Bluebit {
         // Hide constructor since you should
         // never instantiate me.
     }
+
+    public final static String[] UUIDS_OF_LIGHTING = {
+        "49535343-fe7d-4ae5-8fa9-9fafd205e455",
+        "00001800-0000-1000-8000-00805f9b34fb",
+        "0000180a-0000-1000-8000-00805f9b34fb",
+        "00001802-0000-1000-8000-00805f9b34fb",
+        "00001803-0000-1000-8000-00805f9b34fb",
+        "00001804-0000-1000-8000-00805f9b34fb",
+        "00001815-0000-1000-8000-00805f9b34fb"
+    };
 }
+
+
+

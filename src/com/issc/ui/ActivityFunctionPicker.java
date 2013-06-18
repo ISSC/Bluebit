@@ -3,6 +3,7 @@ package com.issc.ui;
 
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
+import com.issc.impl.FunctionAdapter;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -38,12 +39,8 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 public class ActivityFunctionPicker extends ListActivity
         implements BluetoothProfile.ServiceListener {
 
-    private final static String sKey = "key";
-    private final static String sVal = "value";
-
     private BluetoothDevice mDevice;
-    private ArrayList<Map<String, Object>> mEntries;
-    private BaseAdapter mAdapter;
+    private FunctionAdapter mAdapter;
 
     private BluetoothGatt mGatt;
     private BluetoothGattCallback mCallback;
@@ -132,34 +129,10 @@ public class ActivityFunctionPicker extends ListActivity
     }
 
     private void initAdapter() {
-        String[] from = {sKey, sVal};
-        int[] to = {R.id.row_title, R.id.row_description};
-
-        mEntries = new ArrayList<Map<String, Object>>();
-        mAdapter = new SimpleAdapter(
-                    this,
-                    mEntries,
-                    R.layout.row_detail,
-                    from,
-                    to
-                );
-
+        mAdapter = new FunctionAdapter(this);
         setListAdapter(mAdapter);
     }
 
-
-    private void append(String key, String value) {
-        Map<String, Object> entry = new HashMap<String, Object>();
-        entry.put(sKey, key);
-        entry.put(sVal, value);
-        mEntries.add(entry);
-
-        runOnUiThread(new Runnable() {
-            public void run() {
-                mAdapter.notifyDataSetChanged();
-            }
-        });
-    }
 
     private void onDiscovered(BluetoothDevice device) {
         Log.d("on discovered:");
@@ -172,8 +145,12 @@ public class ActivityFunctionPicker extends ListActivity
         }
     }
 
-    private void appendServices(BluetoothGattService srv) {
-        append("Service", srv.getUuid().toString());
+    private void appendServices(final BluetoothGattService srv) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                mAdapter.addUuidInUiThread(srv.getUuid());
+            }
+        });
     }
 
     @Override

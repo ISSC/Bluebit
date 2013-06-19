@@ -266,6 +266,8 @@ public class ActivityDevicesList extends Activity implements
             } else {
                 appendDevice(device);
             }
+        } else {
+            Log.d("found a bond device");
         }
     }
 
@@ -323,6 +325,7 @@ public class ActivityDevicesList extends Activity implements
 
     @Override
     public void onServiceConnected(int profile, BluetoothProfile proxy) {
+        Log.d("service connected");
         if (profile == BluetoothGattAdapter.GATT) {
             mGatt = (BluetoothGatt) proxy;
             mGatt.registerApp(mCallback);
@@ -331,6 +334,7 @@ public class ActivityDevicesList extends Activity implements
 
     @Override
     public void onServiceDisconnected(int profile) {
+        Log.d("service disconnected");
         if (profile == BluetoothGattAdapter.GATT) {
             mGatt.unregisterApp();
             mGatt = null;

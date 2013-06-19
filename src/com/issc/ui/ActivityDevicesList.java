@@ -4,6 +4,7 @@ package com.issc.ui;
 
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
+import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -47,8 +48,7 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 
-public class ActivityDevicesList extends Activity implements
-        BluetoothProfile.ServiceListener {
+public class ActivityDevicesList extends Activity {
 
     private ListView mListView;
     private Button mBtnScan;
@@ -69,7 +69,7 @@ public class ActivityDevicesList extends Activity implements
     private final static int MENU_CHOOSE = 1;
 
     private BluetoothGatt mGatt;
-    private BluetoothGattCallback mCallback;
+    private GattProxy.Listener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +83,7 @@ public class ActivityDevicesList extends Activity implements
         mListView.setOnItemClickListener(new ItemClickListener());
         registerForContextMenu(mListView);
 
-        mCallback = new GattCallback();
+        mListener = new GattListener();
         initAdapter();
     }
 
@@ -129,15 +129,16 @@ public class ActivityDevicesList extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
-        BluetoothGattAdapter.getProfileProxy(this, this,
-                BluetoothGattAdapter.GATT);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.addListener(mListener);
+        proxy.retrieveGatt(mListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT,
-                mGatt);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.rmListener(mListener);
     }
 
     @Override
@@ -289,7 +290,10 @@ public class ActivityDevicesList extends Activity implements
                                     View view,
                                     int position,
                                     long id) {
-            view.showContextMenu();
+            Intent i = new Intent(ActivityDevicesList.this, ActivityFunctionPicker.class);
+            i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(position));
+            startActivity(i);
+
         }
     }
 
@@ -308,25 +312,17 @@ public class ActivityDevicesList extends Activity implements
         }
     }
 
-    @Override
-    public void onServiceConnected(int profile, BluetoothProfile proxy) {
-        Log.d("service connected");
-        if (profile == BluetoothGattAdapter.GATT) {
-            mGatt = (BluetoothGatt) proxy;
-            mGatt.registerApp(mCallback);
+    class GattListener extends GattProxy.ListenerHelper {
+        GattListener() {
+            super("ActivityDevicesList");
         }
-    }
 
-    @Override
-    public void onServiceDisconnected(int profile) {
-        Log.d("service disconnected");
-        if (profile == BluetoothGattAdapter.GATT) {
-            mGatt.unregisterApp();
-            mGatt = null;
+        @Override
+        public void onRetrievedGatt(BluetoothGatt gatt) {
+            Log.d(String.format("onRetrievedGatt"));
+            mGatt = gatt;
         }
-    }
 
-    class GattCallback extends BluetoothGattCallback {
         @Override
         public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
             onFoundDevice(device);

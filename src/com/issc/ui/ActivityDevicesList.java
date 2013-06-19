@@ -248,26 +248,11 @@ public class ActivityDevicesList extends Activity implements
         }
     }
 
-    private void appendBondedDevices() {
-        Set<BluetoothDevice> bonded = Util.getBondedDevices();
-        if (bonded != null) {
-            Iterator<BluetoothDevice> it = bonded.iterator();
-            while(it.hasNext()) {
-                appendDevice(it.next());
-            }
-        }
-
-    }
-
     private void onFoundDevice(BluetoothDevice device) {
-        if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-            if (isInList(mRecords, device)) {
-                Log.d(device.getName() + " already be in list, skip it");
-            } else {
-                appendDevice(device);
-            }
+        if (isInList(mRecords, device)) {
+            Log.d(device.getName() + " already be in list, skip it");
         } else {
-            Log.d("found a bond device");
+            appendDevice(device);
         }
     }
 

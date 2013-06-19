@@ -47,5 +47,5 @@
 	<string name="aio_ctrl_7">Control 7</string>
 
 	<string name="func_light">Control the light</string>
-	<string name="func_light_desc">Control the light via Bluetooth connectoin</string>
+	<string name="func_light_desc">Control the light via Bluetooth connection</string>
 </resources>

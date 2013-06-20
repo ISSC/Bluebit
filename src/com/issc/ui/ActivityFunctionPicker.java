@@ -127,9 +127,6 @@ public class ActivityFunctionPicker extends ListActivity {
                 dismissDialog(DISCOVERY_DIALOG);
             }
         });
-        if (mGatt != null) {
-            mGatt.cancelConnection(mDevice);
-        }
     }
 
     private void initAdapter() {

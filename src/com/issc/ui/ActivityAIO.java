@@ -40,11 +40,22 @@ public class ActivityAIO extends Activity {
     protected ViewHandler  mViewHandler;
 
     private List<BluetoothGattService> mServices;
+    private List<Integer> mToggleIds;
 
     private final static int CONNECTION_DIALOG = 1;
 
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
+
+    private final int[] INDEX = {
+        5, // LED 1
+        3, // LED 2
+        2, // LED 3
+        6, // LED 4
+        1, // LED 5
+        0, // LED 6
+        4  // LED 7
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +67,19 @@ public class ActivityAIO extends Activity {
         mServices = new ArrayList<BluetoothGattService>();
         mViewHandler = new ViewHandler();
         mListener = new GattListener();
+
+        setToggleIds();
+    }
+
+    private void setToggleIds() {
+        mToggleIds = new ArrayList<Integer>();
+        mToggleIds.add(new Integer(R.id.aio_ctrl_1));
+        mToggleIds.add(new Integer(R.id.aio_ctrl_2));
+        mToggleIds.add(new Integer(R.id.aio_ctrl_3));
+        mToggleIds.add(new Integer(R.id.aio_ctrl_4));
+        mToggleIds.add(new Integer(R.id.aio_ctrl_5));
+        mToggleIds.add(new Integer(R.id.aio_ctrl_6));
+        mToggleIds.add(new Integer(R.id.aio_ctrl_7));
     }
 
     @Override
@@ -90,35 +114,31 @@ public class ActivityAIO extends Activity {
         return null;
     }
 
-    private final static UUID SERVICE_AUTOMATION_IO = UUID.fromString("00001815-0000-1000-8000-00805f9b34fb");
-    private final static UUID CHAR_DI = UUID.fromString("00002a56-0000-1000-8000-00805f9b34fb");
-    private final static UUID CHAR_DO = UUID.fromString("00002a57-0000-1000-8000-00805f9b34fb");
-
     public void onToggleClicked(View v) {
         ToggleButton toggle = (ToggleButton)v;
-        Log.d("is checked:" + toggle.isChecked());
-
-        BluetoothGattService srv = mGatt.getService(mDevice, SERVICE_AUTOMATION_IO);
-        if (srv == null) {
-            Log.d("Get Service failed");
-        } else {
-            dumpService(srv);
-        }
+        int select = mToggleIds.indexOf(v.getId());
+        byte[] value = getLEDControlValue(INDEX[select], toggle.isChecked());
+        BluetoothGattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
+        BluetoothGattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
+        chr.setValue(value);
+        mGatt.writeCharacteristic(chr);
+        Log.d(String.format("press %d, idx[%d] ctrl:%02x %02x", select, INDEX[select], value[0], value[1]));
     }
 
-    private void dumpService(BluetoothGattService srv) {
-        BluetoothGattCharacteristic ch = srv.getCharacteristic(CHAR_DO);
-        if (ch == null) {
-            Log.d("get char failed");
-        } else {
-            byte ctrl = (byte)(int)(Math.random() * 2);
-            byte[] value = {(byte)0xfc, (byte)0xfe};
-            value[0] += ctrl;
-            value[1] += ctrl;
-            ch.setValue(value);
-            boolean r = mGatt.writeCharacteristic(ch);
-            Log.d(String.format("ctrl:%1x,%02x %02x, %b", ctrl, value[0], value[1], r));
-        }
+    private byte[] getLEDControlValue(int idx, boolean on) {
+        int offset = 2; // each LED occupy 2 bits
+        int value = 0xFFFF;
+        // on=01b off=00b, but we will use XOR later.
+        // so, on=10b off=11b
+        int ctrl = on ? 0x2 : 0x3;
+
+        // if index = 2 and turning off (ctrl=11b)
+        // 11111111b ^ 00110000b -> 11001111b
+        value = value ^ (ctrl << (idx * offset));
+        byte[] b = new byte[2];
+        b[1] = (byte)(value);
+        b[0] = (byte)(value>>8);
+        return b;
     }
 
     public void updateView(int tag, Bundle info) {

@@ -234,6 +234,8 @@ public class ActivityDevicesList extends Activity {
         mAdapter.notifyDataSetChanged();
 
         if (mGatt != null) {
+            /* connected device will not be ignored when scanning */
+            appendDevices(mGatt.getConnectedDevices());
             mGatt.startScan();
         } else {
             Log.e("No Gatt instance");
@@ -268,6 +270,17 @@ public class ActivityDevicesList extends Activity {
             }
 
             return false;
+        }
+    }
+
+    private void appendDevices(Iterable<BluetoothDevice> bonded) {
+        if (bonded == null) {
+            return;
+        }
+
+        Iterator<BluetoothDevice> it = bonded.iterator();
+        while(it.hasNext()) {
+            appendDevice(it.next());
         }
     }
 

@@ -3,6 +3,7 @@ package com.issc.ui;
 
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
+import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;
 
@@ -29,12 +30,11 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
-public class ActivityAIO extends Activity implements
-        BluetoothProfile.ServiceListener {
+public class ActivityAIO extends Activity {
 
     private BluetoothDevice mDevice;
     private BluetoothGatt mGatt;
-    private BluetoothGattCallback mCallback;
+    private GattProxy.Listener mListener;
 
     private ProgressDialog mConnectionDialog;
     protected ViewHandler  mViewHandler;
@@ -55,7 +55,7 @@ public class ActivityAIO extends Activity implements
         mDevice = device.getDevice();
         mServices = new ArrayList<BluetoothGattService>();
         mViewHandler = new ViewHandler();
-        mCallback = new GattCallback();
+        mListener = new GattListener();
     }
 
     @Override
@@ -65,17 +65,17 @@ public class ActivityAIO extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
-        BluetoothGattAdapter.getProfileProxy(this, this,
-                BluetoothGattAdapter.GATT);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.addListener(mListener);
+        proxy.retrieveGatt(mListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // since there is not a onAppUnregistered, do cancel connection here.
-        mGatt.cancelConnection(mDevice);
-        BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT,
-                mGatt);
+
+        GattProxy proxy = GattProxy.get(this);
+        proxy.rmListener(mListener);
     }
 
     @Override
@@ -121,28 +121,6 @@ public class ActivityAIO extends Activity implements
         }
     }
 
-    @Override
-    public void onServiceConnected(int profile, BluetoothProfile proxy) {
-        Log.d("Service connected");
-        if (profile == BluetoothGattAdapter.GATT) {
-            mGatt = (BluetoothGatt) proxy;
-            Log.d("registering the callback");
-            mGatt.registerApp(mCallback);
-        } else {
-            Log.d("Not GATT? How come?");
-        }
-    }
-
-    @Override
-    public void onServiceDisconnected(int profile) {
-        if (profile == BluetoothGattAdapter.GATT) {
-            mGatt.unregisterApp();
-            mGatt = null;
-            mServices.clear();
-        }
-    }
-
-
     public void updateView(int tag, Bundle info) {
         if (info == null) {
             info = new Bundle();
@@ -177,20 +155,32 @@ public class ActivityAIO extends Activity implements
             Log.d("no services, do discovery");
             mGatt.discoverServices(mDevice);
         } else {
-            Log.d("services found, dismiss dialog");
-            updateView(DISMISS_CONNECTION_DIALOG, null);
-            mServices.addAll(mGatt.getServices(mDevice));
+            onDiscovered();
         }
     }
 
-    class GattCallback extends BluetoothGattCallback {
+    private void onDiscovered() {
+        updateView(DISMISS_CONNECTION_DIALOG, null);
+        mServices.clear();
+        mServices.addAll(mGatt.getServices(mDevice));
+        Log.d("found services:" + mServices.size());
+    }
+
+    class GattListener extends GattProxy.ListenerHelper {
+
+        GattListener() {
+            super("ActivityAIO");
+        }
+
         @Override
-        public void onAppRegistered(int status) {
-            updateView(SHOW_CONNECTION_DIALOG, null);
-            Log.d("callback registered");
+        public void onRetrievedGatt(BluetoothGatt gatt) {
+            Log.d(String.format("onRetrievedGatt"));
+            mGatt = gatt;
+
             int conn = mGatt.getConnectionState(mDevice);
             if (conn == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d("disconnected, connecting to device");
+                updateView(SHOW_CONNECTION_DIALOG, null);
                 mGatt.connect(mDevice, true);
             } else {
                 Log.d("already connected");
@@ -210,9 +200,7 @@ public class ActivityAIO extends Activity implements
 
         @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {
-            updateView(DISMISS_CONNECTION_DIALOG, null);
-            mServices.addAll(mGatt.getServices(device));
-            Log.d("found services:" + mServices.size());
+            onDiscovered();
         }
 
         public void onCharacteristicRead(BluetoothGattCharacteristic charac, int status) {

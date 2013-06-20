@@ -144,7 +144,9 @@ public class ActivityAIO extends Activity {
             if (tag == SHOW_CONNECTION_DIALOG) {
                 showDialog(CONNECTION_DIALOG);
             } else if (tag == DISMISS_CONNECTION_DIALOG) {
-                dismissDialog(CONNECTION_DIALOG);
+                if (mConnectionDialog != null && mConnectionDialog.isShowing()) {
+                    dismissDialog(CONNECTION_DIALOG);
+                }
             }
         }
     }

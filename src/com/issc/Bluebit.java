@@ -1,6 +1,9 @@
 // vim: et sw=4 sts=4 tabstop=4
 package com.issc;
 
+import com.issc.util.Util;
+import java.util.UUID;
+
 /**
  * This is the class to store global constant.
  */
@@ -29,6 +32,55 @@ public final class Bluebit {
         "00001804-0000-1000-8000-00805f9b34fb",
         "00001815-0000-1000-8000-00805f9b34fb"
     };
+
+    /* Automation IO service */
+    public final static UUID SERVICE_AUTOMATION_IO = Util.uuidFromStr("1815");
+    public final static UUID CHR_DIGITAL_IN  = Util.uuidFromStr("2a56");
+    public final static UUID CHR_DIGITAL_OUT = Util.uuidFromStr("2a57");
+    public final static UUID CHR_ANALOG_IN   = Util.uuidFromStr("2a58");
+    public final static UUID CHR_ANALOG_OUT  = Util.uuidFromStr("2a59");
+    public final static UUID CHR_AGG_INPUT   = Util.uuidFromStr("2a5a");
+    public final static UUID CUSTOM_CHR_DI_DES_CHAR = UUID.fromString("49535343-6C1F-401D-BAA3-EC966D1A3AA1");
+    public final static UUID CUSTOM_CHR_DO_DES_CHAR = UUID.fromString("49535343-F82E-4B2B-847C-DBEA67318E35");
+    public final static UUID CUSTOM_CHR_AO1_DESC_CHAR = UUID.fromString("49535343-A742-442B-9D20-24C6709FBD16");
+    public final static UUID CUSTOM_CHR_AI1_DESC_CHAR = UUID.fromString("49535343-B011-4081-9C96-C3990D17A69E");
+
+    public final static UUID DES_USER_DESCRIPTION      = Util.uuidFromStr("2901");
+    public final static UUID DES_DIGITAL_NUMBER        = Util.uuidFromStr("2909");
+    public final static UUID DES_INPUT_TRIGGER_SETTING = Util.uuidFromStr("290A");
+
+    /* battery service */
+    public final static UUID SERVICE_BATTERY       = Util.uuidFromStr("180F");
+    public final static UUID CHR_BATTERY_LEVEL     = Util.uuidFromStr("2A19");
+
+    /* Tx Power service */
+    public final static UUID SERVICE_TX_POWER      = Util.uuidFromStr("1804");
+    public final static UUID CHR_TX_POWER_LEVEL    = Util.uuidFromStr("2A07");
+
+    /* Link Loss service */
+    public final static UUID SERVICE_LINK_LOSS     = Util.uuidFromStr("1803");
+    public final static UUID CHR_ALERT_LEVEL       = Util.uuidFromStr("2A06");
+
+    /* Immediate Alert service */
+    public final static UUID SERVICE_IMMEDIATE_ALERT = Util.uuidFromStr("1802");
+
+    /* Device Info service */
+    public final static UUID SERVICE_DEVICE_INFO     = Util.uuidFromStr("180A");
+    public final static UUID CHR_MANUFACTURE_NAME   = Util.uuidFromStr("2A29");
+    public final static UUID CHR_MODEL_NUMBER       = Util.uuidFromStr("2A24");
+    public final static UUID CHR_SERIAL_NUMBER      = Util.uuidFromStr("2A25");
+    public final static UUID CHR_HARDWARE_REVISION  = Util.uuidFromStr("2A27");
+    public final static UUID CHR_FIRMWARE_REVISION  = Util.uuidFromStr("2A26");
+    public final static UUID CHR_SOFTWARE_REVISION  = Util.uuidFromStr("2A28");
+
+    /* ISSC Proprietary */
+    public final static  UUID SERVICE_ISSC_PROPRIETARY  = UUID.fromString("49535343-FE7D-4AE5-8FA9-9FAFD205E455");
+    public final static  UUID CHR_CONNECTION_PARAMETER  = UUID.fromString("49535343-6DAA-4D02-ABF6-19569ACA69FE");
+    public final static  UUID CHR_AIR_PATCH             = UUID.fromString("49535343-ACA3-481C-91EC-D85E28A60318");
+    public final static  UUID CHR_ISSC_TRANS_TX         = UUID.fromString("49535343-1E4D-4BD9-BA61-23C647249616");
+    public final static  UUID CHR_ISSC_TRANS_RX         = UUID.fromString("49535343-8841-43F4-A8D4-ECBE34729BB3");
+    public final static  UUID CHR_ISSC_MP               = UUID.fromString("49535343-ACA3-481C-91EC-D85E28A60318");
+
 }
 
 

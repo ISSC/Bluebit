@@ -4,6 +4,7 @@ package com.issc.ui;
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
 import com.issc.impl.FunctionAdapter;
+import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -37,14 +38,13 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
-public class ActivityFunctionPicker extends ListActivity
-        implements BluetoothProfile.ServiceListener {
+public class ActivityFunctionPicker extends ListActivity {
 
     private BluetoothDevice mDevice;
     private FunctionAdapter mAdapter;
 
     private BluetoothGatt mGatt;
-    private BluetoothGattCallback mCallback;
+    private GattProxy.Listener mListener;
 
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
@@ -62,7 +62,7 @@ public class ActivityFunctionPicker extends ListActivity
             finish();
         }
 
-        mCallback = new GattCallback();
+        mListener = new GattListener();
         initAdapter();
 
         BLEDevice device = intent.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
@@ -75,15 +75,16 @@ public class ActivityFunctionPicker extends ListActivity
     @Override
     protected void onResume() {
         super.onResume();
-        BluetoothGattAdapter.getProfileProxy(this, this,
-                BluetoothGattAdapter.GATT);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.addListener(mListener);
+        proxy.retrieveGatt(mListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT,
-                mGatt);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.rmListener(mListener);
     }
 
     @Override
@@ -101,7 +102,7 @@ public class ActivityFunctionPicker extends ListActivity
         return null;
     }
 
-    private void startDiscovery() {
+    private void connectToDevice() {
         runOnUiThread(new Runnable() {
             public void run() {
                 showDialog(DISCOVERY_DIALOG);
@@ -112,11 +113,11 @@ public class ActivityFunctionPicker extends ListActivity
                 Log.d("connected, start discovery");
                 mGatt.discoverServices(mDevice);
             } else {
+                Log.d("connecting to device");
                 mGatt.connect(mDevice, false);
-                Log.d("trying to connect");
             }
         } else {
-            Log.d("mGatt is null!!");
+            Log.e("mGatt is null!!");
         }
     }
 
@@ -158,22 +159,6 @@ public class ActivityFunctionPicker extends ListActivity
     }
 
     @Override
-    public void onServiceConnected(int profile, BluetoothProfile proxy) {
-        if (profile == BluetoothGattAdapter.GATT) {
-            mGatt = (BluetoothGatt) proxy;
-            mGatt.registerApp(mCallback);
-        }
-    }
-
-    @Override
-    public void onServiceDisconnected(int profile) {
-        if (profile == BluetoothGattAdapter.GATT) {
-            mGatt.unregisterApp();
-            mGatt = null;
-        }
-    }
-
-    @Override
     protected void onListItemClick(ListView l, View v, int pos, long id) {
         Intent i = mAdapter.createIntent(pos);
         BLEDevice device = new BLEDevice(mDevice);
@@ -181,13 +166,16 @@ public class ActivityFunctionPicker extends ListActivity
         startActivity(i);
     }
 
-    class GattCallback extends BluetoothGattCallback {
+    class GattListener extends GattProxy.ListenerHelper {
+        GattListener() {
+            super("ActivityFunctionPicker");
+        }
 
         @Override
-        public void onAppRegistered(int status) {
-            if (!mDiscovered) {
-                startDiscovery();
-            }
+        public void onRetrievedGatt(BluetoothGatt gatt) {
+            Log.d(String.format("onRetrievedGatt"));
+            mGatt = gatt;
+            connectToDevice();
         }
 
         @Override

@@ -110,8 +110,14 @@ public class ActivityFunctionPicker extends ListActivity {
         });
         if (mGatt != null) {
             if (mGatt.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
-                Log.d("connected, start discovery");
-                mGatt.discoverServices(mDevice);
+                Log.d("connected");
+                List<BluetoothGattService> list = mGatt.getServices(mDevice);
+                if ((list == null) || (list.size() == 0)) {
+                    Log.d("start discovery");
+                    mGatt.discoverServices(mDevice);
+                } else {
+                    onDiscovered(mDevice);
+                }
             } else {
                 Log.d("connecting to device");
                 mGatt.connect(mDevice, false);

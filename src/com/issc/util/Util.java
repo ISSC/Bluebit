@@ -14,10 +14,14 @@ import android.content.Intent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public final class Util {
 
     private final static String TAG = Bluebit.TAG;
+
+    private final static String sPREFIX = "0000";
+    private final static String sPOSTFIX = "-0000-1000-8000-00805f9b34fb";
 
     private final static Map<Integer, BtClass> sMap
                             = new HashMap<Integer, BtClass>();
@@ -81,6 +85,18 @@ public final class Util {
             return -1;
         } else {
             return c.iDescRes;
+        }
+    }
+
+    public static UUID uuidFromStr(String str) {
+        if (!str.matches(".{4}")) {
+            return null;
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append(sPREFIX);
+            sb.append(str);
+            sb.append(sPOSTFIX);
+            return UUID.fromString(sb.toString());
         }
     }
 

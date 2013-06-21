@@ -155,15 +155,21 @@ public class ActivityAIO extends Activity
     public void onToggleClicked(View v) {
         ToggleButton toggle = (ToggleButton)v;
         int select = mToggleIds.indexOf(v.getId());
-        byte[] value = getLEDControlValue(INDEX[select], toggle.isChecked());
+        controlDigital(select, toggle.isChecked());
+    }
+
+    private void controlDigital(int target, boolean on) {
+        Log.d(String.format("Digital: set LED[%d] %b", target, on));
+
+        byte[] value = getLEDControlValue(target, on);
         BluetoothGattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
         BluetoothGattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
         chr.setValue(value);
         mGatt.writeCharacteristic(chr);
-        Log.d(String.format("press %d, idx[%d] ctrl:%02x %02x", select, INDEX[select], value[0], value[1]));
     }
 
-    private byte[] getLEDControlValue(int idx, boolean on) {
+    private byte[] getLEDControlValue(int target, boolean on) {
+        int idx = INDEX[target];
         int offset = 2; // each LED occupy 2 bits
         int value = 0xFFFF;
         // on=01b off=00b, but we will use XOR later.

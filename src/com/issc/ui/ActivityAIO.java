@@ -44,6 +44,12 @@ public class ActivityAIO extends Activity
     protected int mRedVal, mGreenVal, mBlueVal;
 
     private List<BluetoothGattService> mServices;
+    private BluetoothGattService mServiceAIO;
+    private BluetoothGattCharacteristic mChrDOut;
+    private BluetoothGattCharacteristic mChrCustomAOut1;
+    private BluetoothGattCharacteristic mChrAOut1;
+    private BluetoothGattCharacteristic mChrAOut2;
+    private BluetoothGattCharacteristic mChrAOut3;
     private List<Integer> mToggleIds;
 
     private final static int CONNECTION_DIALOG = 1;
@@ -164,8 +170,8 @@ public class ActivityAIO extends Activity
         byte[] value = getLEDControlValue(target, on);
         BluetoothGattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
         BluetoothGattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
-        chr.setValue(value);
-        mGatt.writeCharacteristic(chr);
+        mChrDOut.setValue(value);
+        mGatt.writeCharacteristic(mChrDOut);
     }
 
     private byte[] getLEDControlValue(int target, boolean on) {
@@ -229,7 +235,34 @@ public class ActivityAIO extends Activity
         updateView(DISMISS_CONNECTION_DIALOG, null);
         mServices.clear();
         mServices.addAll(mGatt.getServices(mDevice));
+
+        mServiceAIO = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
+        List<BluetoothGattCharacteristic> chrs = mServiceAIO.getCharacteristics();
+        Iterator<BluetoothGattCharacteristic> it = chrs.iterator();
+        while (it.hasNext()) {
+            BluetoothGattCharacteristic chr = it.next();
+            UUID uuid = chr.getUuid();
+            if (uuid.equals(Bluebit.CHR_DIGITAL_OUT)) {
+                mChrDOut = chr;
+            } else if (uuid.equals(Bluebit.CUSTOM_CHR_AO1_DESC)) {
+                mChrCustomAOut1 = chr;
+            } else if (uuid.equals(Bluebit.CHR_ANALOG_OUT)) {
+                // assign characteristic since they have the same UUID. :-(
+                if (mChrAOut1 == null) {
+                    mChrAOut1 = chr;
+                } else if (mChrAOut2 == null) {
+                    mChrAOut2 = chr;
+                } else if (mChrAOut3 == null) {
+                    mChrAOut3 = chr;
+                }
+            }
+        }
+
         Log.d("found services:" + mServices.size());
+        Log.d(String.format("found Characteristic for Red:%b, Greeb:%b, Blue:%b",
+                mChrAOut1 != null,
+                mChrAOut2 != null,
+                mChrAOut3 != null));
     }
 
     class GattListener extends GattProxy.ListenerHelper {

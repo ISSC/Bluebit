@@ -178,7 +178,9 @@ public class ActivityFunctionPicker extends ListActivity {
         public void onRetrievedGatt(BluetoothGatt gatt) {
             Log.d(String.format("onRetrievedGatt"));
             mGatt = gatt;
-            connectToDevice();
+            if (mAdapter.getCount() == 0) {
+                connectToDevice();
+            }
         }
 
         @Override

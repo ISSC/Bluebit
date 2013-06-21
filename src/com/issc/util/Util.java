@@ -11,6 +11,16 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +30,7 @@ public final class Util {
 
     private final static String TAG = Bluebit.TAG;
 
+    private final static String ENCODE = "UTF-8";
     private final static String sPREFIX = "0000";
     private final static String sPOSTFIX = "-0000-1000-8000-00805f9b34fb";
 
@@ -98,6 +109,39 @@ public final class Util {
             sb.append(sPOSTFIX);
             return UUID.fromString(sb.toString());
         }
+    }
+
+    public static void writeStrToFile(String path, CharSequence data) throws IOException {
+        File file = new File(path);
+        FileOutputStream fos = new FileOutputStream(file);
+        writeStrToStream(fos, data);
+    }
+
+    public static CharSequence readStrFromFile(String path) throws IOException {
+        File file = new File(path);
+        FileInputStream fis = new FileInputStream(file);
+        return readStrFromStream(fis);
+    }
+
+    public static CharSequence readStrFromStream(InputStream str) throws IOException {
+        InputStreamReader isr = new InputStreamReader(str, ENCODE);
+        BufferedReader reader = new BufferedReader(isr);
+        StringBuilder builder = new StringBuilder();
+        String line = null;
+        while((line = reader.readLine()) != null) {
+            builder.append(line);
+        }
+
+        return builder;
+    }
+
+    public static void writeStrToStream(OutputStream str, CharSequence data) throws IOException {
+        OutputStreamWriter osr = new OutputStreamWriter(str, ENCODE);
+        BufferedWriter writer  = new BufferedWriter(osr);
+        System.out.println("length:" + data.length());
+        writer.write(data.toString(), 0, data.length());
+        writer.close();
+        return;
     }
 
     private static int[] sMajorType = {

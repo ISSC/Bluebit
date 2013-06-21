@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
@@ -30,7 +31,8 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
-public class ActivityAIO extends Activity {
+public class ActivityAIO extends Activity
+    implements SeekBar.OnSeekBarChangeListener {
 
     private BluetoothDevice mDevice;
     private BluetoothGatt mGatt;
@@ -38,6 +40,7 @@ public class ActivityAIO extends Activity {
 
     private ProgressDialog mConnectionDialog;
     protected ViewHandler  mViewHandler;
+    protected SeekBar mRed, mGreen, mBlue;
 
     private List<BluetoothGattService> mServices;
     private List<Integer> mToggleIds;
@@ -61,6 +64,13 @@ public class ActivityAIO extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aio);
+
+        mRed   = (SeekBar) findViewById(R.id.aio_seekbar_r);
+        mGreen = (SeekBar) findViewById(R.id.aio_seekbar_g);
+        mBlue  = (SeekBar) findViewById(R.id.aio_seekbar_b);
+        mRed.setOnSeekBarChangeListener(this);
+        mGreen.setOnSeekBarChangeListener(this);
+        mBlue.setOnSeekBarChangeListener(this);
 
         BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
         mDevice = device.getDevice();
@@ -112,6 +122,19 @@ public class ActivityAIO extends Activity {
             return mConnectionDialog;
         }
         return null;
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)  {
+        Log.d("progress:" + progress);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
     }
 
     public void onToggleClicked(View v) {

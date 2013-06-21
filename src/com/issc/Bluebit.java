@@ -40,10 +40,10 @@ public final class Bluebit {
     public final static UUID CHR_ANALOG_IN   = Util.uuidFromStr("2a58");
     public final static UUID CHR_ANALOG_OUT  = Util.uuidFromStr("2a59");
     public final static UUID CHR_AGG_INPUT   = Util.uuidFromStr("2a5a");
-    public final static UUID CUSTOM_CHR_DI_DES_CHAR = UUID.fromString("49535343-6C1F-401D-BAA3-EC966D1A3AA1");
-    public final static UUID CUSTOM_CHR_DO_DES_CHAR = UUID.fromString("49535343-F82E-4B2B-847C-DBEA67318E35");
-    public final static UUID CUSTOM_CHR_AO1_DESC_CHAR = UUID.fromString("49535343-A742-442B-9D20-24C6709FBD16");
-    public final static UUID CUSTOM_CHR_AI1_DESC_CHAR = UUID.fromString("49535343-B011-4081-9C96-C3990D17A69E");
+    public final static UUID CUSTOM_CHR_DI_DESC = UUID.fromString("49535343-6C1F-401D-BAA3-EC966D1A3AA1");
+    public final static UUID CUSTOM_CHR_DO_DESC = UUID.fromString("49535343-F82E-4B2B-847C-DBEA67318E35");
+    public final static UUID CUSTOM_CHR_AO1_DESC = UUID.fromString("49535343-A742-442B-9D20-24C6709FBD16");
+    public final static UUID CUSTOM_CHR_AI1_DESC = UUID.fromString("49535343-B011-4081-9C96-C3990D17A69E");
 
     public final static UUID DES_USER_DESCRIPTION      = Util.uuidFromStr("2901");
     public final static UUID DES_DIGITAL_NUMBER        = Util.uuidFromStr("2909");

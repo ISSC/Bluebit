@@ -41,6 +41,7 @@ public class ActivityAIO extends Activity
     private ProgressDialog mConnectionDialog;
     protected ViewHandler  mViewHandler;
     protected SeekBar mRed, mGreen, mBlue;
+    protected int mRedVal, mGreenVal, mBlueVal;
 
     private List<BluetoothGattService> mServices;
     private List<Integer> mToggleIds;
@@ -124,9 +125,23 @@ public class ActivityAIO extends Activity
         return null;
     }
 
+    private void onSetAnalogValue() {
+        Log.d(String.format("To set: R=%d, G=%d, B=%d", mRedVal, mGreenVal, mBlueVal));
+    }
+
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)  {
-        Log.d("progress:" + progress);
+        if (seekBar == mRed) {
+            mRedVal = progress;
+        } else if (seekBar == mGreen) {
+            mGreenVal = progress;
+        } else if (seekBar == mBlue) {
+            mBlueVal = progress;
+        }
+
+        if (fromUser) {
+            onSetAnalogValue();
+        }
     }
 
     @Override

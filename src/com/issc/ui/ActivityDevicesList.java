@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -124,6 +125,8 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        GattProxy proxy = GattProxy.get(ActivityDevicesList.this);
+        proxy.releaseGatt();
     }
 
     @Override
@@ -151,6 +154,22 @@ public class ActivityDevicesList extends Activity {
             b.putParcelableArrayList(sSavedDevices, devices);
         }
     }
+
+    //@Override
+    //public void onBackPressed() {
+    //    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    //    builder.setTitle("Exit");
+    //    builder.setMessage("Are you going to exit?");
+    //    builder.setPositiveButton(android.R.string.yes,
+    //            new DialogInterface.OnClickListener() {
+    //                public void onClick(DialogInterface dialog, int whichButton) {
+    //                    finish();
+    //                }
+    //            });
+    //    builder.setNegativeButton(android.R.string.no,null);
+    //    builder.setCancelable(true);
+    //    builder.show();
+    //}
 
     @Override
     protected void onRestoreInstanceState(Bundle b) {

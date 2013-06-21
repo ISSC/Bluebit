@@ -44,8 +44,6 @@ public class GattProxy implements BluetoothProfile.ServiceListener {
         mCallback   = new TheCallback();
         mListeners  = new ArrayList<Listener>();
         mRetrievers = new ArrayList<Listener>();
-
-        BluetoothGattAdapter.getProfileProxy(mAppContext, this, BluetoothGattAdapter.GATT);
     }
 
     synchronized static public GattProxy get(Context ctx) {
@@ -73,11 +71,31 @@ public class GattProxy implements BluetoothProfile.ServiceListener {
             syncOnRetrievedGatt(lstnr);
             return true;
         } else {
-            // still connecting to service, cache it
-            mRetrievers.add(lstnr);
             Log.d("add to retrievers");
+            mRetrievers.add(lstnr);
+            if (mOngoingGatt == null) {
+                BluetoothGattAdapter.getProfileProxy(mAppContext,
+                        this, BluetoothGattAdapter.GATT);
+            }
             return false;
         }
+    }
+
+    synchronized public void releaseGatt() {
+        if (mGatt != null) {
+            Log.d("Gatt Releasing");
+            BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT, mGatt);
+
+            /* This is a hack because we are supposed to do this in
+             * onServiceDisconnected. But, holy F! it never be called */
+            syncReleaseGatt();
+        }
+    }
+
+    private void syncReleaseGatt() {
+        mGatt.unregisterApp();
+        mGatt = null;
+        mMe = null;
     }
 
     synchronized private void onGattReady() {
@@ -110,7 +128,7 @@ public class GattProxy implements BluetoothProfile.ServiceListener {
     public void onServiceDisconnected(int profile) {
         Log.d("onServiceDisconnected, you cannot use Gatt anymore in this application");
         if (profile == BluetoothGattAdapter.GATT) {
-            mGatt = null;
+            // we will never be here for unknow reason
         }
     }
 

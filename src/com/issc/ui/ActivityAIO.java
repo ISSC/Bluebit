@@ -131,8 +131,54 @@ public class ActivityAIO extends Activity
         return null;
     }
 
+    private byte[] getled(int level) {
+        int duty = (9 - level)<<4 + 0xf;
+        switch(level) {
+            case 0:
+                duty = 0x9f;
+                break;
+            case 1:
+                duty = 0x8f;
+                break;
+            case 2:
+                duty = 0x7f;
+                break;
+            case 3:
+                duty = 0x6f;
+                break;
+            case 4:
+                duty = 0x5f;
+                break;
+            case 5:
+                duty = 0x4f;
+                break;
+            case 6:
+                duty = 0x3f;
+                break;
+            case 7:
+                duty = 0x2f;
+                break;
+            default:
+                duty = 0x1f;
+                break;
+        }
+        byte[] r = {(byte)duty, (byte)0x00};
+        Log.d(String.format("[0x%02x, 0x%02x]",r[0], r[1]));
+        return r;
+    }
+
     private void onSetAnalogValue() {
         Log.d(String.format("To set: R=%d, G=%d, B=%d", mRedVal, mGreenVal, mBlueVal));
+        byte[] disable = {(byte)0x00, (byte)0xf8, (byte)0x9f, (byte)0x00};
+        mChrCustomAOut1.setValue(disable);
+        mGatt.writeCharacteristic(mChrCustomAOut1);
+
+        mChrAOut1.setValue(getled(mRedVal));
+        mGatt.writeCharacteristic(mChrAOut1);
+        mChrAOut1.setValue(getled(mGreenVal));
+        mGatt.writeCharacteristic(mChrAOut2);
+        mChrAOut3.setValue(getled(mBlueVal));
+        mGatt.writeCharacteristic(mChrAOut3);
     }
 
     @Override
@@ -255,11 +301,24 @@ public class ActivityAIO extends Activity
                 } else if (mChrAOut3 == null) {
                     mChrAOut3 = chr;
                 }
+            } else {
+                Log.d("Char:" + chr.getUuid().toString());
+            }
+        }
+
+        BluetoothGattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
+        List<BluetoothGattCharacteristic> pChrs = proprietary.getCharacteristics();
+        it = pChrs.iterator();
+        while (it.hasNext()) {
+            BluetoothGattCharacteristic chr = it.next();
+            if (chr.getUuid().equals(Bluebit.CUSTOM_CHR_AO1_DESC)) {
+                mChrCustomAOut1 = chr;
             }
         }
 
         Log.d("found services:" + mServices.size());
-        Log.d(String.format("found Characteristic for Red:%b, Greeb:%b, Blue:%b",
+        Log.d(String.format("found Characteristic for Desc:%b, Red:%b, Greeb:%b, Blue:%b",
+                mChrCustomAOut1 != null,
                 mChrAOut1 != null,
                 mChrAOut2 != null,
                 mChrAOut3 != null));

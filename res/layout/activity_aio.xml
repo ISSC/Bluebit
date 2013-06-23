@@ -283,5 +283,33 @@
 				/>
 		</LinearLayout>
 
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			style="@android:style/ButtonBar"
+			>
+			<Button
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Auto Pattern 1"
+				android:layout_weight="1"
+				android:onClick="onClickAutoPattern1"
+				/>
+			<Button
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Auto Pattern 2"
+				android:layout_weight="1"
+				android:onClick="onClickAutoPattern2"
+				/>
+			<Button
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Auto Color"
+				android:layout_weight="1"
+				android:onClick="onClickAutoPattern3"
+				/>
+		</LinearLayout>
+
 	</LinearLayout>
 </ScrollView>

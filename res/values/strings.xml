@@ -11,6 +11,8 @@
 	<string name="scanning">Scanning</string>
 	<string name="discovering">Discovering</string>
 	<string name="connecting">Connecting</string>
+	<string name="running_automation">Running Auto Pattern</string>
+	<string name="automation">Auto Pattern</string>
 	<string name="empty_list">This list is empty</string>
 	<string name="empty_function">There is no corresponding function for this Device</string>
 	<string name="red">Red</string>
@@ -38,13 +40,13 @@
 	<string name="device_class_uncategorized">Uncategorized</string>
 	<string name="device_class_wearable">Wearable</string>
 
-	<string name="aio_ctrl_1">Control 1</string>
-	<string name="aio_ctrl_2">Control 2</string>
-	<string name="aio_ctrl_3">Control 3</string>
-	<string name="aio_ctrl_4">Control 4</string>
-	<string name="aio_ctrl_5">Control 5</string>
-	<string name="aio_ctrl_6">Control 6</string>
-	<string name="aio_ctrl_7">Control 7</string>
+	<string name="aio_ctrl_1">LED 1</string>
+	<string name="aio_ctrl_2">LED 2</string>
+	<string name="aio_ctrl_3">LED 3</string>
+	<string name="aio_ctrl_4">LED 4</string>
+	<string name="aio_ctrl_5">LED 5</string>
+	<string name="aio_ctrl_6">LED 6</string>
+	<string name="aio_ctrl_7">LED 7</string>
 
 	<string name="func_light">Control the light</string>
 	<string name="func_light_desc">Control the light via Bluetooth connection</string>

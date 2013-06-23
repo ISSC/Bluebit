@@ -3,10 +3,12 @@ package com.issc.ui;
 
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
+import com.issc.impl.AlgorithmAIO;
 import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
@@ -17,6 +19,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,13 +35,15 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityAIO extends Activity
-    implements SeekBar.OnSeekBarChangeListener {
+    implements SeekBar.OnSeekBarChangeListener,
+    AlgorithmAIO.Controllable {
 
     private BluetoothDevice mDevice;
     private BluetoothGatt mGatt;
     private GattProxy.Listener mListener;
 
     private ProgressDialog mConnectionDialog;
+    private ProgressDialog mAutomationDialog;
     protected ViewHandler  mViewHandler;
     protected SeekBar mRed, mGreen, mBlue;
     protected int mRedVal, mGreenVal, mBlueVal;
@@ -50,12 +55,19 @@ public class ActivityAIO extends Activity
     private BluetoothGattCharacteristic mChrAOut1;
     private BluetoothGattCharacteristic mChrAOut2;
     private BluetoothGattCharacteristic mChrAOut3;
-    private List<Integer> mToggleIds;
+    private ToggleButton[] mToggles;
+
+    private Transaction mWorkingTransaction;
+    private ArrayDeque<Transaction> mQueue;
+
+    private final static int NUM = 7;
 
     private final static int CONNECTION_DIALOG = 1;
+    private final static int AUTOMATION_DIALOG = 2;
 
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
+    private final static int CONSUME_TRANSACTION        = 0x1002;
 
     private final int[] INDEX = {
         5, // LED 1
@@ -79,24 +91,26 @@ public class ActivityAIO extends Activity
         mGreen.setOnSeekBarChangeListener(this);
         mBlue.setOnSeekBarChangeListener(this);
 
+        mQueue = new ArrayDeque<Transaction>();
+
         BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
         mDevice = device.getDevice();
         mServices = new ArrayList<BluetoothGattService>();
         mViewHandler = new ViewHandler();
         mListener = new GattListener();
 
-        setToggleIds();
+        setToggles();
     }
 
-    private void setToggleIds() {
-        mToggleIds = new ArrayList<Integer>();
-        mToggleIds.add(new Integer(R.id.aio_ctrl_1));
-        mToggleIds.add(new Integer(R.id.aio_ctrl_2));
-        mToggleIds.add(new Integer(R.id.aio_ctrl_3));
-        mToggleIds.add(new Integer(R.id.aio_ctrl_4));
-        mToggleIds.add(new Integer(R.id.aio_ctrl_5));
-        mToggleIds.add(new Integer(R.id.aio_ctrl_6));
-        mToggleIds.add(new Integer(R.id.aio_ctrl_7));
+    private void setToggles() {
+        mToggles = new ToggleButton[NUM];
+        mToggles[0] = (ToggleButton) findViewById(R.id.aio_ctrl_1);
+        mToggles[1] = (ToggleButton) findViewById(R.id.aio_ctrl_2);
+        mToggles[2] = (ToggleButton) findViewById(R.id.aio_ctrl_3);
+        mToggles[3] = (ToggleButton) findViewById(R.id.aio_ctrl_4);
+        mToggles[4] = (ToggleButton) findViewById(R.id.aio_ctrl_5);
+        mToggles[5] = (ToggleButton) findViewById(R.id.aio_ctrl_6);
+        mToggles[6] = (ToggleButton) findViewById(R.id.aio_ctrl_7);
     }
 
     @Override
@@ -119,6 +133,21 @@ public class ActivityAIO extends Activity
         proxy.rmListener(mListener);
     }
 
+    public void onClickAutoPattern1(View v) {
+        showDialog(AUTOMATION_DIALOG);
+        AlgorithmAIO.startAutoPattern1(this);
+    }
+
+    public void onClickAutoPattern2(View v) {
+        showDialog(AUTOMATION_DIALOG);
+        AlgorithmAIO.startAutoPattern2(this);
+    }
+
+    public void onClickAutoPattern3(View v) {
+        showDialog(AUTOMATION_DIALOG);
+        AlgorithmAIO.startAutoPattern3(this);
+    }
+
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
         /*FIXME: this function is deprecated. */
@@ -127,58 +156,21 @@ public class ActivityAIO extends Activity
             mConnectionDialog.setMessage(this.getString(R.string.connecting));
             mConnectionDialog.setCancelable(true);
             return mConnectionDialog;
+        } else if (id == AUTOMATION_DIALOG) {
+            mAutomationDialog = new ProgressDialog(this);
+            mAutomationDialog.setMessage(this.getString(R.string.running_automation));
+            mAutomationDialog.setOnCancelListener(new Dialog.OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    AlgorithmAIO.stopAutoPattern();
+                }
+            });
+            return mAutomationDialog;
         }
         return null;
     }
 
-    private byte[] getled(int level) {
-        int duty = (9 - level)<<4 + 0xf;
-        switch(level) {
-            case 0:
-                duty = 0x9f;
-                break;
-            case 1:
-                duty = 0x8f;
-                break;
-            case 2:
-                duty = 0x7f;
-                break;
-            case 3:
-                duty = 0x6f;
-                break;
-            case 4:
-                duty = 0x5f;
-                break;
-            case 5:
-                duty = 0x4f;
-                break;
-            case 6:
-                duty = 0x3f;
-                break;
-            case 7:
-                duty = 0x2f;
-                break;
-            default:
-                duty = 0x1f;
-                break;
-        }
-        byte[] r = {(byte)duty, (byte)0x00};
-        Log.d(String.format("[0x%02x, 0x%02x]",r[0], r[1]));
-        return r;
-    }
-
     private void onSetAnalogValue() {
-        Log.d(String.format("To set: R=%d, G=%d, B=%d", mRedVal, mGreenVal, mBlueVal));
-        byte[] disable = {(byte)0x00, (byte)0xf8, (byte)0x9f, (byte)0x00};
-        mChrCustomAOut1.setValue(disable);
-        mGatt.writeCharacteristic(mChrCustomAOut1);
-
-        mChrAOut1.setValue(getled(mRedVal));
-        mGatt.writeCharacteristic(mChrAOut1);
-        mChrAOut1.setValue(getled(mGreenVal));
-        mGatt.writeCharacteristic(mChrAOut2);
-        mChrAOut3.setValue(getled(mBlueVal));
-        mGatt.writeCharacteristic(mChrAOut3);
+        AlgorithmAIO.ctrlPWM(mRedVal, mGreenVal, mBlueVal, this);
     }
 
     @Override
@@ -205,36 +197,72 @@ public class ActivityAIO extends Activity
     }
 
     public void onToggleClicked(View v) {
-        ToggleButton toggle = (ToggleButton)v;
-        int select = mToggleIds.indexOf(v.getId());
-        controlDigital(select, toggle.isChecked());
+        controlDigital();
     }
 
-    private void controlDigital(int target, boolean on) {
-        Log.d(String.format("Digital: set LED[%d] %b", target, on));
+    private void controlDigital() {
+        boolean[] leds = new boolean[mToggles.length];
+        for (int i = 0; i < mToggles.length; i++) {
+            leds[i] = mToggles[i].isChecked();
+        }
 
-        byte[] value = getLEDControlValue(target, on);
+        AlgorithmAIO.ctrlDigital(leds, this);
+    }
+
+    private void addTransaction(Transaction trans) {
+        synchronized(mQueue) {
+            mQueue.add(trans);
+        }
+    }
+
+    private void consumeTransaction() {
+        synchronized(mQueue) {
+            if (mWorkingTransaction == null) {
+                mWorkingTransaction = mQueue.poll();
+                if (mWorkingTransaction != null) {
+                    // found transaction
+                    BluetoothGattCharacteristic chr = mWorkingTransaction.chr;
+                    chr.setValue(mWorkingTransaction.value);
+                    mGatt.writeCharacteristic(chr);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onControllDigital(byte[] ctrl) {
         BluetoothGattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
         BluetoothGattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
-        mChrDOut.setValue(value);
-        mGatt.writeCharacteristic(mChrDOut);
+
+        Transaction trans = new Transaction();
+        trans.chr = chr;
+        trans.value = ctrl;
+        addTransaction(trans);
+        consumeTransaction();
     }
 
-    private byte[] getLEDControlValue(int target, boolean on) {
-        int idx = INDEX[target];
-        int offset = 2; // each LED occupy 2 bits
-        int value = 0xFFFF;
-        // on=01b off=00b, but we will use XOR later.
-        // so, on=10b off=11b
-        int ctrl = on ? 0x2 : 0x3;
+    @Override
+    public void onControllPWM(int r, int g, int b, byte[][] ctrl) {
+        Log.d(String.format("To set: R=%d, G=%d, B=%d", r, g, b));
+        Transaction desc = new Transaction();
+        desc.chr = mChrCustomAOut1;
+        desc.value = ctrl[0];
+        addTransaction(desc);
+        Log.d(String.format("desc:0x%02x 0x%02x 0x%02x 0x%02x", ctrl[0][0], ctrl[0][1], ctrl[0][2], ctrl[0][3]));
+        for (int i = 1; i < ctrl.length; i++) {
+            Transaction write = new Transaction();
+            write.value = ctrl[i];
+            write.chr = mChrAOut1;
+            addTransaction(write);
+            Log.d(String.format("[%d]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
+        }
+        consumeTransaction();
+    }
 
-        // if index = 2 and turning off (ctrl=11b)
-        // 11111111b ^ 00110000b -> 11001111b
-        value = value ^ (ctrl << (idx * offset));
-        byte[] b = new byte[2];
-        b[1] = (byte)(value);
-        b[0] = (byte)(value>>8);
-        return b;
+    @Override
+    public void onStopControll() {
+        Log.d("Stopped automation");
+        controlDigital();
     }
 
     public void updateView(int tag, Bundle info) {
@@ -263,6 +291,8 @@ public class ActivityAIO extends Activity
                 if (mConnectionDialog != null && mConnectionDialog.isShowing()) {
                     dismissDialog(CONNECTION_DIALOG);
                 }
+            } else if (tag == CONSUME_TRANSACTION) {
+                consumeTransaction();
             }
         }
     }
@@ -322,6 +352,7 @@ public class ActivityAIO extends Activity
                 mChrAOut1 != null,
                 mChrAOut2 != null,
                 mChrAOut3 != null));
+        controlDigital();
     }
 
     class GattListener extends GattProxy.ListenerHelper {
@@ -361,6 +392,7 @@ public class ActivityAIO extends Activity
             onDiscovered();
         }
 
+        @Override
         public void onCharacteristicRead(BluetoothGattCharacteristic charac, int status) {
             Log.d("read char, uuid=" + charac.getUuid().toString());
             byte[] value = charac.getValue();
@@ -369,5 +401,18 @@ public class ActivityAIO extends Activity
                 Log.d("[" + i + "]" + Byte.toString(value[i]));
             }
         }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
+            synchronized(mQueue) {
+                mWorkingTransaction = null;
+            }
+            updateView(CONSUME_TRANSACTION, null);
+        }
+    }
+
+    class Transaction {
+        BluetoothGattCharacteristic chr;
+        byte[] value;
     }
 }

@@ -150,7 +150,9 @@ public class ActivityFunctionPicker extends ListActivity {
             Log.d("discovered result:" + srvs.size());
             Iterator<BluetoothGattService> it = srvs.iterator();
             while (it.hasNext()) {
-                appendServices(it.next());
+                BluetoothGattService s = it.next();
+                Log.d("S:" + s.getUuid().toString());
+                appendServices(s);
             }
         }
     }

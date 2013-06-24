@@ -33,6 +33,12 @@ public final class Bluebit {
         "00001815-0000-1000-8000-00805f9b34fb"
     };
 
+    public final static String[] UUIDS_OF_TRANSPARENT = {
+        "49535343-fe7d-4ae5-8fa9-9fafd205e455",
+        "0000180a-0000-1000-8000-00805f9b34fb",
+        "00001800-0000-1000-8000-00805f9b34fb"
+    };
+
     /* Automation IO service */
     public final static UUID SERVICE_AUTOMATION_IO = Util.uuidFromStr("1815");
     public final static UUID CHR_DIGITAL_IN  = Util.uuidFromStr("2a56");

@@ -99,6 +99,7 @@ public class FunctionAdapter extends BaseAdapter {
 
     private void initOptions(ArrayList<UuidMatcher> options) {
         addLighting(options);
+        addTransparent(options);
     }
 
     private void addLighting(ArrayList<UuidMatcher> options) {
@@ -110,6 +111,17 @@ public class FunctionAdapter extends BaseAdapter {
 
         matcher.setInfo(mContext.getString(R.string.func_light),
                 mContext.getString(R.string.func_light_desc));
+        options.add(matcher);
+    }
+
+    private void addTransparent(ArrayList<UuidMatcher> options) {
+        UuidMatcher matcher = new UuidMatcher();
+        matcher.setTarget("com.issc", "com.issc.ui.ActivityTransparent");
+        for (int i = 0; i < Bluebit.UUIDS_OF_TRANSPARENT.length; i++) {
+            matcher.addRule(Bluebit.UUIDS_OF_TRANSPARENT[i]);
+        }
+
+        matcher.setInfo("Transparent", "Transfer data to device");
         options.add(matcher);
     }
 }

@@ -87,7 +87,6 @@ public class ActivityTransparent extends Activity implements
         mMsg     = (TextView)findViewById(R.id.trans_msg);
         mInput   = (EditText)findViewById(R.id.trans_input);
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
-        mToggle  = (ToggleButton)findViewById(R.id.trans_type);
         mPeriod  = (EditText)findViewById(R.id.timer_delta);
         mSize    = (EditText)findViewById(R.id.timer_size);
         mTimes   = (EditText)findViewById(R.id.timer_times);

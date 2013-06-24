@@ -5,6 +5,7 @@ import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
 import com.issc.impl.AlgorithmAIO;
 import com.issc.impl.GattProxy;
+import com.issc.impl.GattQueue;
 import com.issc.R;
 import com.issc.util.Log;
 
@@ -36,6 +37,7 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityAIO extends Activity
     implements SeekBar.OnSeekBarChangeListener,
+    GattQueue.Consumer,
     AlgorithmAIO.Controllable {
 
     private BluetoothDevice mDevice;
@@ -57,8 +59,7 @@ public class ActivityAIO extends Activity
     private BluetoothGattCharacteristic mChrAOut3;
     private ToggleButton[] mToggles;
 
-    private Transaction mWorkingTransaction;
-    private ArrayDeque<Transaction> mQueue;
+    private GattQueue mQueue;
 
     private final static int NUM = 7;
 
@@ -91,7 +92,7 @@ public class ActivityAIO extends Activity
         mGreen.setOnSeekBarChangeListener(this);
         mBlue.setOnSeekBarChangeListener(this);
 
-        mQueue = new ArrayDeque<Transaction>();
+        mQueue = new GattQueue(this);
 
         BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
         mDevice = device.getDevice();
@@ -200,6 +201,12 @@ public class ActivityAIO extends Activity
         controlDigital();
     }
 
+    @Override
+    public void onTransact(BluetoothGattCharacteristic chr, byte[] value) {
+        chr.setValue(value);
+        mGatt.writeCharacteristic(chr);
+    }
+
     private void controlDigital() {
         boolean[] leds = new boolean[mToggles.length];
         for (int i = 0; i < mToggles.length; i++) {
@@ -209,54 +216,25 @@ public class ActivityAIO extends Activity
         AlgorithmAIO.ctrlDigital(leds, this);
     }
 
-    private void addTransaction(Transaction trans) {
-        synchronized(mQueue) {
-            mQueue.add(trans);
-        }
-    }
-
-    private void consumeTransaction() {
-        synchronized(mQueue) {
-            if (mWorkingTransaction == null) {
-                mWorkingTransaction = mQueue.poll();
-                if (mWorkingTransaction != null) {
-                    // found transaction
-                    BluetoothGattCharacteristic chr = mWorkingTransaction.chr;
-                    chr.setValue(mWorkingTransaction.value);
-                    mGatt.writeCharacteristic(chr);
-                }
-            }
-        }
-    }
-
     @Override
     public void onControllDigital(byte[] ctrl) {
         BluetoothGattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
         BluetoothGattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
 
-        Transaction trans = new Transaction();
-        trans.chr = chr;
-        trans.value = ctrl;
-        addTransaction(trans);
-        consumeTransaction();
+        mQueue.add(chr, ctrl);
+        mQueue.consume();
     }
 
     @Override
     public void onControllPWM(int r, int g, int b, byte[][] ctrl) {
         Log.d(String.format("To set: R=%d, G=%d, B=%d", r, g, b));
-        Transaction desc = new Transaction();
-        desc.chr = mChrCustomAOut1;
-        desc.value = ctrl[0];
-        addTransaction(desc);
+        mQueue.add(mChrCustomAOut1, ctrl[0]);
         Log.d(String.format("desc:0x%02x 0x%02x 0x%02x 0x%02x", ctrl[0][0], ctrl[0][1], ctrl[0][2], ctrl[0][3]));
         for (int i = 1; i < ctrl.length; i++) {
-            Transaction write = new Transaction();
-            write.value = ctrl[i];
-            write.chr = mChrAOut1;
-            addTransaction(write);
+            mQueue.add(mChrAOut1, ctrl[i]);
             Log.d(String.format("[%d]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
         }
-        consumeTransaction();
+        mQueue.consume();
     }
 
     @Override
@@ -292,7 +270,7 @@ public class ActivityAIO extends Activity
                     dismissDialog(CONNECTION_DIALOG);
                 }
             } else if (tag == CONSUME_TRANSACTION) {
-                consumeTransaction();
+                mQueue.consume();
             }
         }
     }
@@ -404,15 +382,8 @@ public class ActivityAIO extends Activity
 
         @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
-            synchronized(mQueue) {
-                mWorkingTransaction = null;
-            }
+            mQueue.consumedOne();
             updateView(CONSUME_TRANSACTION, null);
         }
-    }
-
-    class Transaction {
-        BluetoothGattCharacteristic chr;
-        byte[] value;
     }
 }

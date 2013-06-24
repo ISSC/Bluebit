@@ -4,11 +4,13 @@ package com.issc.ui;
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
 import com.issc.impl.GattProxy;
+import com.issc.impl.GattQueue;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
@@ -39,7 +41,8 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
-public class ActivityTransparent extends Activity {
+public class ActivityTransparent extends Activity implements
+    GattQueue.Consumer {
     private BluetoothDevice mDevice;
     private BluetoothGatt mGatt;
     private GattProxy.Listener mListener;
@@ -48,13 +51,18 @@ public class ActivityTransparent extends Activity {
     private ProgressDialog mTimerDialog;
     protected ViewHandler  mViewHandler;
 
+    private GattQueue mQueue;
+
+    private final static int PAYLOAD_MAX = 20; // 20 bytes is max?
+
     private final static int CONNECTION_DIALOG = 1;
     private final static int TIMER_DIALOG      = 2;
     private final static int CHOOSE_FILE = 0x101;
 
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
-    private final static int DISMISS_TIMER_DIALOG       = 0x1002;
+    private final static int CONSUME_TRANSACTION        = 0x1002;
+    private final static int DISMISS_TIMER_DIALOG       = 0x1003;
 
     private TabHost mTabHost;
     private TextView mMsg;
@@ -66,10 +74,15 @@ public class ActivityTransparent extends Activity {
     private EditText mSize;
     private EditText mTimes;
 
+    private BluetoothGattCharacteristic mTransTx;
+    private BluetoothGattCharacteristic mTransRx;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trans);
+
+        mQueue = new GattQueue(this);
 
         mMsg     = (TextView)findViewById(R.id.trans_msg);
         mInput   = (EditText)findViewById(R.id.trans_input);
@@ -88,18 +101,25 @@ public class ActivityTransparent extends Activity {
         addTab(mTabHost, "Tab3", "Echo", R.id.tab_echo);
 
         mMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
-        //BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-        //mDevice = device.getDevice();
+        BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
+        mDevice = device.getDevice();
+
+        mListener = new GattListener();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        GattProxy proxy = GattProxy.get(this);
+        proxy.addListener(mListener);
+        proxy.retrieveGatt(mListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        GattProxy proxy = GattProxy.get(this);
+        proxy.rmListener(mListener);
     }
 
     private void addTab(TabHost host, String tag, CharSequence text, int viewResource) {
@@ -156,6 +176,29 @@ public class ActivityTransparent extends Activity {
         mMsg.append("send:");
         mMsg.append(cs);
         mMsg.append("\n");
+        write(cs);
+    }
+
+    private void write(CharSequence cs) {
+        byte[] bytes = cs.toString().getBytes();
+        ByteBuffer buf = ByteBuffer.allocate(bytes.length);
+        while(buf.remaining() != 0) {
+            int size = (buf.remaining() > PAYLOAD_MAX) ? PAYLOAD_MAX: buf.remaining();
+            byte[] dst = new byte[size];
+            buf.get(dst, 0, size);
+            mQueue.add(mTransRx, dst);
+            mQueue.consume();
+        }
+    }
+
+    @Override
+    public void onTransact(BluetoothGattCharacteristic chr, byte[] value) {
+        chr.setValue(value);
+        int type = mToggle.isChecked() ?
+            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT:
+            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
+        chr.setWriteType(type);
+        mGatt.writeCharacteristic(chr);
     }
 
     @Override
@@ -171,6 +214,7 @@ public class ActivityTransparent extends Activity {
             mTimerDialog.setMessage("Timer is running");
             mTimerDialog.setOnCancelListener(new Dialog.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
+                    Log.d("some one canceled me");
                     stopTimer();
                 }
             });
@@ -186,6 +230,7 @@ public class ActivityTransparent extends Activity {
         }
 
         Log.d(sb.toString());
+        write(sb);
     }
 
     private boolean mRunning;
@@ -251,14 +296,72 @@ public class ActivityTransparent extends Activity {
                 if (mTimerDialog != null && mTimerDialog.isShowing()) {
                     dismissDialog(TIMER_DIALOG);
                 }
+            } else if (tag == CONSUME_TRANSACTION) {
+                mQueue.consume();
             }
         }
+    }
+
+    private void onConnected() {
+        List<BluetoothGattService> list = mGatt.getServices(mDevice);
+        if ((list == null) || (list.size() == 0)) {
+            Log.d("no services, do discovery");
+            mGatt.discoverServices(mDevice);
+        } else {
+            onDiscovered();
+        }
+    }
+
+    private void onDiscovered() {
+        updateView(DISMISS_CONNECTION_DIALOG, null);
+
+        BluetoothGattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
+        mTransTx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_TX);
+        mTransRx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_RX);
+        Log.d(String.format("found Tx:%b, Rx:%b", mTransTx != null, mTransRx != null));
     }
 
     class GattListener extends GattProxy.ListenerHelper {
 
         GattListener() {
             super("ActivityTransparent");
+        }
+
+        @Override
+        public void onRetrievedGatt(BluetoothGatt gatt) {
+            Log.d(String.format("onRetrievedGatt"));
+            mGatt = gatt;
+
+            int conn = mGatt.getConnectionState(mDevice);
+            if (conn == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.d("disconnected, connecting to device");
+                updateView(SHOW_CONNECTION_DIALOG, null);
+                mGatt.connect(mDevice, true);
+            } else {
+                Log.d("already connected");
+                onConnected();
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothDevice device, int status) {
+            onDiscovered();
+        }
+
+        @Override
+        public void onCharacteristicRead(BluetoothGattCharacteristic charac, int status) {
+            Log.d("read char, uuid=" + charac.getUuid().toString());
+            byte[] value = charac.getValue();
+            Log.d("get value, byte length:" + value.length);
+            for (int i = 0; i < value.length; i++) {
+                Log.d("[" + i + "]" + Byte.toString(value[i]));
+            }
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
+            mQueue.consumedOne();
+            updateView(CONSUME_TRANSACTION, null);
         }
     }
 }

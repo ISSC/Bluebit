@@ -19,6 +19,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,7 +29,9 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
@@ -42,17 +45,26 @@ public class ActivityTransparent extends Activity {
     private GattProxy.Listener mListener;
 
     private ProgressDialog mConnectionDialog;
+    private ProgressDialog mTimerDialog;
     protected ViewHandler  mViewHandler;
 
     private final static int CONNECTION_DIALOG = 1;
+    private final static int TIMER_DIALOG      = 2;
     private final static int CHOOSE_FILE = 0x101;
 
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
+    private final static int DISMISS_TIMER_DIALOG       = 0x1002;
 
+    private TabHost mTabHost;
     private TextView mMsg;
     private EditText mInput;
     private Button   mBtnSend;
+    private ToggleButton mToggle;
+
+    private EditText mPeriod;
+    private EditText mSize;
+    private EditText mTimes;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +74,18 @@ public class ActivityTransparent extends Activity {
         mMsg     = (TextView)findViewById(R.id.trans_msg);
         mInput   = (EditText)findViewById(R.id.trans_input);
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
+        mToggle  = (ToggleButton)findViewById(R.id.trans_type);
+        mPeriod  = (EditText)findViewById(R.id.timer_delta);
+        mSize    = (EditText)findViewById(R.id.timer_size);
+        mTimes   = (EditText)findViewById(R.id.timer_times);
+
+        mViewHandler = new ViewHandler();
+
+        mTabHost = (TabHost) findViewById(R.id.tabhost);
+        mTabHost.setup();
+        addTab(mTabHost, "Tab1", "Raw", R.id.tab_raw);
+        addTab(mTabHost, "Tab2", "Timer", R.id.tab_timer);
+        addTab(mTabHost, "Tab3", "Echo", R.id.tab_echo);
 
         mMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
         //BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
@@ -78,9 +102,21 @@ public class ActivityTransparent extends Activity {
         super.onPause();
     }
 
+    private void addTab(TabHost host, String tag, CharSequence text, int viewResource) {
+        TabHost.TabSpec spec = host.newTabSpec(tag);
+        spec.setIndicator(text);
+        spec.setContent(viewResource);
+        host.addTab(spec);
+    }
+
     public void onClickSend(View v) {
         CharSequence cs = mInput.getText();
         send(cs);
+    }
+
+    public void onClickStartTimer(View v) {
+        showDialog(TIMER_DIALOG);
+        startTimer();
     }
 
     public void onClickChoose(View v) {
@@ -88,6 +124,14 @@ public class ActivityTransparent extends Activity {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("text/plain");
         startActivityForResult(intent, CHOOSE_FILE);
+    }
+
+    public void onClickToggle(View v) {
+        onSetType(mToggle.isChecked());
+    }
+
+    private void onSetType(boolean withResponse) {
+        Log.d("set write with response:" + withResponse);
     }
 
     @Override
@@ -122,8 +166,59 @@ public class ActivityTransparent extends Activity {
             mConnectionDialog.setMessage(this.getString(R.string.connecting));
             mConnectionDialog.setCancelable(true);
             return mConnectionDialog;
+        } else if (id == TIMER_DIALOG) {
+            mTimerDialog = new ProgressDialog(this);
+            mTimerDialog.setMessage("Timer is running");
+            mTimerDialog.setOnCancelListener(new Dialog.OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    stopTimer();
+                }
+            });
+            return mTimerDialog;
         }
         return null;
+    }
+
+    private void onTimerSend(int count, int size) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < size; i++) {
+            sb.append("" + count);
+        }
+
+        Log.d(sb.toString());
+    }
+
+    private boolean mRunning;
+
+    private void startTimer() {
+        final int period = Integer.parseInt(mPeriod.getText().toString());
+        final int size   = Integer.parseInt(mSize.getText().toString());
+        final int times  = Integer.parseInt(mTimes.getText().toString());
+        mRunning = true;
+        Thread runner = new Thread() {
+            public void run() {
+                int counter = 0;
+                try {
+                    while(mRunning) {
+                        if (times != 0 && times == counter) {
+                            stopTimer();
+                        } else {
+                            onTimerSend(counter, size);
+                            sleep(period);
+                            counter++;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                updateView(DISMISS_TIMER_DIALOG, null);
+            }
+        };
+        runner.start();
+    }
+
+    private void stopTimer() {
+        mRunning = false;
     }
 
     public void updateView(int tag, Bundle info) {
@@ -151,6 +246,10 @@ public class ActivityTransparent extends Activity {
             } else if (tag == DISMISS_CONNECTION_DIALOG) {
                 if (mConnectionDialog != null && mConnectionDialog.isShowing()) {
                     dismissDialog(CONNECTION_DIALOG);
+                }
+            } else if (tag == DISMISS_TIMER_DIALOG) {
+                if (mTimerDialog != null && mTimerDialog.isShowing()) {
+                    dismissDialog(TIMER_DIALOG);
                 }
             }
         }

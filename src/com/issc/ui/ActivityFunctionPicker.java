@@ -119,8 +119,9 @@ public class ActivityFunctionPicker extends ListActivity {
                     onDiscovered(mDevice);
                 }
             } else {
-                Log.d("connecting to device");
-                mGatt.connect(mDevice, false);
+                boolean init = mGatt.connect(mDevice, false);
+                Log.d("connecting to device, is this BLE? " + mGatt.isBLEDevice(mDevice));
+                Log.d("does connection initialize successfully? " + init);
             }
         } else {
             Log.e("mGatt is null!!");
@@ -146,6 +147,7 @@ public class ActivityFunctionPicker extends ListActivity {
         mDiscovered = true;
         if (mGatt != null) {
             List<BluetoothGattService> srvs = mGatt.getServices(device);
+            Log.d("discovered result:" + srvs.size());
             Iterator<BluetoothGattService> it = srvs.iterator();
             while (it.hasNext()) {
                 appendServices(it.next());
@@ -202,6 +204,7 @@ public class ActivityFunctionPicker extends ListActivity {
                 Log.d("connected to device, start discovery");
                 mGatt.discoverServices(mDevice);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.d("disconnected!!!");
             }
         }
     }

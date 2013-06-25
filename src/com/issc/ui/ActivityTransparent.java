@@ -64,10 +64,13 @@ public class ActivityTransparent extends Activity implements
     private final static int TIMER_DIALOG      = 2;
     private final static int CHOOSE_FILE = 0x101;
 
+    private final static String INFO_CONTENT = "the_information_body";
+
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
     private final static int CONSUME_TRANSACTION        = 0x1002;
     private final static int DISMISS_TIMER_DIALOG       = 0x1003;
+    private final static int APPEND_MESSAGE             = 0x1004;
 
     private TabHost mTabHost;
     private TextView mMsg;
@@ -96,6 +99,7 @@ public class ActivityTransparent extends Activity implements
         mMsg     = (TextView)findViewById(R.id.trans_msg);
         mInput   = (EditText)findViewById(R.id.trans_input);
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
+        mToggle  = (ToggleButton)findViewById(R.id.trans_type);
 
         mViewHandler = new ViewHandler();
 
@@ -169,7 +173,8 @@ public class ActivityTransparent extends Activity implements
 
     public void onClickSend(View v) {
         CharSequence cs = mInput.getText();
-        send(cs);
+        msgSend(cs);
+        write(cs);
     }
 
     public void onClickStartTimer(View v) {
@@ -200,7 +205,8 @@ public class ActivityTransparent extends Activity implements
                 String filePath = uri.getPath();
                 Log.d("chosen file:" + filePath);
                 try {
-                    send(Util.readStrFromFile(filePath));
+                    write(Util.readStrFromFile(filePath));
+                    msgSend(filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.d("IO Exception");
@@ -209,12 +215,15 @@ public class ActivityTransparent extends Activity implements
         }
     }
 
-    private void send(CharSequence cs) {
-        Log.d("send:" + cs.toString());
-        mMsg.append("send:");
-        mMsg.append(cs);
-        mMsg.append("\n");
-        write(cs);
+    private void msgSend(CharSequence cs) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("send:");
+        sb.append(cs);
+
+        Log.d(sb.toString());
+        Bundle msg = new Bundle();
+        msg.putCharSequence(INFO_CONTENT, sb);
+        updateView(APPEND_MESSAGE, msg);
     }
 
     private void write(CharSequence cs) {
@@ -267,7 +276,7 @@ public class ActivityTransparent extends Activity implements
             sb.append("" + count);
         }
 
-        Log.d(sb.toString());
+        msgSend(sb);
         write(sb);
     }
 
@@ -337,6 +346,19 @@ public class ActivityTransparent extends Activity implements
                 }
             } else if (tag == CONSUME_TRANSACTION) {
                 mQueue.consume();
+            } else if (tag == APPEND_MESSAGE) {
+                CharSequence content = bundle.getCharSequence(INFO_CONTENT);
+                if (content != null) {
+                    mMsg.append(content);
+                    mMsg.append("\n");
+
+                    /*fot automaticaly scrolling to end*/
+                    final int amount = mMsg.getLayout().getLineTop(mMsg.getLineCount())
+                        - mMsg.getHeight();
+                    if (amount > 0) {
+                        mMsg.scrollTo(0, amount);
+                    }
+                }
             }
         }
     }

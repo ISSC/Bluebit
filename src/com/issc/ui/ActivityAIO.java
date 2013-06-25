@@ -233,8 +233,24 @@ public class ActivityAIO extends Activity
         mQueue.add(mChrCustomAOut1, ctrl[0]);
         Log.d(String.format("desc:0x%02x 0x%02x 0x%02x 0x%02x", ctrl[0][0], ctrl[0][1], ctrl[0][2], ctrl[0][3]));
         for (int i = 1; i < ctrl.length; i++) {
-            mQueue.add(mChrAOut1, ctrl[i]);
-            Log.d(String.format("[%d]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
+            if (r != 0) {
+                mQueue.add(mChrAOut1, ctrl[i]);
+                Log.d(String.format("[%d(R)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
+                r = 0;
+                break;
+            }
+            if (g != 0) {
+                mQueue.add(mChrAOut2, ctrl[i]);
+                Log.d(String.format("[%d(G)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
+                g = 0;
+                break;
+            }
+            if (b != 0) {
+                mQueue.add(mChrAOut3, ctrl[i]);
+                Log.d(String.format("[%d(B)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
+                b = 0;
+                break;
+            }
         }
         mQueue.consume();
     }
@@ -384,6 +400,7 @@ public class ActivityAIO extends Activity
 
         @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
+            Log.d("on consumed!!");
             mQueue.consumedOne();
             updateView(CONSUME_TRANSACTION, null);
         }

@@ -57,6 +57,7 @@ public class GattQueue {
                     BluetoothGattCharacteristic chr = mWorkingTransaction.chr;
                     byte[] value = mWorkingTransaction.value;
                     boolean write = mWorkingTransaction.isWrite;
+                    Log.d("consumer transact one");
                     mConsumer.onTransact(chr, value, write);
                 }
             }

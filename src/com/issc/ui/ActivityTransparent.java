@@ -122,8 +122,12 @@ public class ActivityTransparent extends Activity implements
     }
 
     private void addTab(TabHost host, String tag, CharSequence text, int viewResource) {
+        View indicator = getLayoutInflater().inflate(R.layout.tab_indicator, null);
+        TextView tv = (TextView)indicator.findViewById(R.id.indicator_text);
+        tv.setText(text);
+
         TabHost.TabSpec spec = host.newTabSpec(tag);
-        spec.setIndicator(text);
+        spec.setIndicator(indicator);
         spec.setContent(viewResource);
         host.addTab(spec);
     }

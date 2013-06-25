@@ -124,18 +124,33 @@
 				</TableRow>
 			</TableLayout>
 
-			<LinearLayout
+			<TableLayout
 				android:id="@+id/tab_echo"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:orientation="vertical"
 				>
-				<TextView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:text="Echo"
-					/>
-			</LinearLayout>
+				<TableRow
+					>
+					<TextView
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:text="Turn on Echo function to transfer data back automatically"
+						android:layout_marginLeft="@dimen/large_gutter"
+						/>
+					<ToggleButton
+						android:id="@+id/trans_echo"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textOn="@string/on"
+						android:textOff="@string/off"
+						android:layout_marginRight="@dimen/large_gutter"
+						android:onClick="onClickEcho"
+						android:checked="false"
+						/>
+				</TableRow>
+			</TableLayout>
 		</FrameLayout>
 
 		<LinearLayout
@@ -160,7 +175,7 @@
 				android:textOn="@string/on"
 				android:textOff="@string/off"
 				android:layout_marginRight="@dimen/large_gutter"
-				android:onClick="onClickToggle"
+				android:onClick="onClickType"
 				android:checked="true"
 				/>
 		</LinearLayout>

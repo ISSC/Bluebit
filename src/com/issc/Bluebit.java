@@ -87,6 +87,9 @@ public final class Bluebit {
     public final static  UUID CHR_ISSC_TRANS_RX         = UUID.fromString("49535343-8841-43F4-A8D4-ECBE34729BB3");
     public final static  UUID CHR_ISSC_MP               = UUID.fromString("49535343-ACA3-481C-91EC-D85E28A60318");
 
+
+    /* Client Characteristic Configuration Descriptor */
+    public final static UUID DES_CLIENT_CHR_CONFIG = Util.uuidFromStr("2902");
 }
 
 

@@ -44,6 +44,7 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityTransparent extends Activity implements
@@ -76,7 +77,8 @@ public class ActivityTransparent extends Activity implements
     private TextView mMsg;
     private EditText mInput;
     private Button   mBtnSend;
-    private ToggleButton mToggle;
+    private ToggleButton mToggleResponse;
+    private ToggleButton mToggleEcho;
 
     private Spinner mSpinnerDelta;
     private Spinner mSpinnerSize;
@@ -99,7 +101,8 @@ public class ActivityTransparent extends Activity implements
         mMsg     = (TextView)findViewById(R.id.trans_msg);
         mInput   = (EditText)findViewById(R.id.trans_input);
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
-        mToggle  = (ToggleButton)findViewById(R.id.trans_type);
+        mToggleResponse = (ToggleButton)findViewById(R.id.trans_type);
+        mToggleEcho     = (ToggleButton)findViewById(R.id.trans_echo);
 
         mViewHandler = new ViewHandler();
 
@@ -189,12 +192,57 @@ public class ActivityTransparent extends Activity implements
         startActivityForResult(intent, CHOOSE_FILE);
     }
 
-    public void onClickToggle(View v) {
-        onSetType(mToggle.isChecked());
+    public void onClickType(View v) {
+        onSetType(mToggleResponse.isChecked());
     }
 
     private void onSetType(boolean withResponse) {
         Log.d("set write with response:" + withResponse);
+    }
+
+    public void onClickEcho(View v) {
+        onSetEcho(mToggleEcho.isChecked());
+    }
+
+    private void onSetEcho(boolean enable) {
+        if (enable) {
+            enableNotification();
+        } else {
+            disableNotification();
+        }
+    }
+
+    private void onEcho(byte[] data) {
+        StringBuffer sb = new StringBuffer();
+        if (data == null) {
+            sb.append("Received empty data");
+        } else {
+            String recv = new String(data);
+            msgRecv(recv);
+            write(recv);
+            msgEcho(recv);
+        }
+        Bundle msg = new Bundle();
+        msg.putCharSequence(INFO_CONTENT, sb);
+        updateView(APPEND_MESSAGE, msg);
+    }
+
+    private void enableNotification() {
+        boolean set = mGatt.setCharacteristicNotification(mTransTx, true);
+        Log.d("set notification:" + set);
+        BluetoothGattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
+        dsc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        boolean success = mGatt.writeDescriptor(dsc);
+        Log.d("writing enable descriptor:" + success);
+    }
+
+    private void disableNotification() {
+        boolean set = mGatt.setCharacteristicNotification(mTransTx, false);
+        Log.d("set notification:" + set);
+        BluetoothGattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
+        dsc.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE );
+        boolean success = mGatt.writeDescriptor(dsc);
+        Log.d("writing disable descriptor:" + success);
     }
 
     @Override
@@ -215,14 +263,31 @@ public class ActivityTransparent extends Activity implements
         }
     }
 
+    private void msgRecv(CharSequence cs) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("recv:");
+        sb.append(cs);
+        msgShow(sb);
+    }
+
+    private void msgEcho(CharSequence cs) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("echo:");
+        sb.append(cs);
+        msgShow(sb);
+    }
+
     private void msgSend(CharSequence cs) {
         StringBuilder sb = new StringBuilder();
         sb.append("send:");
         sb.append(cs);
+        msgShow(sb);
+    }
 
-        Log.d(sb.toString());
+    private void msgShow(CharSequence cs) {
+        Log.d(cs.toString());
         Bundle msg = new Bundle();
-        msg.putCharSequence(INFO_CONTENT, sb);
+        msg.putCharSequence(INFO_CONTENT, cs);
         updateView(APPEND_MESSAGE, msg);
     }
 
@@ -242,7 +307,7 @@ public class ActivityTransparent extends Activity implements
     public void onTransact(BluetoothGattCharacteristic chr, byte[] value, boolean isWrite) {
         chr.setValue(value);
         if (isWrite) {
-            int type = mToggle.isChecked() ?
+            int type = mToggleResponse.isChecked() ?
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT:
                 BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
             chr.setWriteType(type);
@@ -323,7 +388,7 @@ public class ActivityTransparent extends Activity implements
         if (info == null) {
             info = new Bundle();
         }
-        mViewHandler.removeMessages(tag);
+        //mViewHandler.removeMessages(tag);
         Message msg = mViewHandler.obtainMessage(tag);
         msg.what = tag;
         msg.setData(info);
@@ -425,7 +490,26 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
+        public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
+            Log.d("on descriptor write:" + status);
+        }
+
+        @Override
+        public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
+            Log.d("on descriptor read:" + status);
+        }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
+            Log.d("on chr changed" );
+            if (chrc.getUuid().equals(Bluebit.CHR_ISSC_TRANS_TX)) {
+                onEcho(chrc.getValue());
+            }
+        }
+
+        @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
+            Log.d("on chr write" );
             mQueue.consumedOne();
             updateView(CONSUME_TRANSACTION, null);
         }

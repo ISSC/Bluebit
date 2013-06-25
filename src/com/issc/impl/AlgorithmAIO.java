@@ -37,7 +37,7 @@ public class AlgorithmAIO {
      */
     public static byte[] ctrlDigital(boolean[] leds, Controllable callback) {
         final int width = 2; // each LED occupy 2 bits
-        int value = 0xc000; // 1100 0000 0000 0000
+        int value = 0x0000; // 0000 0000 0000 0000
         for (int i = 0; i < NUM; i++) {
             int idx = INDEX[i];
             // on=01b off=00b
@@ -230,6 +230,7 @@ public class AlgorithmAIO {
     private static void printLEDCtrlValue(byte[] val) {
         boolean[] s = parseLEDState(val);
 
+        out(String.format("0x%02x  0x%02x - ", val[0], val[1]));
         out(String.format("LED: %b\t%b\t%b\t%b,\t%b\t%b\t%b\n",
                     s[0], s[1], s[2], s[3], s[4], s[5], s[6]));
     }

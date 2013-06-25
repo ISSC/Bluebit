@@ -271,13 +271,14 @@ public class ActivityTransparent extends Activity implements
     }
 
     private void onTimerSend(int count, int size) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < size; i++) {
-            sb.append("" + count);
+        /* max is 20 */
+        String out = String.format("%020d", count);
+        if (out.length() > size) {
+            // if too long
+            out = out.substring(out.length() - size);
         }
-
-        msgSend(sb);
-        write(sb);
+        msgSend(out);
+        write(out);
     }
 
     private boolean mRunning;

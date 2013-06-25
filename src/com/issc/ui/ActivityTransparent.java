@@ -132,7 +132,7 @@ public class ActivityTransparent extends Activity implements
         initSpinner(R.array.size_text, mSpinnerSize);
         initSpinner(R.array.repeat_text, mSpinnerRepeat);
 
-        mSpinnerDelta.setSelection(2);  // supposed to select 1000ms
+        mSpinnerDelta.setSelection(3);  // supposed to select 1000ms
         mSpinnerSize.setSelection(19);  // supposed to select 20bytes
         mSpinnerRepeat.setSelection(0); // supposed to select Unlimited
     }

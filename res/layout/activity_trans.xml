@@ -75,7 +75,7 @@
 						android:layout_height="wrap_content"
 						android:text="Delta time(ms)"
 						/>
-					<EditText
+					<Spinner
 						android:id="@+id/timer_delta"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
@@ -91,13 +91,10 @@
 						android:layout_height="wrap_content"
 						android:text="Pattern Size(less than 20)"
 						/>
-					<EditText
+					<Spinner
 						android:id="@+id/timer_size"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:maxLines="1"
-						android:text="20"
-						android:inputType="number"
 						/>
 				</TableRow>
 				<TableRow
@@ -107,8 +104,8 @@
 						android:layout_height="wrap_content"
 						android:text="Times(0: unlimited)"
 						/>
-					<EditText
-						android:id="@+id/timer_times"
+					<Spinner
+						android:id="@+id/timer_repeat"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:maxLines="1"

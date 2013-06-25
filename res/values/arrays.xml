@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="delta_text">
+		<item>250 ms</item>
+		<item>500 ms</item>
+		<item>1000 ms</item>
+		<item>2000 ms</item>
+		<item>3000 ms</item>
+	</string-array>
+	<integer-array name="delta_value">
+		<item>250</item>
+		<item>500</item>
+		<item>1000</item>
+		<item>2000</item>
+		<item>3000</item>
+	</integer-array>
+
+	<string-array name="size_text">
+		<item>1 byte</item>
+		<item>2 bytes</item>
+		<item>3 bytes</item>
+		<item>4 bytes</item>
+		<item>5 bytes</item>
+		<item>6 bytes</item>
+		<item>7 bytes</item>
+		<item>8 bytes</item>
+		<item>9 bytes</item>
+		<item>10 bytes</item>
+		<item>11 bytes</item>
+		<item>12 bytes</item>
+		<item>13 bytes</item>
+		<item>14 bytes</item>
+		<item>15 bytes</item>
+		<item>16 bytes</item>
+		<item>17 bytes</item>
+		<item>18 bytes</item>
+		<item>19 bytes</item>
+		<item>20 bytes(max)</item>
+	</string-array>
+	<integer-array name="size_value">
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
+		<item>7</item>
+		<item>8</item>
+		<item>9</item>
+		<item>10</item>
+		<item>11</item>
+		<item>12</item>
+		<item>13</item>
+		<item>14</item>
+		<item>15</item>
+		<item>16</item>
+		<item>17</item>
+		<item>18</item>
+		<item>19</item>
+		<item>20</item>
+	</integer-array>
+
+	<string-array name="repeat_text">
+		<item>Unlimited</item>
+		<item>1 time</item>
+		<item>3 times</item>
+		<item>5 times</item>
+		<item>10 times</item>
+		<item>20 times</item>
+	</string-array>
+	<integer-array name="repeat_value">
+		<item>0</item>
+		<item>1</item>
+		<item>3</item>
+		<item>5</item>
+		<item>10</item>
+		<item>20</item>
+	</integer-array>
+
+
+</resources>

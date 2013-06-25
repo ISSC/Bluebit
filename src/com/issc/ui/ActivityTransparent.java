@@ -23,14 +23,19 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -70,9 +75,13 @@ public class ActivityTransparent extends Activity implements
     private Button   mBtnSend;
     private ToggleButton mToggle;
 
-    private EditText mPeriod;
-    private EditText mSize;
-    private EditText mTimes;
+    private Spinner mSpinnerDelta;
+    private Spinner mSpinnerSize;
+    private Spinner mSpinnerRepeat;
+
+    private int[] mValueDelta;
+    private int[] mValueSize;
+    private int[] mValueRepeat;
 
     private BluetoothGattCharacteristic mTransTx;
     private BluetoothGattCharacteristic mTransRx;
@@ -87,9 +96,6 @@ public class ActivityTransparent extends Activity implements
         mMsg     = (TextView)findViewById(R.id.trans_msg);
         mInput   = (EditText)findViewById(R.id.trans_input);
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
-        mPeriod  = (EditText)findViewById(R.id.timer_delta);
-        mSize    = (EditText)findViewById(R.id.timer_size);
-        mTimes   = (EditText)findViewById(R.id.timer_times);
 
         mViewHandler = new ViewHandler();
 
@@ -104,6 +110,35 @@ public class ActivityTransparent extends Activity implements
         //mDevice = device.getDevice();
 
         mListener = new GattListener();
+        initSpinners();
+    }
+
+    private void initSpinners() {
+        Resources res = getResources();
+
+        mSpinnerDelta  = (Spinner)findViewById(R.id.timer_delta);
+        mSpinnerSize   = (Spinner)findViewById(R.id.timer_size);
+        mSpinnerRepeat = (Spinner)findViewById(R.id.timer_repeat);
+
+        mValueDelta  = res.getIntArray(R.array.delta_value);
+        mValueSize   = res.getIntArray(R.array.size_value);
+        mValueRepeat = res.getIntArray(R.array.repeat_value);
+
+        initSpinner(R.array.delta_text, mSpinnerDelta);
+        initSpinner(R.array.size_text, mSpinnerSize);
+        initSpinner(R.array.repeat_text, mSpinnerRepeat);
+
+        mSpinnerDelta.setSelection(2);  // supposed to select 1000ms
+        mSpinnerSize.setSelection(19);  // supposed to select 20bytes
+        mSpinnerRepeat.setSelection(0); // supposed to select Unlimited
+    }
+
+    private void initSpinner(int textArrayId, Spinner spinner) {
+        ArrayAdapter<CharSequence> adapter;
+        adapter = ArrayAdapter.createFromResource(
+                this, textArrayId, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 
     @Override
@@ -239,20 +274,21 @@ public class ActivityTransparent extends Activity implements
     private boolean mRunning;
 
     private void startTimer() {
-        final int period = Integer.parseInt(mPeriod.getText().toString());
-        final int size   = Integer.parseInt(mSize.getText().toString());
-        final int times  = Integer.parseInt(mTimes.getText().toString());
+
+        final int delta  = mValueDelta[mSpinnerDelta.getSelectedItemPosition()];
+        final int size   = mValueSize[mSpinnerSize.getSelectedItemPosition()];
+        final int repeat = mValueRepeat[mSpinnerRepeat.getSelectedItemPosition()];
         mRunning = true;
         Thread runner = new Thread() {
             public void run() {
                 int counter = 0;
                 try {
                     while(mRunning) {
-                        if (times != 0 && times == counter) {
+                        if (repeat != 0 && repeat == counter) {
                             stopTimer();
                         } else {
                             onTimerSend(counter, size);
-                            sleep(period);
+                            sleep(delta);
                             counter++;
                         }
                     }

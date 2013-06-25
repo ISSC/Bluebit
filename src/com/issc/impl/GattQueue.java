@@ -30,9 +30,15 @@ public class GattQueue {
     }
 
     public void add(BluetoothGattCharacteristic chr, byte[] value) {
+        /* by default, it is write*/
+        add(chr, value, true);
+    }
+
+    public void add(BluetoothGattCharacteristic chr, byte[] value, boolean isWrite) {
         Transaction t = new Transaction();
         t.chr = chr;
         t.value = value;
+        t.isWrite = isWrite;
         addTransaction(t);
     }
 
@@ -50,7 +56,8 @@ public class GattQueue {
                     // found transaction
                     BluetoothGattCharacteristic chr = mWorkingTransaction.chr;
                     byte[] value = mWorkingTransaction.value;
-                    mConsumer.onTransact(chr, value);
+                    boolean write = mWorkingTransaction.isWrite;
+                    mConsumer.onTransact(chr, value, write);
                 }
             }
         }
@@ -65,9 +72,10 @@ public class GattQueue {
     class Transaction {
         BluetoothGattCharacteristic chr;
         byte[] value;
+        boolean isWrite;
     }
 
     public interface Consumer {
-        public void onTransact(BluetoothGattCharacteristic chr, byte[] value);
+        public void onTransact(BluetoothGattCharacteristic chr, byte[] value, boolean isWrite);
     }
 }

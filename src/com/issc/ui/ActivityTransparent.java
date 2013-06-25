@@ -239,13 +239,17 @@ public class ActivityTransparent extends Activity implements
     }
 
     @Override
-    public void onTransact(BluetoothGattCharacteristic chr, byte[] value) {
+    public void onTransact(BluetoothGattCharacteristic chr, byte[] value, boolean isWrite) {
         chr.setValue(value);
-        int type = mToggle.isChecked() ?
-            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT:
-            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
-        chr.setWriteType(type);
-        mGatt.writeCharacteristic(chr);
+        if (isWrite) {
+            int type = mToggle.isChecked() ?
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT:
+                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
+            chr.setWriteType(type);
+            mGatt.writeCharacteristic(chr);
+        } else {
+            mGatt.readCharacteristic(chr);
+        }
     }
 
     @Override

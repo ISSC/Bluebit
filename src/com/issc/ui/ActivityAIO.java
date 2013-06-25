@@ -202,9 +202,11 @@ public class ActivityAIO extends Activity
     }
 
     @Override
-    public void onTransact(BluetoothGattCharacteristic chr, byte[] value) {
+    public void onTransact(BluetoothGattCharacteristic chr, byte[] value, boolean isWrite) {
         chr.setValue(value);
-        mGatt.writeCharacteristic(chr);
+        if (isWrite) {
+            mGatt.writeCharacteristic(chr);
+        }
     }
 
     private void controlDigital() {

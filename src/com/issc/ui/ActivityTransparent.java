@@ -107,7 +107,7 @@ public class ActivityTransparent extends Activity implements
 
         mMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
         BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-        //mDevice = device.getDevice();
+        mDevice = device.getDevice();
 
         mListener = new GattListener();
         initSpinners();
@@ -144,16 +144,16 @@ public class ActivityTransparent extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
-        //GattProxy proxy = GattProxy.get(this);
-        //proxy.addListener(mListener);
-        //proxy.retrieveGatt(mListener);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.addListener(mListener);
+        proxy.retrieveGatt(mListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //GattProxy proxy = GattProxy.get(this);
-        //proxy.rmListener(mListener);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.rmListener(mListener);
     }
 
     private void addTab(TabHost host, String tag, CharSequence text, int viewResource) {
@@ -224,8 +224,8 @@ public class ActivityTransparent extends Activity implements
             int size = (buf.remaining() > PAYLOAD_MAX) ? PAYLOAD_MAX: buf.remaining();
             byte[] dst = new byte[size];
             buf.get(dst, 0, size);
-            //mQueue.add(mTransRx, dst);
-            //mQueue.consume();
+            mQueue.add(mTransRx, dst);
+            mQueue.consume();
         }
     }
 

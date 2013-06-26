@@ -133,6 +133,7 @@ public class ActivityAIO extends Activity
 
         GattProxy proxy = GattProxy.get(this);
         proxy.rmListener(mListener);
+        mQueue.clear();
     }
 
     public void onClickAutoPattern1(View v) {

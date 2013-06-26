@@ -171,6 +171,7 @@ public class ActivityTransparent extends Activity implements
         super.onPause();
         GattProxy proxy = GattProxy.get(this);
         proxy.rmListener(mListener);
+        mQueue.clear();
     }
 
     @Override

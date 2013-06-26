@@ -4,10 +4,11 @@ package com.issc.ui;
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
 import com.issc.impl.GattProxy;
-import com.issc.impl.GattQueue;
+import com.issc.impl.GattTransaction;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
+import com.issc.util.TransactionQueue;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,7 +49,7 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityTransparent extends Activity implements
-    GattQueue.Consumer {
+    TransactionQueue.Consumer<GattTransaction> {
     private BluetoothDevice mDevice;
     private BluetoothGatt mGatt;
     private GattProxy.Listener mListener;
@@ -57,7 +58,7 @@ public class ActivityTransparent extends Activity implements
     private ProgressDialog mTimerDialog;
     protected ViewHandler  mViewHandler;
 
-    private GattQueue mQueue;
+    private TransactionQueue mQueue;
 
     private final static int PAYLOAD_MAX = 20; // 20 bytes is max?
 
@@ -96,7 +97,7 @@ public class ActivityTransparent extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trans);
 
-        mQueue = new GattQueue(this);
+        mQueue = new TransactionQueue(this);
 
         mMsg     = (TextView)findViewById(R.id.trans_msg);
         mInput   = (EditText)findViewById(R.id.trans_input);
@@ -298,22 +299,23 @@ public class ActivityTransparent extends Activity implements
             int size = (buf.remaining() > PAYLOAD_MAX) ? PAYLOAD_MAX: buf.remaining();
             byte[] dst = new byte[size];
             buf.get(dst, 0, size);
-            mQueue.add(mTransRx, dst);
+            GattTransaction t = new GattTransaction(mTransRx, dst);
+            mQueue.add(t);
             mQueue.consume();
         }
     }
 
     @Override
-    public void onTransact(BluetoothGattCharacteristic chr, byte[] value, boolean isWrite) {
-        chr.setValue(value);
-        if (isWrite) {
+    public void onTransact(GattTransaction t) {
+        t.chr.setValue(t.value);
+        if (t.isWrite) {
             int type = mToggleResponse.isChecked() ?
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT:
                 BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
-            chr.setWriteType(type);
-            mGatt.writeCharacteristic(chr);
+            t.chr.setWriteType(type);
+            mGatt.writeCharacteristic(t.chr);
         } else {
-            mGatt.readCharacteristic(chr);
+            mGatt.readCharacteristic(t.chr);
         }
     }
 
@@ -452,6 +454,13 @@ public class ActivityTransparent extends Activity implements
         Log.d(String.format("found Tx:%b, Rx:%b", mTransTx != null, mTransRx != null));
     }
 
+    private void onDisconnected() {
+        Log.d("disconnected, connecting to device");
+        updateView(SHOW_CONNECTION_DIALOG, null);
+        mGatt.connect(mDevice, true);
+
+    }
+
     class GattListener extends GattProxy.ListenerHelper {
 
         GattListener() {
@@ -465,12 +474,19 @@ public class ActivityTransparent extends Activity implements
 
             int conn = mGatt.getConnectionState(mDevice);
             if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d("disconnected, connecting to device");
-                updateView(SHOW_CONNECTION_DIALOG, null);
-                mGatt.connect(mDevice, true);
+                onDisconnected();
             } else {
                 Log.d("already connected");
                 onConnected();
+            }
+        }
+
+        @Override
+        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                onConnected();
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                onDisconnected();
             }
         }
 

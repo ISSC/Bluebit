@@ -5,9 +5,10 @@ import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
 import com.issc.impl.AlgorithmAIO;
 import com.issc.impl.GattProxy;
-import com.issc.impl.GattQueue;
+import com.issc.impl.GattTransaction;
 import com.issc.R;
 import com.issc.util.Log;
+import com.issc.util.TransactionQueue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityAIO extends Activity
     implements SeekBar.OnSeekBarChangeListener,
-    GattQueue.Consumer,
+    TransactionQueue.Consumer<GattTransaction>,
     AlgorithmAIO.Controllable {
 
     private BluetoothDevice mDevice;
@@ -59,7 +60,7 @@ public class ActivityAIO extends Activity
     private BluetoothGattCharacteristic mChrAOut3;
     private ToggleButton[] mToggles;
 
-    private GattQueue mQueue;
+    private TransactionQueue mQueue;
 
     private final static int NUM = 7;
 
@@ -92,7 +93,7 @@ public class ActivityAIO extends Activity
         mGreen.setOnSeekBarChangeListener(this);
         mBlue.setOnSeekBarChangeListener(this);
 
-        mQueue = new GattQueue(this);
+        mQueue = new TransactionQueue(this);
 
         BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
         mDevice = device.getDevice();
@@ -202,10 +203,10 @@ public class ActivityAIO extends Activity
     }
 
     @Override
-    public void onTransact(BluetoothGattCharacteristic chr, byte[] value, boolean isWrite) {
-        chr.setValue(value);
-        if (isWrite) {
-            mGatt.writeCharacteristic(chr);
+    public void onTransact(GattTransaction t) {
+        t.chr.setValue(t.value);
+        if (t.isWrite) {
+            mGatt.writeCharacteristic(t.chr);
         }
     }
 
@@ -223,30 +224,38 @@ public class ActivityAIO extends Activity
         BluetoothGattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
         BluetoothGattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
 
-        mQueue.add(chr, ctrl);
+        GattTransaction t = new GattTransaction(chr, ctrl);
+        mQueue.add(t);
         mQueue.consume();
     }
 
     @Override
     public void onControllPWM(int r, int g, int b, byte[][] ctrl) {
         Log.d(String.format("To set: R=%d, G=%d, B=%d", r, g, b));
-        mQueue.add(mChrCustomAOut1, ctrl[0]);
+        GattTransaction t = new GattTransaction(mChrCustomAOut1, ctrl[0]);
+        t.setOrdered(false);
         Log.d(String.format("desc:0x%02x 0x%02x 0x%02x 0x%02x", ctrl[0][0], ctrl[0][1], ctrl[0][2], ctrl[0][3]));
         for (int i = 1; i < ctrl.length; i++) {
             if (r != 0) {
-                mQueue.add(mChrAOut1, ctrl[i]);
+                GattTransaction c = new GattTransaction(mChrAOut1, ctrl[i]);
+                c.setOrdered(false);
+                mQueue.add(c);
                 Log.d(String.format("[%d(R)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
                 r = 0;
                 break;
             }
             if (g != 0) {
-                mQueue.add(mChrAOut2, ctrl[i]);
+                GattTransaction c = new GattTransaction(mChrAOut2, ctrl[i]);
+                c.setOrdered(false);
+                mQueue.add(c);
                 Log.d(String.format("[%d(G)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
                 g = 0;
                 break;
             }
             if (b != 0) {
-                mQueue.add(mChrAOut3, ctrl[i]);
+                GattTransaction c = new GattTransaction(mChrAOut3, ctrl[i]);
+                c.setOrdered(false);
+                mQueue.add(c);
                 Log.d(String.format("[%d(B)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
                 b = 0;
                 break;

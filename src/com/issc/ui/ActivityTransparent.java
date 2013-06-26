@@ -440,7 +440,8 @@ public class ActivityTransparent extends Activity implements
                     dismissDialog(TIMER_DIALOG);
                 }
             } else if (tag == CONSUME_TRANSACTION) {
-                mQueue.consume();
+                // mQueue itself will consume next transaction
+                //mQueue.consume();
             } else if (tag == APPEND_MESSAGE) {
                 CharSequence content = bundle.getCharSequence(INFO_CONTENT);
                 if (content != null) {

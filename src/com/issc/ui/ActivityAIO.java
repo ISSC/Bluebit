@@ -298,7 +298,8 @@ public class ActivityAIO extends Activity
                     dismissDialog(CONNECTION_DIALOG);
                 }
             } else if (tag == CONSUME_TRANSACTION) {
-                mQueue.consume();
+                // mQueue itself will consume next transaction
+                //mQueue.consume();
             }
         }
     }

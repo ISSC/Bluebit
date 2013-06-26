@@ -56,6 +56,7 @@ public class TransactionQueue {
         synchronized(mQueue) {
             mWorkingTransaction = null;
         }
+        consume();
     }
 
     public interface Transaction {

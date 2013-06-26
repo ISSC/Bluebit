@@ -31,6 +31,13 @@ public class TransactionQueue {
         addTransaction(t);
     }
 
+    public void clear() {
+        synchronized(mQueue) {
+            mQueue.clear();
+            mWorkingTransaction = null;
+        }
+    }
+
     private void addTransaction(Transaction trans) {
         synchronized(mQueue) {
             mQueue.add(trans);

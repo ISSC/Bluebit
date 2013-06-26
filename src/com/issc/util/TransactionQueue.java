@@ -23,11 +23,6 @@ public class TransactionQueue {
     }
 
     public void add(Transaction t) {
-        /* by default, it is write*/
-        add(t, true);
-    }
-
-    public void add(Transaction t, boolean isWrite) {
         addTransaction(t);
     }
 

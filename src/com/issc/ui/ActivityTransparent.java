@@ -316,6 +316,8 @@ public class ActivityTransparent extends Activity implements
 
     private void write(byte[] bytes) {
         ByteBuffer buf = ByteBuffer.allocate(bytes.length);
+        buf.put(bytes);
+        buf.position(0);
         while(buf.remaining() != 0) {
             int size = (buf.remaining() > PAYLOAD_MAX) ? PAYLOAD_MAX: buf.remaining();
             byte[] dst = new byte[size];

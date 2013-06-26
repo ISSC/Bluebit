@@ -490,16 +490,6 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
-        public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
-            Log.d("on descriptor write:" + status);
-        }
-
-        @Override
-        public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
-            Log.d("on descriptor read:" + status);
-        }
-
-        @Override
         public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
             Log.d("on chr changed" );
             if (chrc.getUuid().equals(Bluebit.CHR_ISSC_TRANS_TX)) {

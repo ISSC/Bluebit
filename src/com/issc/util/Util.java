@@ -13,6 +13,7 @@ import android.content.Intent;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -115,6 +116,24 @@ public final class Util {
         File file = new File(path);
         FileOutputStream fos = new FileOutputStream(file);
         writeStrToStream(fos, data);
+    }
+
+    public static byte[] readBytesFromFile(String path) throws IOException {
+        File file = new File(path);
+        FileInputStream fis = new FileInputStream(file);
+        return readBytesFromStream(fis);
+    }
+
+    public static byte[] readBytesFromStream(InputStream str) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buf = new byte[1024];
+        int count = 0;
+        while ((count = str.read(buf, 0, buf.length)) != -1) {
+            output.write(buf, 0, count);
+        }
+
+        output.flush();
+        return output.toByteArray();
     }
 
     public static CharSequence readStrFromFile(String path) throws IOException {

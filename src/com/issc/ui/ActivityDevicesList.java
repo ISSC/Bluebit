@@ -23,7 +23,6 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -53,7 +52,6 @@ public class ActivityDevicesList extends Activity {
 
     private ListView mListView;
     private Button mBtnScan;
-    private BroadcastReceiver mReceiver;
 
     private ProgressDialog mScanningDialog;
 
@@ -79,7 +77,6 @@ public class ActivityDevicesList extends Activity {
 
         mBtnScan = (Button) findViewById(R.id.btn_scan);
         mListView = (ListView) findViewById(R.id.devices_list);
-        mReceiver = new ActionReceiver();
 
         mListView.setOnItemClickListener(new ItemClickListener());
         registerForContextMenu(mListView);
@@ -112,14 +109,12 @@ public class ActivityDevicesList extends Activity {
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        this.registerReceiver(mReceiver, filter);
 
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -326,21 +321,6 @@ public class ActivityDevicesList extends Activity {
             i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(position));
             startActivity(i);
 
-        }
-    }
-
-    class ActionReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device =
-                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                onFoundDevice(device);
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                mScanningDialog.cancel();
-            }
         }
     }
 

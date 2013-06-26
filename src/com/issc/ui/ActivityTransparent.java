@@ -30,6 +30,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.method.ScrollingMovementMethod;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
@@ -65,6 +69,7 @@ public class ActivityTransparent extends Activity implements
     private final static int CONNECTION_DIALOG = 1;
     private final static int TIMER_DIALOG      = 2;
     private final static int CHOOSE_FILE = 0x101;
+    private final static int MENU_CLEAR  = 0x501;
 
     private final static String INFO_CONTENT = "the_information_body";
 
@@ -73,6 +78,7 @@ public class ActivityTransparent extends Activity implements
     private final static int CONSUME_TRANSACTION        = 0x1002;
     private final static int DISMISS_TIMER_DIALOG       = 0x1003;
     private final static int APPEND_MESSAGE             = 0x1004;
+
 
     private TabHost mTabHost;
     private TextView mMsg;
@@ -114,6 +120,7 @@ public class ActivityTransparent extends Activity implements
         addTab(mTabHost, "Tab3", "Echo", R.id.tab_echo);
 
         mMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
+        registerForContextMenu(mMsg);
         BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
         mDevice = device.getDevice();
 
@@ -162,6 +169,27 @@ public class ActivityTransparent extends Activity implements
         super.onPause();
         GattProxy proxy = GattProxy.get(this);
         proxy.rmListener(mListener);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu,
+                                        View v,
+                                        ContextMenuInfo info) {
+        super.onCreateContextMenu(menu, v, info);
+        if (v == mMsg) {
+            menu.setHeaderTitle("Message Area");
+            menu.add(0, MENU_CLEAR, Menu.NONE, "Clear");
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == MENU_CLEAR) {
+            mMsg.setText("");
+            mMsg.scrollTo(0, 0);
+        }
+        return true;
     }
 
     private void addTab(TabHost host, String tag, CharSequence text, int viewResource) {

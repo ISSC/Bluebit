@@ -205,7 +205,7 @@ public class ActivityTransparent extends Activity implements
 
     public void onClickSend(View v) {
         CharSequence cs = mInput.getText();
-        msgSend(cs);
+        msgShow("send:", cs);
         write(cs);
     }
 
@@ -247,9 +247,9 @@ public class ActivityTransparent extends Activity implements
             sb.append("Received empty data");
         } else {
             String recv = new String(data);
-            msgRecv(recv);
+            msgShow("recv:", recv);
             write(recv);
-            msgEcho(recv);
+            msgShow("echo:", recv);
         }
         Bundle msg = new Bundle();
         msg.putCharSequence(INFO_CONTENT, sb);
@@ -283,7 +283,7 @@ public class ActivityTransparent extends Activity implements
                 Log.d("chosen file:" + filePath);
                 try {
                     write(Util.readStrFromFile(filePath));
-                    msgSend(filePath);
+                    msgShow("send:", filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.d("IO Exception");
@@ -292,23 +292,9 @@ public class ActivityTransparent extends Activity implements
         }
     }
 
-    private void msgRecv(CharSequence cs) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("recv:");
-        sb.append(cs);
-        msgShow(sb);
-    }
-
-    private void msgEcho(CharSequence cs) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("echo:");
-        sb.append(cs);
-        msgShow(sb);
-    }
-
-    private void msgSend(CharSequence cs) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("send:");
+    private void msgShow(CharSequence prefix, CharSequence cs) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(prefix);
         sb.append(cs);
         msgShow(sb);
     }
@@ -376,7 +362,7 @@ public class ActivityTransparent extends Activity implements
             // if too long
             out = out.substring(out.length() - size);
         }
-        msgSend(out);
+        msgShow("send:", out);
         write(out);
     }
 
@@ -543,7 +529,8 @@ public class ActivityTransparent extends Activity implements
 
         @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
-            Log.d("on chr write" );
+            Log.d("wrote: " + charac.getValue().length);
+            msgShow("wrote:", charac.getValue().length + " bytes");
             mQueue.consumedOne();
             updateView(CONSUME_TRANSACTION, null);
         }

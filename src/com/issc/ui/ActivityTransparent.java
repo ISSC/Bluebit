@@ -282,7 +282,7 @@ public class ActivityTransparent extends Activity implements
                 String filePath = uri.getPath();
                 Log.d("chosen file:" + filePath);
                 try {
-                    write(Util.readStrFromFile(filePath));
+                    write(Util.readBytesFromFile(filePath));
                     msgShow("send:", filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -308,6 +308,10 @@ public class ActivityTransparent extends Activity implements
 
     private void write(CharSequence cs) {
         byte[] bytes = cs.toString().getBytes();
+        write(bytes);
+    }
+
+    private void write(byte[] bytes) {
         ByteBuffer buf = ByteBuffer.allocate(bytes.length);
         while(buf.remaining() != 0) {
             int size = (buf.remaining() > PAYLOAD_MAX) ? PAYLOAD_MAX: buf.remaining();

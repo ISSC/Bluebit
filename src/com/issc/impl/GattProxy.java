@@ -26,24 +26,26 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
  *
  * This singleton will try to keep the Gatt instance to be used via each Activity.
  */
-public class GattProxy implements BluetoothProfile.ServiceListener {
+public class GattProxy {
+
+    private static GattProxy mMe = null;
 
     private Context mAppContext;
+    private BluetoothGattCallback mCallback;
+    private SystemProfileServiceListener mSystemListener;
 
     private BluetoothGatt mGatt = null;
     private BluetoothGatt mOngoingGatt = null;
     private List<Listener> mListeners;
     private List<Listener> mRetrievers;
 
-    private static GattProxy mMe = null;
-    private BluetoothGattCallback mCallback;
-
     private GattProxy(Context app) {
         super();
-        mAppContext = app;
+        mAppContext = app.getApplicationContext();
         mCallback   = new TheCallback();
         mListeners  = new ArrayList<Listener>();
         mRetrievers = new ArrayList<Listener>();
+        mSystemListener = new SystemProfileServiceListener();
     }
 
     synchronized static public GattProxy get(Context ctx) {
@@ -75,7 +77,7 @@ public class GattProxy implements BluetoothProfile.ServiceListener {
             mRetrievers.add(lstnr);
             if (mOngoingGatt == null) {
                 BluetoothGattAdapter.getProfileProxy(mAppContext,
-                        this, BluetoothGattAdapter.GATT);
+                        mSystemListener, BluetoothGattAdapter.GATT);
             }
             return false;
         }
@@ -114,22 +116,29 @@ public class GattProxy implements BluetoothProfile.ServiceListener {
         lstnr.onRetrievedGatt(mGatt);
     }
 
-    @Override
-    public void onServiceConnected(int profile, BluetoothProfile proxy) {
-        Log.d("onServiceConnected");
-        if (profile == BluetoothGattAdapter.GATT) {
-            /* Gatt is not completely ready */
-            mOngoingGatt = (BluetoothGatt) proxy;
-            mOngoingGatt.registerApp(mCallback);
-        }
-    }
+    class SystemProfileServiceListener implements BluetoothProfile.ServiceListener {
 
-    @Override
-    public void onServiceDisconnected(int profile) {
-        Log.d("onServiceDisconnected, you cannot use Gatt anymore in this application");
-        if (profile == BluetoothGattAdapter.GATT) {
-            // we will never be here for unknow reason
+        @Override
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            Log.d("connection to service of System Profile created");
+            Log.d("registering callback to system service.");
+            if (profile == BluetoothGattAdapter.GATT) {
+                /* Gatt is not completely ready */
+                mOngoingGatt = (BluetoothGatt) proxy;
+                mOngoingGatt.registerApp(mCallback);
+            }
         }
+
+        @Override
+        public void onServiceDisconnected(int profile) {
+            // Unfortunately, this callback seems never been called
+            // from SDK for unknown reason.
+            Log.d("connection to service of System Profile removed");
+            Log.d("you cannot use Gatt anymore in this application");
+            if (profile == BluetoothGattAdapter.GATT) {
+            }
+        }
+
     }
 
     /* This is the only one callback that register to GATT Profile. It dispatch each
@@ -237,19 +246,30 @@ public class GattProxy implements BluetoothProfile.ServiceListener {
     }
 
     public interface Listener {
-          public void onRetrievedGatt(BluetoothGatt gatt);
+        /**
+         * To Retrieve ready-to-use Gatt Proxy.
+         *
+         * It will be called if
+         * 1) This class got Profile Proxy from system
+         * 2) and this class registered its own callback to System Proxy.
+         *
+         * Since this instance of class, GattProxy, is a singleton object, the
+         * Gatt Proxy will be kept until this instance be destroy or the method
+         * {@link GattProxy#releaseGatt()} be called.
+         * */
+        public void onRetrievedGatt(BluetoothGatt gatt);
 
-          /* to keep compatibility to Samsung SDK */
-          public void onAppRegistered(int status);
-          public void onCharacteristicChanged(BluetoothGattCharacteristic chrc);
-          public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status);
-          public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status);
-          public void onConnectionStateChange(BluetoothDevice device, int status, int newState);
-          public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status);
-          public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status);
-          public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status);
-          public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord);
-          public void onServicesDiscovered(BluetoothDevice device, int status);
+        /* to keep compatibility to Samsung SDK */
+        public void onAppRegistered(int status);
+        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc);
+        public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status);
+        public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status);
+        public void onConnectionStateChange(BluetoothDevice device, int status, int newState);
+        public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status);
+        public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status);
+        public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status);
+        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord);
+        public void onServicesDiscovered(BluetoothDevice device, int status);
     }
 
     public static class ListenerHelper implements Listener {

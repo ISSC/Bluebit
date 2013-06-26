@@ -144,6 +144,7 @@ public class ActivityFunctionPicker extends ListActivity {
 
     private void onDiscovered(BluetoothDevice device) {
         Log.d("on discovered:");
+        stopDiscovery();
         mDiscovered = true;
         if (mGatt != null) {
             List<BluetoothGattService> srvs = mGatt.getServices(device);
@@ -189,7 +190,6 @@ public class ActivityFunctionPicker extends ListActivity {
 
         @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {
-            stopDiscovery();
             onDiscovered(device);
         }
 

@@ -44,6 +44,7 @@
 						android:layout_height="wrap_content"
 						android:maxLines="1"
 						android:layout_weight="1"
+						android:inputType="textShortMessage"
 						/>
 					<Button
 						android:id="@+id/trans_btn_send"

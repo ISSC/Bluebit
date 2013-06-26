@@ -227,42 +227,32 @@ public class ActivityAIO extends Activity
 
         GattTransaction t = new GattTransaction(chr, ctrl);
         mQueue.add(t);
-        mQueue.consume();
     }
 
     @Override
     public void onControllPWM(int r, int g, int b, byte[][] ctrl) {
         Log.d(String.format("To set: R=%d, G=%d, B=%d", r, g, b));
-        GattTransaction t = new GattTransaction(mChrCustomAOut1, ctrl[0]);
-        t.setOrdered(false);
+        GattTransaction t = new GattTransaction(mChrCustomAOut1, ctrl[0], 200);
         Log.d(String.format("desc:0x%02x 0x%02x 0x%02x 0x%02x", ctrl[0][0], ctrl[0][1], ctrl[0][2], ctrl[0][3]));
+        mQueue.add(t);
         for (int i = 1; i < ctrl.length; i++) {
             if (r != 0) {
-                GattTransaction c = new GattTransaction(mChrAOut1, ctrl[i]);
-                c.setOrdered(false);
+                GattTransaction c = new GattTransaction(mChrAOut1, ctrl[i], 200);
                 mQueue.add(c);
                 Log.d(String.format("[%d(R)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
                 r = 0;
-                break;
-            }
-            if (g != 0) {
-                GattTransaction c = new GattTransaction(mChrAOut2, ctrl[i]);
-                c.setOrdered(false);
+            } else if (g != 0) {
+                GattTransaction c = new GattTransaction(mChrAOut2, ctrl[i], 200);
                 mQueue.add(c);
                 Log.d(String.format("[%d(G)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
                 g = 0;
-                break;
-            }
-            if (b != 0) {
-                GattTransaction c = new GattTransaction(mChrAOut3, ctrl[i]);
-                c.setOrdered(false);
+            } else if (b != 0) {
+                GattTransaction c = new GattTransaction(mChrAOut3, ctrl[i], 200);
                 mQueue.add(c);
                 Log.d(String.format("[%d(B)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
                 b = 0;
-                break;
             }
         }
-        mQueue.consume();
     }
 
     @Override
@@ -299,7 +289,7 @@ public class ActivityAIO extends Activity
                 }
             } else if (tag == CONSUME_TRANSACTION) {
                 // mQueue itself will consume next transaction
-                //mQueue.consume();
+                //mQueue.process();
             }
         }
     }
@@ -412,7 +402,7 @@ public class ActivityAIO extends Activity
         @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
             Log.d("on consumed!!");
-            mQueue.consumedOne();
+            mQueue.onConsumed();
             updateView(CONSUME_TRANSACTION, null);
         }
     }

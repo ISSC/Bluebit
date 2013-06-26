@@ -324,7 +324,6 @@ public class ActivityTransparent extends Activity implements
             buf.get(dst, 0, size);
             GattTransaction t = new GattTransaction(mTransRx, dst);
             mQueue.add(t);
-            mQueue.consume();
         }
     }
 
@@ -441,7 +440,7 @@ public class ActivityTransparent extends Activity implements
                 }
             } else if (tag == CONSUME_TRANSACTION) {
                 // mQueue itself will consume next transaction
-                //mQueue.consume();
+                //mQueue.process();
             } else if (tag == APPEND_MESSAGE) {
                 CharSequence content = bundle.getCharSequence(INFO_CONTENT);
                 if (content != null) {
@@ -545,7 +544,7 @@ public class ActivityTransparent extends Activity implements
                     total);
             Log.d("wrote:" + s );
             msgShow("wrote:", s);
-            mQueue.consumedOne();
+            mQueue.onConsumed();
             updateView(CONSUME_TRANSACTION, null);
         }
     }

@@ -178,17 +178,6 @@ public class ActivityAIO extends Activity
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)  {
-        if (seekBar == mRed) {
-            mRedVal = progress;
-        } else if (seekBar == mGreen) {
-            mGreenVal = progress;
-        } else if (seekBar == mBlue) {
-            mBlueVal = progress;
-        }
-
-        if (fromUser) {
-            onSetAnalogValue();
-        }
     }
 
     @Override
@@ -197,6 +186,19 @@ public class ActivityAIO extends Activity
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
+        if (seekBar == mRed) {
+            mRedVal = seekBar.getProgress();
+        } else if (seekBar == mGreen) {
+            mGreenVal = seekBar.getProgress();
+        } else if (seekBar == mBlue) {
+            mBlueVal = seekBar.getProgress();
+        }
+
+        onSetAnalogValue();
+
+        //if (fromUser) {
+        //    onSetAnalogValue();
+        //}
     }
 
     public void onToggleClicked(View v) {

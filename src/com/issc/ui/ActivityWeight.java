@@ -20,9 +20,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -30,27 +33,31 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 
-public class ActivityMain extends Activity {
+public class ActivityWeight extends Activity {
 
     private BluetoothGatt mGatt;
     private GattProxy.Listener mListener;
 
+    private TextView mKg;
+    private TextView mLb;
+    private TextView mSt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_weight);
+
+        mKg = (TextView) findViewById(R.id.kg);
+        mLb = (TextView) findViewById(R.id.lb);
+        mSt = (TextView) findViewById(R.id.st);
         mListener = new GattListener();
     }
 
@@ -67,7 +74,7 @@ public class ActivityMain extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        GattProxy proxy = GattProxy.get(ActivityMain.this);
+        GattProxy proxy = GattProxy.get(ActivityWeight.this);
         proxy.releaseGatt();
     }
 
@@ -86,51 +93,38 @@ public class ActivityMain extends Activity {
         proxy.rmListener(mListener);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle b) {
-        super.onSaveInstanceState(b);
+    private void startDiscovery() {
+        Log.d("Scanning Devices");
+        if (mGatt != null) {
+            /* connected device will not be ignored when scanning */
+            mGatt.startScan();
+        } else {
+            Log.e("No Gatt instance");
+        }
     }
 
-    //@Override
-    //public void onBackPressed() {
-    //    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    //    builder.setTitle("Exit");
-    //    builder.setMessage("Are you going to exit?");
-    //    builder.setPositiveButton(android.R.string.yes,
-    //            new DialogInterface.OnClickListener() {
-    //                public void onClick(DialogInterface dialog, int whichButton) {
-    //                    finish();
-    //                }
-    //            });
-    //    builder.setNegativeButton(android.R.string.no,null);
-    //    builder.setCancelable(true);
-    //    builder.show();
-    //}
-
-    @Override
-    protected void onRestoreInstanceState(Bundle b) {
-        super.onRestoreInstanceState(b);
-    }
-
-    public void onClickScan(View v) {
-        Intent i = new Intent(this, ActivityDevicesList.class);
-        startActivity(i);
-    }
-
-    public void onClickWeight(View v) {
-        Intent i = new Intent(this, ActivityWeight.class);
-        startActivity(i);
+    private void stopDiscovery() {
+        Log.d("Stop scanning");
+        if (mGatt != null) {
+            mGatt.stopScan();
+        } else {
+            Log.e("No Gatt instance");
+        }
     }
 
     class GattListener extends GattProxy.ListenerHelper {
         GattListener() {
-            super("ActivityMain");
+            super("ActivityWeight");
         }
 
         @Override
         public void onRetrievedGatt(BluetoothGatt gatt) {
-            super.onRetrievedGatt(gatt);
+            Log.d(String.format("onRetrievedGatt"));
             mGatt = gatt;
+        }
+
+        @Override
+        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
         }
     }
 }

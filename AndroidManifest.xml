@@ -38,6 +38,9 @@
 		<activity android:name=".ui.ActivityAIO"
 			android:screenOrientation="portrait"
 			/>
+		<activity android:name=".ui.ActivityWeight"
+			android:screenOrientation="portrait"
+			/>
 
 	</application>
 </manifest>

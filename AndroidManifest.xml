@@ -15,6 +15,7 @@
 
 		<activity android:name=".ui.ActivityMain"
 			android:label="@string/app_name"
+			android:screenOrientation="portrait"
 			>
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
@@ -22,11 +23,21 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".ui.ActivityDevicesList" />
-		<activity android:name=".ui.ActivityTransparent" />
-		<activity android:name=".ui.ActivityDeviceDetail" />
-		<activity android:name=".ui.ActivityFunctionPicker" />
-		<activity android:name=".ui.ActivityAIO" />
+		<activity android:name=".ui.ActivityDevicesList"
+			android:screenOrientation="portrait"
+			/>
+		<activity android:name=".ui.ActivityTransparent"
+			android:screenOrientation="portrait"
+			/>
+		<activity android:name=".ui.ActivityDeviceDetail"
+			android:screenOrientation="portrait"
+			/>
+		<activity android:name=".ui.ActivityFunctionPicker"
+			android:screenOrientation="portrait"
+			/>
+		<activity android:name=".ui.ActivityAIO"
+			android:screenOrientation="portrait"
+			/>
 
 	</application>
 </manifest>

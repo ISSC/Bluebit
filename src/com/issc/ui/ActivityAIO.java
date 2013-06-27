@@ -202,7 +202,7 @@ public class ActivityAIO extends Activity
     }
 
     public void onToggleClicked(View v) {
-        controlDigital();
+        onSetDigitalValue();
     }
 
     @Override
@@ -213,7 +213,7 @@ public class ActivityAIO extends Activity
         }
     }
 
-    private void controlDigital() {
+    private void onSetDigitalValue() {
         boolean[] leds = new boolean[mToggles.length];
         for (int i = 0; i < mToggles.length; i++) {
             leds[i] = mToggles[i].isChecked();
@@ -260,7 +260,7 @@ public class ActivityAIO extends Activity
     @Override
     public void onStopControll() {
         Log.d("Stopped automation");
-        controlDigital();
+        onSetDigitalValue();
         onSetAnalogValue();
     }
 
@@ -352,7 +352,7 @@ public class ActivityAIO extends Activity
                 mChrAOut1 != null,
                 mChrAOut2 != null,
                 mChrAOut3 != null));
-        controlDigital();
+        onSetDigitalValue();
     }
 
     class GattListener extends GattProxy.ListenerHelper {

@@ -6,6 +6,10 @@
 
 	<dimen name="home_btn_min_height">100dip</dimen>
 
+	<dimen name="large_font_size">32sp</dimen>
+	<dimen name="small_font_size">12sp</dimen>
+
 	<dimen name="top_btn_min_height">30dip</dimen>
 	<dimen name="top_btn_min_width">100dip</dimen>
+	<dimen name="navigation_icon_size">100dip</dimen>
 </resources>

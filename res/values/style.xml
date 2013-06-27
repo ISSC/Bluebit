@@ -37,4 +37,19 @@
 	<style name="detail_value">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
 	</style>
+
+	<style name="navigation_title">
+		<item name="android:textSize">@dimen/large_font_size</item>
+		<item name="android:ellipsize">marquee</item>
+		<item name="android:fadingEdge">horizontal</item>
+		<item name="android:marqueeRepeatLimit">marquee_forever</item>
+		<item name="android:textColor">@color/white</item>
+	</style>
+
+	<style name="navigation_description">
+		<item name="android:fadingEdge">horizontal</item>
+		<item name="android:marqueeRepeatLimit">marquee_forever</item>
+		<item name="android:textColor">@color/white</item>
+	</style>
+
 </resources>

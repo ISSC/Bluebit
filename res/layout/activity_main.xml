@@ -8,10 +8,74 @@
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
 		>
-		<TextView
-			android:layout_width="wrap_content"
+		<LinearLayout
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="Hi"
-			/>
+			android:background="@color/turquoise"
+			android:onClick="onClickScan"
+			>
+			<ImageView
+				android:layout_width="@dimen/navigation_icon_size"
+				android:layout_height="@dimen/navigation_icon_size"
+				android:src="@drawable/ic_search"
+				android:scaleType="fitXY"
+				/>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_weight="1"
+				android:orientation="vertical"
+				>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="@dimen/small_gutter"
+					android:text="Scan"
+					style="@style/navigation_title"
+					/>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="@dimen/small_gutter"
+					android:text="To scan devices around you"
+					style="@style/navigation_description"
+					/>
+			</LinearLayout>
+		</LinearLayout>
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="@color/alizarin"
+			android:onClick="onClickWeight"
+			>
+			<ImageView
+				android:layout_width="@dimen/navigation_icon_size"
+				android:layout_height="@dimen/navigation_icon_size"
+				android:src="@drawable/ic_scale"
+				android:scaleType="fitXY"
+				/>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_weight="1"
+				android:orientation="vertical"
+				>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="@dimen/small_gutter"
+					android:text="Weight Scale"
+					style="@style/navigation_title"
+					/>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="@dimen/small_gutter"
+					android:text="Get data from your weight scale"
+					style="@style/navigation_description"
+					/>
+			</LinearLayout>
+		</LinearLayout>
+
 	</LinearLayout>
 </ScrollView>

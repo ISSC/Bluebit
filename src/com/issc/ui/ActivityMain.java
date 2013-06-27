@@ -129,7 +129,10 @@ public class ActivityMain extends Activity {
         super.onRestoreInstanceState(b);
     }
 
-    public void onClickBtnScan(View v) {
+    public void onClickScan(View v) {
+    }
+
+    public void onClickWeight(View v) {
     }
 
     class GattListener extends GattProxy.ListenerHelper {

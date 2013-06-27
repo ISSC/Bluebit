@@ -51,15 +51,15 @@ public class FunctionAdapter extends BaseAdapter {
 
     private void updateDataSet() {
         mResults.clear();
+        notifyDataSetChanged();
         Iterator<UuidMatcher> it = mOptions.iterator();
         while (it.hasNext()) {
             UuidMatcher target = it.next();
             if (target.equals(mUuids)) {
                 mResults.add(target);
+                notifyDataSetChanged();
             }
         }
-
-        notifyDataSetChanged();
     }
 
     @Override

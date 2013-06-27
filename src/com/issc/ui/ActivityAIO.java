@@ -261,6 +261,7 @@ public class ActivityAIO extends Activity
     public void onStopControll() {
         Log.d("Stopped automation");
         controlDigital();
+        onSetAnalogValue();
     }
 
     public void updateView(int tag, Bundle info) {

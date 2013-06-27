@@ -130,6 +130,8 @@ public class ActivityMain extends Activity {
     }
 
     public void onClickScan(View v) {
+        Intent i = new Intent(this, ActivityDevicesList.class);
+        startActivity(i);
     }
 
     public void onClickWeight(View v) {

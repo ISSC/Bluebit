@@ -383,6 +383,7 @@ public class ActivityAIO extends Activity
             if (newState ==  BluetoothProfile.STATE_CONNECTED) {
                 onConnected();
             } else if (newState ==  BluetoothProfile.STATE_DISCONNECTED) {
+                mGatt.connect(mDevice, true);
                 updateView(SHOW_CONNECTION_DIALOG, null);
             }
         }

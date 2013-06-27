@@ -98,7 +98,8 @@ public class ActivityTransparent extends Activity implements
     private BluetoothGattCharacteristic mTransTx;
     private BluetoothGattCharacteristic mTransRx;
 
-    private int total = 0;
+    private int mSuccess = 0;
+    private int mFail    = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -538,11 +539,16 @@ public class ActivityTransparent extends Activity implements
 
         @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
-            total += charac.getValue().length;
-            String s = String.format("%d bytes, total = %d bytes",
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                mSuccess +=charac.getValue().length;
+            } else {
+                mFail += charac.getValue().length;
+            }
+
+            String s = String.format("%d bytes, success= %d, fail= %d",
                     charac.getValue().length,
-                    total);
-            Log.d("wrote:" + s );
+                    mSuccess,
+                    mFail);
             msgShow("wrote:", s);
             mQueue.onConsumed();
             updateView(CONSUME_TRANSACTION, null);

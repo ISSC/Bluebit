@@ -44,23 +44,6 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 
 public class ActivityMain extends Activity {
 
-    private ListView mListView;
-    private Button mBtnScan;
-
-    private ProgressDialog mScanningDialog;
-
-    private BaseAdapter mAdapter;
-    private List<Map<String, Object>> mRecords;
-    private List<BLEDevice> mDevices;
-    private final static String sName = "_name";
-    private final static String sAddr = "_address";
-    private final static String sSavedDevices = "_devices_info_in_bundle";
-
-    private final static int SCAN_DIALOG = 1;
-
-    private final static int MENU_DETAIL = 0;
-    private final static int MENU_CHOOSE = 1;
-
     private BluetoothGatt mGatt;
     private GattProxy.Listener mListener;
 

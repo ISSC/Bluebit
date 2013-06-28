@@ -307,6 +307,13 @@ public class ActivityAIO extends Activity
         }
     }
 
+    private void onDisconnected() {
+        Log.d("disconnected, connecting to device");
+        mQueue.clear();
+        updateView(SHOW_CONNECTION_DIALOG, null);
+        mGatt.connect(mDevice, false);
+    }
+
     private void onDiscovered() {
         updateView(DISMISS_CONNECTION_DIALOG, null);
         mServices.clear();
@@ -368,9 +375,7 @@ public class ActivityAIO extends Activity
 
             int conn = mGatt.getConnectionState(mDevice);
             if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d("disconnected, connecting to device");
-                updateView(SHOW_CONNECTION_DIALOG, null);
-                mGatt.connect(mDevice, true);
+                onDisconnected();
             } else {
                 Log.d("already connected");
                 onConnected();
@@ -385,11 +390,10 @@ public class ActivityAIO extends Activity
                 return;
             }
             if (newState ==  BluetoothProfile.STATE_CONNECTED) {
+                Log.d("connected to device");
                 onConnected();
             } else if (newState ==  BluetoothProfile.STATE_DISCONNECTED) {
-                mQueue.clear();
-                mGatt.connect(mDevice, true);
-                updateView(SHOW_CONNECTION_DIALOG, null);
+                onDisconnected();
             }
         }
 

@@ -6,7 +6,7 @@
 	>
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="wrap_content"
 		android:background="@color/turquoise"
 		android:layout_weight="1"
 		>
@@ -33,7 +33,7 @@
 
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="wrap_content"
 		android:layout_weight="1"
 		>
 		<LinearLayout
@@ -89,4 +89,22 @@
 				/>
 		</LinearLayout>
 	</LinearLayout>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="50dip"
+		android:background="@color/belize_hole"
+		android:onClick="onClickName"
+		>
+		<TextView
+			android:id="@+id/weight_name"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:gravity="center"
+			android:textSize="22sp"
+			android:text="ISSC"
+			style="@style/flat_white"
+			/>
+	</LinearLayout>
+
 </LinearLayout>

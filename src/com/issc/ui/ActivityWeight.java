@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +50,9 @@ public class ActivityWeight extends Activity {
     private TextView mKg;
     private TextView mLb;
     private TextView mSt;
+    private TextView mName;
+
+    private CharSequence mInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,7 @@ public class ActivityWeight extends Activity {
         mKg = (TextView) findViewById(R.id.kg);
         mLb = (TextView) findViewById(R.id.lb);
         mSt = (TextView) findViewById(R.id.st);
+        mName = (TextView) findViewById(R.id.weight_name);
         mListener = new GattListener();
     }
 
@@ -91,6 +96,40 @@ public class ActivityWeight extends Activity {
         super.onPause();
         GattProxy proxy = GattProxy.get(this);
         proxy.rmListener(mListener);
+    }
+
+    public void onClickName(View v) {
+        /*TODO: using Dialog is not good, we should improve it */
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Set New Name");
+
+        // Set an EditText view to get user input 
+        final EditText input = new EditText(this);
+        alert.setView(input);
+        input.setText(mName.getText());
+
+        alert.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                if(input.getText().length() <= 0) {
+                    // input nothing, aborting
+                    return;
+                }
+                onChangingName(input.getText());
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+
+        alert.show();
+    }
+
+    private void onChangingName(CharSequence newName) {
+        mName.setText(newName);
     }
 
     private void startDiscovery() {

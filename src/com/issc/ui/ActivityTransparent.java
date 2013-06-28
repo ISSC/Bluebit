@@ -482,7 +482,7 @@ public class ActivityTransparent extends Activity implements
         Log.d("disconnected, connecting to device");
         updateView(SHOW_CONNECTION_DIALOG, null);
         mQueue.clear();
-        mGatt.connect(mDevice, true);
+        mGatt.connect(mDevice, false);
     }
 
     class GattListener extends GattProxy.ListenerHelper {

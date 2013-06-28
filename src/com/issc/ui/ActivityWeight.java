@@ -60,6 +60,8 @@ public class ActivityWeight extends Activity {
 
     private final static int UPDATE_VALUE = 0x9527;
     private final static int UPDATE_NAME  = 0x1984;
+    private final static int SHOW_LOADER  = 0x2013;
+    private final static int HIDE_LOADER  = 0x2014;
 
     private final static String VALUE_IN_MSG = "value_in_message_instance";
     private final static String NAME_IN_MSG  = "name_message_instance";
@@ -81,6 +83,7 @@ public class ActivityWeight extends Activity {
     private TextView mLb;
     private TextView mSt;
     private TextView mName;
+    private View     mLoader;
 
     private ViewHandler mViewHandler;
     private final static DecimalFormat sDF = new DecimalFormat("0.0");
@@ -93,6 +96,7 @@ public class ActivityWeight extends Activity {
         mKg = (TextView) findViewById(R.id.kg);
         mLb = (TextView) findViewById(R.id.lb);
         mSt = (TextView) findViewById(R.id.st);
+        mLoader = findViewById(R.id.loader);
         mName = (TextView) findViewById(R.id.weight_name);
         mListener = new GattListener();
         mViewHandler = new ViewHandler();
@@ -177,6 +181,7 @@ public class ActivityWeight extends Activity {
             //uuids[0] = mAdvData;
             //mGatt.startScan(uuids);
             mGatt.startScan();
+            updateView(SHOW_LOADER, null);
         } else {
             Log.e("No Gatt instance");
         }
@@ -184,6 +189,7 @@ public class ActivityWeight extends Activity {
 
     private void stopScanningTarget() {
         Log.d("Stop scanning");
+        updateView(HIDE_LOADER, null);
         if (mGatt != null) {
             mGatt.stopScan();
         } else {
@@ -240,14 +246,21 @@ public class ActivityWeight extends Activity {
         return false;
     }
 
+    public void updateView(int tag, Bundle info) {
+        if (info == null) {
+            info = new Bundle();
+        }
+        mViewHandler.removeMessages(tag);
+        Message msg = mViewHandler.obtainMessage(tag);
+        msg.what = tag;
+        msg.setData(info);
+        mViewHandler.sendMessage(msg);
+    }
+
     public void updateValue(int value) {
         Bundle info = new Bundle();
         info.putInt(VALUE_IN_MSG, value);
-        mViewHandler.removeMessages(UPDATE_VALUE);
-        Message msg = mViewHandler.obtainMessage(UPDATE_VALUE);
-        msg.what = UPDATE_VALUE;
-        msg.setData(info);
-        mViewHandler.sendMessage(msg);
+        updateView(UPDATE_VALUE, info);
     }
 
     private void onUpdateValue(int value) {
@@ -284,6 +297,10 @@ public class ActivityWeight extends Activity {
                 int value = bundle.getInt(VALUE_IN_MSG, 0);
                 onUpdateValue(value);
             } else if (tag == UPDATE_NAME) {
+            } else if (tag == SHOW_LOADER) {
+                mLoader.setVisibility(View.VISIBLE);
+            } else if (tag == HIDE_LOADER) {
+                mLoader.setVisibility(View.INVISIBLE);
             }
         }
     }

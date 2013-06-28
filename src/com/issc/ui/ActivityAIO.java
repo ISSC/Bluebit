@@ -106,6 +106,7 @@ public class ActivityAIO extends Activity
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         mQueue.clear();
         mViewHandler.removeCallbacksAndMessages(null);
     }

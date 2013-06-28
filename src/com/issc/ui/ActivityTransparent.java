@@ -133,6 +133,7 @@ public class ActivityTransparent extends Activity implements
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         mQueue.clear();
         mViewHandler.removeCallbacksAndMessages(null);
     }

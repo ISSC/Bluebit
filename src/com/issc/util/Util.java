@@ -23,9 +23,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public final class Util {
 
@@ -162,6 +168,50 @@ public final class Util {
         writer.close();
         return;
     }
+
+    public static void dumpServices(List<BluetoothGattService> list) {
+        Iterator<BluetoothGattService> it = list.iterator();
+        while (it.hasNext()) {
+            dumpService(it.next());
+        }
+    }
+
+    public static void dumpService(BluetoothGattService srv) {
+        Log.d(String.format("  Service uuid: %s,", srv.getUuid().toString()));
+        List<BluetoothGattCharacteristic> list = srv.getCharacteristics();
+        if (list == null || list.size() <= 0) {
+            Log.d("    ...without characteristic");
+        }
+
+        Iterator<BluetoothGattCharacteristic> it = list.iterator();
+        while (it.hasNext()) {
+            dumpChr(it.next());
+        }
+    }
+
+    public static void dumpChr(BluetoothGattCharacteristic chr) {
+        Log.d(String.format("    chr uuid: %s,", chr.getUuid().toString()));
+        List<BluetoothGattDescriptor> list = chr.getDescriptors();
+        if (list == null || list.size() <= 0) {
+            Log.d("    ...without descriptor");
+        }
+
+        Iterator<BluetoothGattDescriptor> it = list.iterator();
+        while (it.hasNext()) {
+            dumpDesc(it.next());
+        }
+    }
+
+    public static void dumpDesc(BluetoothGattDescriptor desc) {
+        Log.d(String.format("        desc uuid: %s, permission:0x%x",
+                    desc.getUuid().toString(),
+                    desc.getPermissions()));
+
+        if (desc.getValue() != null) {
+            Log.d("          value length =" + desc.getValue().length);
+        }
+    }
+
 
     private static int[] sMajorType = {
         BluetoothClass.Device.Major.AUDIO_VIDEO,

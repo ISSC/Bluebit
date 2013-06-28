@@ -380,9 +380,14 @@ public class ActivityAIO extends Activity
         @Override
         public void onConnectionStateChange(BluetoothDevice device,
                 int status, int newState) {
+            if (!mDevice.getAddress().equals(device.getAddress())) {
+                // not the device I care about
+                return;
+            }
             if (newState ==  BluetoothProfile.STATE_CONNECTED) {
                 onConnected();
             } else if (newState ==  BluetoothProfile.STATE_DISCONNECTED) {
+                mQueue.clear();
                 mGatt.connect(mDevice, true);
                 updateView(SHOW_CONNECTION_DIALOG, null);
             }

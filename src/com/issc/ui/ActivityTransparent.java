@@ -481,8 +481,8 @@ public class ActivityTransparent extends Activity implements
     private void onDisconnected() {
         Log.d("disconnected, connecting to device");
         updateView(SHOW_CONNECTION_DIALOG, null);
+        mQueue.clear();
         mGatt.connect(mDevice, true);
-
     }
 
     class GattListener extends GattProxy.ListenerHelper {
@@ -507,6 +507,11 @@ public class ActivityTransparent extends Activity implements
 
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+            if (!mDevice.getAddress().equals(device.getAddress())) {
+                // not the device I care about
+                return;
+            }
+
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 onConnected();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {

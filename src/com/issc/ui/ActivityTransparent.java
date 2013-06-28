@@ -131,6 +131,12 @@ public class ActivityTransparent extends Activity implements
         initSpinners();
     }
 
+    @Override
+    public void onDestroy() {
+        mQueue.clear();
+        mViewHandler.removeCallbacksAndMessages(null);
+    }
+
     private void initSpinners() {
         Resources res = getResources();
 

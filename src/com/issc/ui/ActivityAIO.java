@@ -104,6 +104,12 @@ public class ActivityAIO extends Activity
         setToggles();
     }
 
+    @Override
+    public void onDestroy() {
+        mQueue.clear();
+        mViewHandler.removeCallbacksAndMessages(null);
+    }
+
     private void setToggles() {
         mToggles = new ToggleButton[NUM];
         mToggles[0] = (ToggleButton) findViewById(R.id.aio_ctrl_1);

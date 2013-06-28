@@ -10,6 +10,7 @@ import com.issc.util.Log;
 import com.issc.util.Util;
 
 import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,6 +30,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -43,6 +46,8 @@ import android.widget.Toast;
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityWeight extends Activity {
@@ -50,17 +55,35 @@ public class ActivityWeight extends Activity {
     private BluetoothGatt mGatt;
     private GattProxy.Listener mListener;
 
+    private final static double LB_BASE = 2.2046; // 1 kg is about 2.2046 lb
+    private final static double ST_BASE = 0.1574; // 1 kg is about 0.1574 st
+
+    private final static int UPDATE_VALUE = 0x9527;
+    private final static int UPDATE_NAME  = 0x1984;
+
+    private final static String VALUE_IN_MSG = "value_in_message_instance";
+    private final static String NAME_IN_MSG  = "name_message_instance";
+
     private final static UUID mAdvData = Util.uuidFromStr("FFF0");
     private final static String ADDR = "78:C5:E5:6E:19:F2";
 
+    /* use 0xFFF4 descriptor of 0xFFF0 characteristic to enable
+     * notification from target */
+    private final static UUID mUuidFFF0 = Util.uuidFromStr("FFF0");
+    private final static UUID mUuidFFF4 = Util.uuidFromStr("FFF4");
+
     private BluetoothDevice mDevice;
+    private BluetoothGattService        mFFF0;
+    private BluetoothGattCharacteristic mFFF4;
+    private BluetoothGattDescriptor     mCCC;
 
     private TextView mKg;
     private TextView mLb;
     private TextView mSt;
     private TextView mName;
 
-    private CharSequence mInput;
+    private ViewHandler mViewHandler;
+    private final static DecimalFormat sDF = new DecimalFormat("0.0");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +95,7 @@ public class ActivityWeight extends Activity {
         mSt = (TextView) findViewById(R.id.st);
         mName = (TextView) findViewById(R.id.weight_name);
         mListener = new GattListener();
+        mViewHandler = new ViewHandler();
     }
 
     @Override
@@ -178,12 +202,20 @@ public class ActivityWeight extends Activity {
     }
 
     private void onDiscovered() {
-        Log.d("Discovered services!!");
-        List<BluetoothGattService> list = mGatt.getServices(mDevice);
-        Util.dumpServices(list);
+        Log.d("Discovered services, enable notification");
+        mFFF0 = mGatt.getService(mDevice, mUuidFFF0);
+        mFFF4 = mFFF0.getCharacteristic(mUuidFFF4);
+        mGatt.setCharacteristicNotification(mFFF4, true);
+
+        mCCC = mFFF4.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
+        mCCC.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        mGatt.writeDescriptor(mCCC);
     }
 
     private void onDisconnected() {
+        mFFF0 = null;
+        mFFF4 = null;
+        mCCC = null;
         scanTarget();
     }
 
@@ -206,6 +238,54 @@ public class ActivityWeight extends Activity {
             return true;
         }
         return false;
+    }
+
+    public void updateValue(int value) {
+        Bundle info = new Bundle();
+        info.putInt(VALUE_IN_MSG, value);
+        mViewHandler.removeMessages(UPDATE_VALUE);
+        Message msg = mViewHandler.obtainMessage(UPDATE_VALUE);
+        msg.what = UPDATE_VALUE;
+        msg.setData(info);
+        mViewHandler.sendMessage(msg);
+    }
+
+    private void onUpdateValue(int value) {
+        double f = (double)value;
+        double carry = 10.0; // if we got 102, it means 10.2 kg
+        double kg = f / carry;
+        double lb = (f * LB_BASE) / carry;
+        double st = (f * ST_BASE) / carry;
+
+        mKg.setText(sDF.format(kg));
+        mLb.setText(sDF.format(lb));
+        mSt.setText(sDF.format(st));
+    }
+
+    private void updateValue(final float num) {
+
+        runOnUiThread(new Runnable() {
+            public void run() {
+                mKg.setText("" + num);
+            }
+        });
+    }
+
+    class ViewHandler extends Handler {
+        public void handleMessage(Message msg) {
+            Bundle bundle = msg.getData();
+            if (bundle == null) {
+                Log.d("ViewHandler handled a message without information");
+                return;
+            }
+
+            int tag = msg.what;
+            if (tag == UPDATE_VALUE) {
+                int value = bundle.getInt(VALUE_IN_MSG, 0);
+                onUpdateValue(value);
+            } else if (tag == UPDATE_NAME) {
+            }
+        }
     }
 
     class GattListener extends GattProxy.ListenerHelper {
@@ -242,6 +322,16 @@ public class ActivityWeight extends Activity {
                 onDisconnected();
             }
         }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
+            Log.d("on chr changed");
+            final int index = 4; // got this index from Frontline
+            byte[] data = chrc.getValue();
+            int value = ((0xFF & data[index]) << 8) + (0xFF & data[index + 1]);
+            updateValue(value);
+        }
+
 
         @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {

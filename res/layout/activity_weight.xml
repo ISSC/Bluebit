@@ -4,7 +4,7 @@
 	android:layout_height="match_parent"
 	android:orientation="vertical"
 	>
-	<LinearLayout
+	<RelativeLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:background="@color/turquoise"
@@ -13,30 +13,31 @@
 		<TextView
 			android:id="@+id/kg"
 			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
+			android:layout_height="wrap_content"
 			android:layout_marginLeft="@dimen/small_gutter"
-			android:gravity="center_vertical"
-			android:textSize="150sp"
-			android:text="00"
+			android:layout_centerInParent="true"
+			android:textSize="150dp"
+			android:text="0.0"
 			style="@style/flat_white"
 			/>
 		<TextView
 			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:layout_marginLeft="@dimen/small_gutter"
-			android:gravity="center_vertical"
+			android:layout_height="wrap_content"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentRight="true"
+			android:padding="@dimen/small_gutter"
 			android:textSize="22sp"
 			android:text="kg"
 			style="@style/flat_white"
 			/>
-	</LinearLayout>
+	</RelativeLayout>
 
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
 		>
-		<LinearLayout
+		<RelativeLayout
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:background="@color/orange"
@@ -45,24 +46,24 @@
 			<TextView
 				android:id="@+id/lb"
 				android:layout_width="wrap_content"
-				android:layout_height="match_parent"
-				android:layout_marginLeft="@dimen/small_gutter"
-				android:gravity="center_vertical"
+				android:layout_height="wrap_content"
+				android:layout_centerInParent="true"
 				android:textSize="75sp"
-				android:text="00"
+				android:text="0.0"
 				style="@style/flat_white"
 				/>
 			<TextView
 				android:layout_width="wrap_content"
-				android:layout_height="match_parent"
-				android:layout_marginLeft="@dimen/small_gutter"
-				android:gravity="center_vertical"
+				android:layout_height="wrap_content"
+				android:layout_alignParentTop="true"
+				android:layout_alignParentLeft="true"
+				android:padding="@dimen/small_gutter"
 				android:textSize="22sp"
 				android:text="lb"
 				style="@style/flat_white"
 				/>
-		</LinearLayout>
-		<LinearLayout
+		</RelativeLayout>
+		<RelativeLayout
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:background="@color/alizarin"
@@ -71,28 +72,30 @@
 			<TextView
 				android:id="@+id/st"
 				android:layout_width="wrap_content"
-				android:layout_height="match_parent"
-				android:layout_marginLeft="@dimen/small_gutter"
-				android:gravity="center_vertical"
+				android:layout_height="wrap_content"
+				android:layout_centerInParent="true"
 				android:textSize="75sp"
-				android:text="00"
+				android:text="0.0"
 				style="@style/flat_white"
 				/>
 			<TextView
 				android:layout_width="wrap_content"
-				android:layout_height="match_parent"
-				android:layout_marginLeft="@dimen/small_gutter"
+				android:layout_height="wrap_content"
+				android:layout_alignParentTop="true"
+				android:layout_alignParentRight="true"
+				android:padding="@dimen/small_gutter"
 				android:gravity="center_vertical"
 				android:textSize="22sp"
 				android:text="st"
 				style="@style/flat_white"
 				/>
-		</LinearLayout>
+		</RelativeLayout>
 	</LinearLayout>
 
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="50dip"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
 		android:background="@color/belize_hole"
 		android:onClick="onClickName"
 		>

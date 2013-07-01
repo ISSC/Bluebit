@@ -85,7 +85,6 @@ public class ActivityTransparent extends Activity implements
     private EditText mInput;
     private Button   mBtnSend;
     private ToggleButton mToggleResponse;
-    private ToggleButton mToggleEcho;
 
     private Spinner mSpinnerDelta;
     private Spinner mSpinnerSize;
@@ -112,7 +111,6 @@ public class ActivityTransparent extends Activity implements
         mInput   = (EditText)findViewById(R.id.trans_input);
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
         mToggleResponse = (ToggleButton)findViewById(R.id.trans_type);
-        mToggleEcho     = (ToggleButton)findViewById(R.id.trans_echo);
 
         mViewHandler = new ViewHandler();
 
@@ -121,6 +119,8 @@ public class ActivityTransparent extends Activity implements
         addTab(mTabHost, "Tab1", "Raw", R.id.tab_raw);
         addTab(mTabHost, "Tab2", "Timer", R.id.tab_timer);
         addTab(mTabHost, "Tab3", "Echo", R.id.tab_echo);
+
+        mTabHost.setOnTabChangedListener(new TabListener());
 
         mMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
         registerForContextMenu(mMsg);
@@ -238,10 +238,6 @@ public class ActivityTransparent extends Activity implements
 
     private void onSetType(boolean withResponse) {
         Log.d("set write with response:" + withResponse);
-    }
-
-    public void onClickEcho(View v) {
-        onSetEcho(mToggleEcho.isChecked());
     }
 
     private void onSetEcho(boolean enable) {
@@ -490,6 +486,19 @@ public class ActivityTransparent extends Activity implements
         updateView(SHOW_CONNECTION_DIALOG, null);
         mQueue.clear();
         mGatt.connect(mDevice, false);
+    }
+
+    class TabListener implements TabHost.OnTabChangeListener {
+        @Override
+        public void onTabChanged(String tabId) {
+            if (tabId.equals("Tab3")) {
+                Log.d("Enable Echo");
+                onSetEcho(true);
+            } else {
+                Log.d("Disable Echo");
+                onSetEcho(false);
+            }
+        }
     }
 
     class GattListener extends GattProxy.ListenerHelper {

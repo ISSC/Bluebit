@@ -235,13 +235,12 @@ public class ActivityWeight extends Activity {
 
     private boolean isTheTarget(BluetoothDevice device, byte[] records) {
         String name = "Electronic Scales";
-        final int idx = 19; // the char 'E', we got it by dumping Scan response
-        ByteBuffer buf = ByteBuffer.allocate(name.length());
-        buf.put(records, idx, buf.limit());
-        String target = new String(buf.array());
+        String response = new String(records);
 
-        if (name.equals(target)) {
+        if (response.contains(name)) {
             return true;
+        } else {
+            Log.d("Not:" + response);
         }
         return false;
     }

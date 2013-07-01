@@ -55,7 +55,7 @@ public class FunctionAdapter extends BaseAdapter {
         Iterator<UuidMatcher> it = mOptions.iterator();
         while (it.hasNext()) {
             UuidMatcher target = it.next();
-            if (target.equals(mUuids)) {
+            if (target.isEnclosedBy(mUuids)) {
                 mResults.add(target);
                 notifyDataSetChanged();
             }

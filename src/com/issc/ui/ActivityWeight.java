@@ -143,6 +143,7 @@ public class ActivityWeight extends Activity implements
         super.onPause();
         stopScanningTarget();
         GattProxy proxy = GattProxy.get(this);
+        mGatt.cancelConnection(mDevice);
         proxy.rmListener(mListener);
         mQueue.clear();
     }

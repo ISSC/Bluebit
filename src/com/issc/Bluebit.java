@@ -23,22 +23,6 @@ public final class Bluebit {
         // never instantiate me.
     }
 
-    public final static String[] UUIDS_OF_LIGHTING = {
-        "49535343-fe7d-4ae5-8fa9-9fafd205e455",
-        "00001800-0000-1000-8000-00805f9b34fb",
-        "0000180a-0000-1000-8000-00805f9b34fb",
-        "00001802-0000-1000-8000-00805f9b34fb",
-        "00001803-0000-1000-8000-00805f9b34fb",
-        "00001804-0000-1000-8000-00805f9b34fb",
-        "00001815-0000-1000-8000-00805f9b34fb"
-    };
-
-    public final static String[] UUIDS_OF_TRANSPARENT = {
-        "49535343-fe7d-4ae5-8fa9-9fafd205e455",
-        "0000180a-0000-1000-8000-00805f9b34fb",
-        "00001800-0000-1000-8000-00805f9b34fb"
-    };
-
     /* Automation IO service */
     public final static UUID SERVICE_AUTOMATION_IO = Util.uuidFromStr("1815");
     public final static UUID CHR_DIGITAL_IN  = Util.uuidFromStr("2a56");
@@ -97,6 +81,21 @@ public final class Bluebit {
 
     /* Client Characteristic Configuration Descriptor */
     public final static UUID DES_CLIENT_CHR_CONFIG = Util.uuidFromStr("2902");
+
+    public final static UUID[] UUIDS_OF_LIGHTING = {
+        SERVICE_AUTOMATION_IO,
+        CHR_DIGITAL_OUT,
+        CHR_ANALOG_OUT,
+        CUSTOM_CHR_AO1_DESC,
+        SERVICE_ISSC_PROPRIETARY
+    };
+
+    public final static UUID[] UUIDS_OF_TRANSPARENT = {
+        SERVICE_ISSC_PROPRIETARY,
+        CHR_ISSC_TRANS_TX,
+        CHR_ISSC_TRANS_RX
+    };
+
 }
 
 

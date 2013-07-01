@@ -14,6 +14,7 @@ import com.issc.util.TransactionQueue;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -258,6 +259,7 @@ public class ActivityWeight extends Activity implements
             Log.d("not proprietary, do not write name");
             return;
         }
+        updateView(SHOW_LOADER, null);
         Log.d("proprietary, write name:" + name);
 
         final int max = Bluebit.NAME_MAX_SIZE;
@@ -480,6 +482,13 @@ public class ActivityWeight extends Activity implements
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
             Log.d("on chr write:" + status);
             mQueue.onConsumed();
+            byte[] value = charac.getValue();
+            ByteBuffer cmd = ByteBuffer.allocate(Bluebit.CMD_WRITE_MEMORY.length);
+            cmd.put(value, 0, cmd.limit());
+            if (Arrays.equals(cmd.array(), Bluebit.CMD_WRITE_MEMORY)) {
+                // finished writing memory
+                updateView(HIDE_LOADER, null);
+            }
         }
 
         @Override

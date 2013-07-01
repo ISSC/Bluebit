@@ -13,6 +13,7 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 public class GattTransaction implements Transaction {
 
     public BluetoothGattCharacteristic chr;
+    public BluetoothGattDescriptor     desc;
     public byte[] value;
     public boolean isWrite;
     public long timeout;
@@ -37,6 +38,36 @@ public class GattTransaction implements Transaction {
         value = v;
         isWrite = w;
         timeout = t;
+    }
+
+    public boolean isForCharacteristic() {
+        return (chr != null);
+    }
+
+    public GattTransaction(BluetoothGattDescriptor d, byte[] v) {
+        this(d, v, true);
+    }
+
+    public GattTransaction(BluetoothGattDescriptor d, byte[] v, long t) {
+        this(d, v, true, t);
+    }
+
+    public GattTransaction(BluetoothGattDescriptor d, byte[] v, boolean w) {
+        this(d, v, w, Transaction.TIMEOUT_NONE);
+    }
+
+    public GattTransaction(BluetoothGattDescriptor d,
+            byte[] v,
+            boolean w,
+            long t) {
+        desc = d;
+        value = v;
+        isWrite = w;
+        timeout = t;
+    }
+
+    public boolean isForDescriptor() {
+        return (desc != null);
     }
 
     @Override

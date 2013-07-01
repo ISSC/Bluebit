@@ -5,9 +5,11 @@ package com.issc.ui;
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
 import com.issc.impl.GattProxy;
+import com.issc.impl.GattTransaction;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
+import com.issc.util.TransactionQueue;
 
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
@@ -50,7 +52,8 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
-public class ActivityWeight extends Activity {
+public class ActivityWeight extends Activity implements
+    TransactionQueue.Consumer<GattTransaction> {
 
     private BluetoothGatt mGatt;
     private GattProxy.Listener mListener;
@@ -78,6 +81,10 @@ public class ActivityWeight extends Activity {
     private BluetoothGattService        mFFF0;
     private BluetoothGattCharacteristic mFFF4;
     private BluetoothGattDescriptor     mCCC;
+    private BluetoothGattService        mProprietary;
+    private BluetoothGattCharacteristic mAirPatch;
+
+    private TransactionQueue mQueue;
 
     private TextView mKg;
     private TextView mLb;
@@ -98,6 +105,9 @@ public class ActivityWeight extends Activity {
         mSt = (TextView) findViewById(R.id.st);
         mLoader = findViewById(R.id.loader);
         mName = (TextView) findViewById(R.id.weight_name);
+
+        mQueue = new TransactionQueue(this);
+
         mListener = new GattListener();
         mViewHandler = new ViewHandler();
     }
@@ -116,6 +126,7 @@ public class ActivityWeight extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         GattProxy proxy = GattProxy.get(ActivityWeight.this);
+        mQueue.clear();
     }
 
     @Override
@@ -132,9 +143,16 @@ public class ActivityWeight extends Activity {
         stopScanningTarget();
         GattProxy proxy = GattProxy.get(this);
         proxy.rmListener(mListener);
+        mQueue.clear();
     }
 
     public void onClickName(View v) {
+        if (!isProprietary()) {
+            Toast.makeText(this, "This device does not support changing name",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         /*TODO: using Dialog is not good, we should improve it */
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -166,6 +184,7 @@ public class ActivityWeight extends Activity {
 
     private void onChangingName(CharSequence newName) {
         mName.setText(newName);
+        writeName(newName);
     }
 
     private void connect() {
@@ -209,19 +228,121 @@ public class ActivityWeight extends Activity {
 
     private void onDiscovered() {
         Log.d("Discovered services, enable notification");
-        mFFF0 = mGatt.getService(mDevice, mUuidFFF0);
-        mFFF4 = mFFF0.getCharacteristic(mUuidFFF4);
+        mQueue.clear();
+        diggServices();
         mGatt.setCharacteristicNotification(mFFF4, true);
+        GattTransaction t = new GattTransaction(mCCC,
+                BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        mQueue.add(t);
 
-        mCCC = mFFF4.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
-        mCCC.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        mGatt.writeDescriptor(mCCC);
+        enableAirPatch();
+    }
+
+    private boolean isProprietary() {
+        return (mProprietary != null) && (mAirPatch != null);
+    }
+
+    private void enableAirPatch() {
+        if (!isProprietary()) {
+            return;
+        }
+
+        Log.d("proprietary, enabling air patch");
+        byte[] enable = {(byte)0x03};
+        GattTransaction t = new GattTransaction(mAirPatch, enable);
+        mQueue.add(t);
+    }
+
+    private void writeName(CharSequence name) {
+        if (!isProprietary()) {
+            Log.d("not proprietary, do not write name");
+            return;
+        }
+        Log.d("proprietary, write name:" + name);
+
+        final int max = Bluebit.NAME_MAX_SIZE;
+        final byte empty = (byte)0x00;
+        byte[] nameData = name.toString().getBytes();
+        ByteBuffer data = ByteBuffer.allocate(max);
+        for (int i = 0; i < data.limit(); i++) {
+            if (i >= nameData.length) {
+                data.put(empty);
+            } else {
+                data.put(nameData[i]);
+            }
+        }
+
+        ByteBuffer e2prom = ByteBuffer.allocate(
+                Bluebit.CMD_WRITE_E2PROM.length +
+                Bluebit.ADDR_E2PROM_NAME.length +
+                1 +  // 1 byte for length
+                max);
+        e2prom.put(Bluebit.CMD_WRITE_E2PROM);  // write e2prom
+        e2prom.put(Bluebit.ADDR_E2PROM_NAME);  // 0x000b -> addr of name on e2prom
+        e2prom.put((byte)max);
+        e2prom.put(data.array());
+        GattTransaction t1 = new GattTransaction(mAirPatch, e2prom.array());
+        mQueue.add(t1);
+
+        ByteBuffer memory = ByteBuffer.allocate(
+                Bluebit.CMD_WRITE_MEMORY.length +
+                Bluebit.ADDR_MEMORY_NAME.length +
+                1 +  // 1 byte for length
+                max);
+        memory.put(Bluebit.CMD_WRITE_MEMORY);  // write memory
+        memory.put(Bluebit.ADDR_MEMORY_NAME);  // 0x4e0b -> addr of name on memory
+        memory.put((byte)max);
+        memory.put(data.array());
+        GattTransaction t2 = new GattTransaction(mAirPatch, memory.array());
+        mQueue.add(t2);
+    }
+
+    @Override
+    public void onTransact(GattTransaction t) {
+        if (t.isForCharacteristic()) {
+            if (t.isWrite) {
+                Log.d("gatt writing characteristic");
+                t.chr.setValue(t.value);
+                mGatt.writeCharacteristic(t.chr);
+            } else {
+                t.chr.setValue(t.value);
+                boolean r = mGatt.readCharacteristic(t.chr);
+                Log.d("gatt reading characteristic:" + r);
+            }
+        } else if (t.isForDescriptor()) {
+            if (t.isWrite) {
+                t.desc.setValue(t.value);
+                mGatt.writeDescriptor(t.desc);
+            }
+        }
+    }
+
+    private void diggServices() {
+        mFFF0 = null;
+        mFFF4 = null;
+        mCCC  = null;
+        mProprietary = null;
+
+        List<BluetoothGattService> list = mGatt.getServices(mDevice);
+        Iterator<BluetoothGattService> it = list.iterator();
+        while(it.hasNext()) {
+            BluetoothGattService srv = it.next();
+            if (srv.getUuid().equals(mUuidFFF0)) {
+                mFFF0 = srv;
+                mFFF4 = mFFF0.getCharacteristic(mUuidFFF4);
+                mCCC  = mFFF4.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
+            } else if (srv.getUuid().equals(Bluebit.SERVICE_ISSC_PROPRIETARY)) {
+                mProprietary = srv;
+                mAirPatch = mProprietary.getCharacteristic(Bluebit.CHR_AIR_PATCH);
+            }
+        }
     }
 
     private void onDisconnected() {
         mFFF0 = null;
         mFFF4 = null;
         mCCC = null;
+        mProprietary = null;
         scanTarget();
     }
 
@@ -348,6 +469,30 @@ public class ActivityWeight extends Activity {
             updateValue(value);
         }
 
+        @Override
+        public void onCharacteristicRead(BluetoothGattCharacteristic charac, int status) {
+            Log.d("on chr read:" + status);
+            byte[] value = charac.getValue();
+            mQueue.onConsumed();
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
+            Log.d("on chr write:" + status);
+            mQueue.onConsumed();
+        }
+
+        @Override
+        public void onDescriptorRead(BluetoothGattDescriptor desc, int status) {
+            Log.d("on desc read:" + status);
+            mQueue.onConsumed();
+        }
+
+        @Override
+        public void onDescriptorWrite(BluetoothGattDescriptor desc, int status) {
+            Log.d("on desc write:" + status);
+            mQueue.onConsumed();
+        }
 
         @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {

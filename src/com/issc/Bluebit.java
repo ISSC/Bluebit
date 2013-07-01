@@ -87,6 +87,13 @@ public final class Bluebit {
     public final static  UUID CHR_ISSC_TRANS_RX         = UUID.fromString("49535343-8841-43F4-A8D4-ECBE34729BB3");
     public final static  UUID CHR_ISSC_MP               = UUID.fromString("49535343-ACA3-481C-91EC-D85E28A60318");
 
+    public final static byte[] CMD_WRITE_E2PROM = {(byte)0x0b};
+    public final static byte[] CMD_READ_E2PROM  = {(byte)0x0a};
+    public final static byte[] CMD_WRITE_MEMORY = {(byte)0x09};
+    public final static byte[] ADDR_E2PROM_NAME = {(byte)0x00, (byte)0x0b};
+    public final static byte[] ADDR_MEMORY_NAME = {(byte)0x4e, (byte)0x0b};
+    public final static int NAME_MAX_SIZE = 16;
+
 
     /* Client Characteristic Configuration Descriptor */
     public final static UUID DES_CLIENT_CHR_CONFIG = Util.uuidFromStr("2902");

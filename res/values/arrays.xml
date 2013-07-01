@@ -65,18 +65,18 @@
 	<string-array name="repeat_text">
 		<item>Unlimited</item>
 		<item>1 time</item>
-		<item>3 times</item>
 		<item>5 times</item>
-		<item>10 times</item>
 		<item>20 times</item>
+		<item>100 times</item>
+		<item>500 times</item>
 	</string-array>
 	<integer-array name="repeat_value">
 		<item>0</item>
 		<item>1</item>
-		<item>3</item>
 		<item>5</item>
-		<item>10</item>
 		<item>20</item>
+		<item>100</item>
+		<item>500</item>
 	</integer-array>
 
 

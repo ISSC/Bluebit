@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -152,16 +153,27 @@ public class ActivityFunctionPicker extends ListActivity {
             Iterator<BluetoothGattService> it = srvs.iterator();
             while (it.hasNext()) {
                 BluetoothGattService s = it.next();
-                Log.d("S:" + s.getUuid().toString());
-                appendServices(s);
+                appendService(s);
             }
         }
     }
 
-    private void appendServices(final BluetoothGattService srv) {
+    private void appendService(BluetoothGattService srv) {
+        Log.d("append Service:" + srv.getUuid().toString());
+        appendUuid(srv.getUuid());
+        List<BluetoothGattCharacteristic> list = srv.getCharacteristics();
+        Iterator<BluetoothGattCharacteristic> it = list.iterator();
+        while (it.hasNext()) {
+            BluetoothGattCharacteristic chr = it.next();
+            Log.d("  append chr:" + chr.getUuid().toString());
+            appendUuid(chr.getUuid());
+        }
+    }
+
+    private void appendUuid(final UUID uuid) {
         runOnUiThread(new Runnable() {
             public void run() {
-                mAdapter.addUuidInUiThread(srv.getUuid());
+                mAdapter.addUuidInUiThread(uuid);
             }
         });
     }

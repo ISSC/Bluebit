@@ -392,8 +392,6 @@ public class ActivityWeight extends Activity implements
 
         if (response.contains(name)) {
             return true;
-        } else {
-            Log.d("Not:" + response);
         }
         return false;
     }

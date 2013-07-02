@@ -242,10 +242,10 @@ public class ActivityDevicesList extends Activity {
     private void startDiscovery() {
         Log.d("Scanning Devices");
         mRecords.clear();
+        mAdapter.notifyDataSetChanged();
+
         mDevices.clear();
         showDialog(SCAN_DIALOG);
-
-        mAdapter.notifyDataSetChanged();
 
         if (mGatt != null) {
             /* connected device will not be ignored when scanning */

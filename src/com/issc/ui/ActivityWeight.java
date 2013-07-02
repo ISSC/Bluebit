@@ -274,8 +274,8 @@ public class ActivityWeight extends Activity implements
         ByteBuffer e2prom = ByteBuffer.allocate(
                 Bluebit.CMD_READ_E2PROM.length +
                 Bluebit.ADDR_E2PROM_NAME.length +
-                1 +  // 1 byte for length
-                max);
+                1  // 1 byte for length
+                );
         e2prom.put(Bluebit.CMD_READ_E2PROM);   // read e2prom
         e2prom.put(Bluebit.ADDR_E2PROM_NAME);  // 0x000b -> addr of name on e2prom
         e2prom.put((byte)max);

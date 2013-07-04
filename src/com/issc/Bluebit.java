@@ -6,15 +6,20 @@ import java.util.UUID;
 
 /**
  * This is the class to store global constant.
+ *
+ * These constants will be used across classes.
  */
 
 public final class Bluebit {
 
+    /** Tag for Logcat output */
     public final static String TAG = "Bluebit";
 
+    // Keys that be used by Intent, Bundle...etc.
+    /** The device has been choosen from another activity. */
     public final static String CHOSEN_DEVICE = "the_device_been_choosen";
 
-    /* request code for Activities-communication */
+    // Request-Code for Activities-communication
     private final static int _REQ_START = 0x9527; // just random number
     public final static int REQ_CHOOSE_DEVICE = _REQ_START + 1;
 

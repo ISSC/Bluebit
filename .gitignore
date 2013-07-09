@@ -2,3 +2,4 @@ gen
 bin
 local.properties
 
+libs/samsung_ble_sdk_200.jar

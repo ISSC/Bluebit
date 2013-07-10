@@ -66,6 +66,7 @@ public class ActivityDevicesList extends Activity {
 
     private final static int MENU_DETAIL = 0;
     private final static int MENU_CHOOSE = 1;
+    private final static int MENU_RMBOND = 2;
 
     private BluetoothGatt mGatt;
     private GattProxy.Listener mListener;
@@ -218,6 +219,7 @@ public class ActivityDevicesList extends Activity {
             menu.setHeaderTitle(R.string.device_menu_title);
             menu.add(0, MENU_DETAIL, Menu.NONE, R.string.device_menu_detail);
             menu.add(0, MENU_CHOOSE, Menu.NONE, R.string.device_menu_choose);
+            menu.add(0, MENU_RMBOND, Menu.NONE, "Remove bond");
         }
     }
 
@@ -235,6 +237,10 @@ public class ActivityDevicesList extends Activity {
             Intent i = new Intent(this, ActivityFunctionPicker.class);
             i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
             startActivity(i);
+        } else if (id == MENU_RMBOND) {
+            BluetoothDevice target = mDevices.get(pos).getDevice();
+            boolean r = mGatt.removeBond(target);
+            Log.d("Remove bond:" + r);
         }
         return true;
     }

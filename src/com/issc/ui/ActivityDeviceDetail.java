@@ -3,6 +3,7 @@ package com.issc.ui;
 
 import com.issc.Bluebit;
 import com.issc.data.BLEDevice;
+import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -24,6 +25,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ParcelUuid;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.SimpleAdapter;
@@ -31,8 +36,8 @@ import android.widget.TextView;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
+import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityDeviceDetail extends ListActivity {
@@ -40,13 +45,16 @@ public class ActivityDeviceDetail extends ListActivity {
     private final static String sKey = "key";
     private final static String sVal = "value";
 
+    private final static int COLOR_SRV = 0xFFFF0000; // red
+    private final static int COLOR_CHR = 0xFF000088; // blue
+    private final static int COLOR_DESC= 0xFF885555;
+
     private BluetoothDevice mDevice;
     private ArrayList<Map<String, Object>> mEntries;
-    private BaseAdapter mAdapter;
+    private SimpleAdapter mAdapter;
 
     private BluetoothGatt mGatt;
-    private GattServiceListener mGattListener;
-    private BluetoothGattCallback mCallback;
+    private GattProxy.Listener mListener;
 
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
@@ -62,29 +70,27 @@ public class ActivityDeviceDetail extends ListActivity {
             finish();
         }
 
-        mCallback = new GattCallback();
+        mListener = new GattListener();
         initAdapter();
 
         BLEDevice device = intent.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
         mDevice = device.getDevice();
         init(mDevice);
-
-        mGattListener = new GattServiceListener();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        BluetoothGattAdapter.getProfileProxy(this,
-                mGattListener,
-                BluetoothGattAdapter.GATT);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.addListener(mListener);
+        proxy.retrieveGatt(mListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT,
-                mGatt);
+        GattProxy proxy = GattProxy.get(this);
+        proxy.rmListener(mListener);
     }
 
     @Override
@@ -105,8 +111,19 @@ public class ActivityDeviceDetail extends ListActivity {
     private void startDiscovery() {
         if (mGatt != null) {
             showDialog(DISCOVERY_DIALOG);
-            mGatt.connect(mDevice, false);
+            if (mGatt.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
+                List<BluetoothGattService> list = mGatt.getServices(mDevice);
+                if ((list == null) || (list.size() == 0)) {
+                    Log.d("start discovery");
+                    mGatt.discoverServices(mDevice);
+                } else {
+                    onDiscovered(mDevice);
+                }
+            } else {
+                mGatt.connect(mDevice, false);
+            }
         }
+
     }
 
     private void stopDiscovery() {
@@ -129,6 +146,7 @@ public class ActivityDeviceDetail extends ListActivity {
                     to
                 );
 
+        mAdapter.setViewBinder(new MyBinder());
         setListAdapter(mAdapter);
     }
 
@@ -163,9 +181,19 @@ public class ActivityDeviceDetail extends ListActivity {
     }
 
     private void append(String key, String value) {
+        append(key, value, 0xFF000000);
+    }
+
+    private void append(String key, String value, int color) {
+        SpannableString span = new SpannableString(value);
+        span.setSpan(new ForegroundColorSpan(color),
+                0,
+                value.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
         Map<String, Object> entry = new HashMap<String, Object>();
         entry.put(sKey, key);
-        entry.put(sVal, value);
+        entry.put(sVal, span);
         mEntries.add(entry);
 
         runOnUiThread(new Runnable() {
@@ -187,7 +215,7 @@ public class ActivityDeviceDetail extends ListActivity {
     }
 
     private void appendServices(BluetoothGattService srv) {
-        append("Service", srv.getUuid().toString());
+        append("Service", srv.getUuid().toString(), COLOR_SRV);
         List<BluetoothGattCharacteristic> chars = srv.getCharacteristics();
         Iterator<BluetoothGattCharacteristic> it = chars.iterator();
         while (it.hasNext()) {
@@ -196,26 +224,59 @@ public class ActivityDeviceDetail extends ListActivity {
     }
 
     private void appendCharacteristic(BluetoothGattCharacteristic ch) {
-        append("Char", ch.getUuid().toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append(ch.getUuid().toString());
+        byte[] value = ch.getValue();
+        if (value != null) {
+            sb.append("(");
+            for (int i = 0; i < value.length; i++) {
+                sb.append(String.format(" 0x%02x", value[i]));
+            }
+            sb.append(")");
+        }
+        append("Char", sb.toString(), COLOR_CHR);
+
+        Iterator<BluetoothGattDescriptor> it = ch.getDescriptors().iterator();
+        while (it.hasNext()) {
+            appendDescriptor(it.next());
+        }
     }
 
-    class GattServiceListener implements BluetoothProfile.ServiceListener {
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (profile == BluetoothGattAdapter.GATT) {
-                mGatt = (BluetoothGatt) proxy;
-                mGatt.registerApp(mCallback);
+    private void appendDescriptor(BluetoothGattDescriptor desc) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(desc.getUuid().toString());
+        byte[] value = desc.getValue();
+        if (value != null) {
+            sb.append("(");
+            for (int i = 0; i < value.length; i++) {
+                sb.append(String.format(" 0x%02x", value[i]));
             }
+            sb.append(")");
         }
+        append("Desc", sb.toString(), COLOR_DESC);
+    }
 
-        public void onServiceDisconnected(int profile) {
-            if (profile == BluetoothGattAdapter.GATT) {
-                mGatt.unregisterApp();
-                mGatt = null;
+    class MyBinder implements SimpleAdapter.ViewBinder {
+        public boolean setViewValue(View view, Object data, String textRepresentation) {
+            if (view instanceof TextView) {
+                ((TextView)view).setText((CharSequence)data);
             }
+            return true;
         }
     }
 
-    class GattCallback extends BluetoothGattCallback {
+    class GattListener extends GattProxy.ListenerHelper {
+
+        GattListener() {
+            super("ActivityDeviceDetail");
+        }
+
+        @Override
+        public void onRetrievedGatt(BluetoothGatt gatt) {
+            Log.d(String.format("onRetrievedGatt"));
+            mGatt = gatt;
+        }
+
         @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {
             stopDiscovery();

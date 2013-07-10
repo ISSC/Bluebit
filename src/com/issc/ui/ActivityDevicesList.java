@@ -60,6 +60,7 @@ public class ActivityDevicesList extends Activity {
     private List<BLEDevice> mDevices;
     private final static String sName = "_name";
     private final static String sAddr = "_address";
+    private final static String sExtra = "_come_from";
     private final static String sSavedDevices = "_devices_info_in_bundle";
 
     private final static int SCAN_DIALOG = 1;
@@ -87,8 +88,8 @@ public class ActivityDevicesList extends Activity {
     }
 
     private void initAdapter() {
-        String[] from = {sName, sAddr};
-        int[] to = {R.id.row_title, R.id.row_description};
+        String[] from = {sName, sAddr, sExtra};
+        int[] to = {R.id.row_title, R.id.row_description, R.id.row_extra};
 
         mRecords = new ArrayList<Map<String, Object>>();
         mDevices = new ArrayList<BLEDevice>();
@@ -175,7 +176,7 @@ public class ActivityDevicesList extends Activity {
         devices = b.getParcelableArrayList(sSavedDevices);
         if (devices != null) {
             for (int i = 0; i < devices.size(); i++) {
-                appendDevice(devices.get(i).getDevice());
+                appendDevice(devices.get(i).getDevice(), "restored");
             }
         }
     }
@@ -241,6 +242,7 @@ public class ActivityDevicesList extends Activity {
             BluetoothDevice target = mDevices.get(pos).getDevice();
             boolean r = mGatt.removeBond(target);
             Log.d("Remove bond:" + r);
+            resetList();
         }
         return true;
     }
@@ -255,11 +257,19 @@ public class ActivityDevicesList extends Activity {
 
         if (mGatt != null) {
             /* connected device will not be ignored when scanning */
-            appendDevices(mGatt.getConnectedDevices());
+            resetList();
             mGatt.startScan();
         } else {
             Log.e("No Gatt instance");
         }
+    }
+
+    private void resetList() {
+        mDevices.clear();
+        mRecords.clear();
+        appendDevices(mGatt.getConnectedDevices(), "connected");
+        appendBondDevices();
+        mAdapter.notifyDataSetChanged();
     }
 
     private void stopDiscovery() {
@@ -275,7 +285,7 @@ public class ActivityDevicesList extends Activity {
         if (isInList(mRecords, device)) {
             Log.d(device.getName() + " already be in list, skip it");
         } else {
-            appendDevice(device);
+            appendDevice(device, "");
         }
     }
 
@@ -293,21 +303,37 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
-    private void appendDevices(Iterable<BluetoothDevice> bonded) {
+    private void appendBondDevices() {
+        Set<BluetoothDevice> bonded = Util.getBondedDevices();
+        if (bonded != null) {
+            Iterator<BluetoothDevice> it = bonded.iterator();
+            while(it.hasNext()) {
+                BluetoothDevice device = it.next();
+                Log.d("Bonded device:" + device.getName() + ", " + device.getAddress());
+                if (!isInList(mRecords, device)) {
+                    appendDevice(device, "bonded");
+                }
+            }
+        }
+
+    }
+
+    private void appendDevices(Iterable<BluetoothDevice> bonded, String type) {
         if (bonded == null) {
             return;
         }
 
         Iterator<BluetoothDevice> it = bonded.iterator();
         while(it.hasNext()) {
-            appendDevice(it.next());
+            appendDevice(it.next(), type);
         }
     }
 
-    private void appendDevice(BluetoothDevice device) {
+    private void appendDevice(BluetoothDevice device, String type) {
         Map<String, Object> record = new HashMap<String, Object>();
         record.put(sName, device.getName());
         record.put(sAddr, device.getAddress());
+        record.put(sExtra, type);
         mRecords.add(record);
         mDevices.add(new BLEDevice(device));
         this.runOnUiThread(new Runnable() {
@@ -339,6 +365,7 @@ public class ActivityDevicesList extends Activity {
         public void onRetrievedGatt(BluetoothGatt gatt) {
             Log.d(String.format("onRetrievedGatt"));
             mGatt = gatt;
+            resetList();
         }
 
         @Override

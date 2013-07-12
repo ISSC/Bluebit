@@ -548,6 +548,7 @@ public class ActivityTransparent extends Activity implements
             for (int i = 0; i < value.length; i++) {
                 Log.d("[" + i + "]" + Byte.toString(value[i]));
             }
+            // FIXME: should I call consumed here?
         }
 
         @Override

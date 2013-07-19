@@ -69,8 +69,9 @@ public class ActivityWeight extends Activity implements
     private final static String VALUE_IN_MSG = "value_in_message_instance";
     private final static String NAME_IN_MSG  = "name_message_instance";
 
+    private final static String SEARCH_PATTERN = "Electronic Scales";
+
     private final static UUID mAdvData = Util.uuidFromStr("FFF0");
-    private final static String ADDR = "78:C5:E5:6E:19:F2";
 
     /* use 0xFFF4 descriptor of 0xFFF0 characteristic to enable
      * notification from target */
@@ -386,10 +387,8 @@ public class ActivityWeight extends Activity implements
     }
 
     private boolean isTheTarget(BluetoothDevice device, byte[] records) {
-        String name = "Electronic Scales";
         String response = new String(records);
-
-        if (response.contains(name)) {
+        if (response.contains(SEARCH_PATTERN)) {
             return true;
         }
         return false;

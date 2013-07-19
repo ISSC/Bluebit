@@ -119,8 +119,6 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        GattProxy proxy = GattProxy.get(ActivityDevicesList.this);
-        proxy.releaseGatt();
     }
 
     @Override
@@ -139,12 +137,7 @@ public class ActivityDevicesList extends Activity {
     }
 
     public void onClickBtnScan(View v) {
-        if (Util.isBluetoothEnabled()) {
-            startDiscovery();
-        } else {
-            Log.d("Trying to enable Bluetooth");
-            Util.enableBluetooth(this, 0);
-        }
+        startDiscovery();
     }
 
     @Override

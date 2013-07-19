@@ -112,13 +112,24 @@ public class ActivityMain extends Activity {
     }
 
     public void onClickScan(View v) {
-        Intent i = new Intent(this, ActivityDevicesList.class);
-        startActivity(i);
+        if (Util.isBluetoothEnabled()) {
+            Intent i = new Intent(this, ActivityDevicesList.class);
+            startActivity(i);
+        } else {
+            Log.d("Trying to enable Bluetooth");
+            Util.enableBluetooth(this, 0);
+        }
+
     }
 
     public void onClickWeight(View v) {
-        Intent i = new Intent(this, ActivityWeight.class);
-        startActivity(i);
+        if (Util.isBluetoothEnabled()) {
+            Intent i = new Intent(this, ActivityWeight.class);
+            startActivity(i);
+        } else {
+            Log.d("Trying to enable Bluetooth");
+            Util.enableBluetooth(this, 0);
+        }
     }
 
     class GattListener extends GattProxy.ListenerHelper {

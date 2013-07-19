@@ -140,30 +140,6 @@ public class ActivityDevicesList extends Activity {
         proxy.rmListener(mListener);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle b) {
-        super.onSaveInstanceState(b);
-        ArrayList<BluetoothDevice> devices;
-        /* cache scanned results if Activity being rotated */
-        if (mDevices.size() > 0) {
-            devices = new ArrayList<BluetoothDevice>(mDevices);
-            b.putParcelableArrayList(sSavedDevices, devices);
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle b) {
-        super.onRestoreInstanceState(b);
-        ArrayList<BluetoothDevice> devices;
-        /* restore scanned results if any */
-        devices = b.getParcelableArrayList(sSavedDevices);
-        if (devices != null) {
-            for (int i = 0; i < devices.size(); i++) {
-                appendDevice(devices.get(i), "restored");
-            }
-        }
-    }
-
     public void onClickBtnScan(View v) {
         if (Util.isBluetoothEnabled()) {
             startDiscovery();

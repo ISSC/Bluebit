@@ -154,23 +154,6 @@ public class ActivityDeviceDetail extends ListActivity {
     private void init(BluetoothDevice device) {
         append(getString(R.string.detail_name), device.getName());
         append(getString(R.string.detail_addr), device.getAddress());
-        setDeviceClass(device);
-    }
-
-    private void setDeviceClass(BluetoothDevice device) {
-        BluetoothClass clazz = device.getBluetoothClass();
-        if (clazz == null) {
-            Log.e("No Bluetooth Class");
-            append(getString(R.string.detail_device_class), "None");
-        } else {
-            int major = clazz.getMajorDeviceClass();
-            int res = Util.getDeviceClassRes(major);
-            if (res == -1) {
-                append(getString(R.string.detail_device_class), "Unknown");
-            } else {
-                append(getString(R.string.detail_device_class), getString(res));
-            }
-        }
     }
 
     private void append(String key, String value) {

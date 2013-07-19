@@ -50,4 +50,8 @@
 
 	<string name="func_light">Control the light</string>
 	<string name="func_light_desc">Control the light via Bluetooth connection</string>
+
+	<string name="title_srv">Service</string>
+	<string name="title_chr">Characteristic</string>
+	<string name="title_dsc">Descriptor</string>
 </resources>

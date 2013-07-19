@@ -5,7 +5,12 @@
 	<color name="transparent_green">#3311FF11</color>
 	<color name="transparent_blue">#331111FF</color>
 
+	<color name="black">#000000</color>
 	<color name="white">#FFFFFF</color>
+
+	<color name="important">#FFFF0000</color>
+	<color name="normal">#FF000088</color>
+	<color name="trivial">#FF885555</color>
 
 	<!-- from http://flatuicolors.com/ -->
 	<color name="turquoise">#1abc9c</color>

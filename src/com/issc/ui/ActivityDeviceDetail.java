@@ -44,10 +44,6 @@ public class ActivityDeviceDetail extends ListActivity {
     private final static String sKey = "key";
     private final static String sVal = "value";
 
-    private final static int COLOR_SRV = 0xFFFF0000; // red
-    private final static int COLOR_CHR = 0xFF000088; // blue
-    private final static int COLOR_DESC= 0xFF885555;
-
     private BluetoothDevice mDevice;
     private ArrayList<Map<String, Object>> mEntries;
     private SimpleAdapter mAdapter;
@@ -172,17 +168,17 @@ public class ActivityDeviceDetail extends ListActivity {
             if (res == -1) {
                 append(getString(R.string.detail_device_class), "Unknown");
             } else {
-                append(getString(R.string.detail_device_class),
-                            getString(res));
+                append(getString(R.string.detail_device_class), getString(res));
             }
         }
     }
 
     private void append(String key, String value) {
-        append(key, value, 0xFF000000);
+        append(key, value, R.color.black);
     }
 
-    private void append(String key, String value, int color) {
+    private void append(String key, String value, int res) {
+        int color = getResources().getColor(res);
         SpannableString span = new SpannableString(value);
         span.setSpan(new ForegroundColorSpan(color),
                 0,
@@ -213,7 +209,7 @@ public class ActivityDeviceDetail extends ListActivity {
     }
 
     private void appendServices(BluetoothGattService srv) {
-        append("Service", srv.getUuid().toString(), COLOR_SRV);
+        append(getString(R.string.title_srv), srv.getUuid().toString(), R.color.important);
         List<BluetoothGattCharacteristic> chars = srv.getCharacteristics();
         Iterator<BluetoothGattCharacteristic> it = chars.iterator();
         while (it.hasNext()) {
@@ -232,7 +228,7 @@ public class ActivityDeviceDetail extends ListActivity {
             }
             sb.append(")");
         }
-        append("Char", sb.toString(), COLOR_CHR);
+        append(getString(R.string.title_chr), sb.toString(), R.color.normal);
 
         Iterator<BluetoothGattDescriptor> it = ch.getDescriptors().iterator();
         while (it.hasNext()) {
@@ -251,7 +247,7 @@ public class ActivityDeviceDetail extends ListActivity {
             }
             sb.append(")");
         }
-        append("Desc", sb.toString(), COLOR_DESC);
+        append(getString(R.string.title_dsc), sb.toString(), R.color.trivial);
     }
 
     class MyBinder implements SimpleAdapter.ViewBinder {
@@ -297,3 +293,4 @@ public class ActivityDeviceDetail extends ListActivity {
         }
     }
 }
+

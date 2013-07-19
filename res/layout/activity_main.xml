@@ -30,14 +30,14 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginLeft="@dimen/small_gutter"
-					android:text="Scan"
+					android:text="@string/main_scan_title"
 					style="@style/navigation_title"
 					/>
 				<TextView
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginLeft="@dimen/small_gutter"
-					android:text="To scan devices around you"
+					android:text="@string/main_scan_desc"
 					style="@style/navigation_description"
 					/>
 			</LinearLayout>
@@ -64,14 +64,14 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginLeft="@dimen/small_gutter"
-					android:text="Weight Scale"
+					android:text="@string/main_weight_title"
 					style="@style/navigation_title"
 					/>
 				<TextView
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginLeft="@dimen/small_gutter"
-					android:text="Get data from your weight scale"
+					android:text="@string/main_weight_desc"
 					style="@style/navigation_description"
 					/>
 			</LinearLayout>

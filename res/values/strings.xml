@@ -40,6 +40,11 @@
 	<string name="device_class_uncategorized">Uncategorized</string>
 	<string name="device_class_wearable">Wearable</string>
 
+	<string name="main_scan_title">Scan</string>
+	<string name="main_scan_desc">To scan devices around you</string>
+	<string name="main_weight_title">Weight Scale</string>
+	<string name="main_weight_desc">Get data from your weight scale</string>
+
 	<string name="aio_ctrl_1">LED 1</string>
 	<string name="aio_ctrl_2">LED 2</string>
 	<string name="aio_ctrl_3">LED 3</string>

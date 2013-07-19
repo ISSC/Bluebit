@@ -2,7 +2,6 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.data.BLEDevice;
 import com.issc.impl.AlgorithmAIO;
 import com.issc.impl.GattProxy;
 import com.issc.impl.GattTransaction;
@@ -95,8 +94,7 @@ public class ActivityAIO extends Activity
 
         mQueue = new TransactionQueue(this);
 
-        BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-        mDevice = device.getDevice();
+        mDevice = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
         mServices = new ArrayList<BluetoothGattService>();
         mViewHandler = new ViewHandler();
         mListener = new GattListener();

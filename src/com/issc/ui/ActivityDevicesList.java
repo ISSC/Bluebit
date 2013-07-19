@@ -3,7 +3,6 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.data.BLEDevice;
 import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;
@@ -57,7 +56,7 @@ public class ActivityDevicesList extends Activity {
 
     private BaseAdapter mAdapter;
     private List<Map<String, Object>> mRecords;
-    private List<BLEDevice> mDevices;
+    private List<BluetoothDevice> mDevices;
     private final static String sName = "_name";
     private final static String sAddr = "_address";
     private final static String sExtra = "_come_from";
@@ -92,7 +91,7 @@ public class ActivityDevicesList extends Activity {
         int[] to = {R.id.row_title, R.id.row_description, R.id.row_extra};
 
         mRecords = new ArrayList<Map<String, Object>>();
-        mDevices = new ArrayList<BLEDevice>();
+        mDevices = new ArrayList<BluetoothDevice>();
         mAdapter = new SimpleAdapter(
                     this,
                     mRecords,
@@ -144,10 +143,10 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle b) {
         super.onSaveInstanceState(b);
-        ArrayList<BLEDevice> devices;
+        ArrayList<BluetoothDevice> devices;
         /* cache scanned results if Activity being rotated */
         if (mDevices.size() > 0) {
-            devices = new ArrayList<BLEDevice>(mDevices);
+            devices = new ArrayList<BluetoothDevice>(mDevices);
             b.putParcelableArrayList(sSavedDevices, devices);
         }
     }
@@ -171,12 +170,12 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onRestoreInstanceState(Bundle b) {
         super.onRestoreInstanceState(b);
-        ArrayList<BLEDevice> devices;
+        ArrayList<BluetoothDevice> devices;
         /* restore scanned results if any */
         devices = b.getParcelableArrayList(sSavedDevices);
         if (devices != null) {
             for (int i = 0; i < devices.size(); i++) {
-                appendDevice(devices.get(i).getDevice(), "restored");
+                appendDevice(devices.get(i), "restored");
             }
         }
     }
@@ -239,7 +238,7 @@ public class ActivityDevicesList extends Activity {
             i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
             startActivity(i);
         } else if (id == MENU_RMBOND) {
-            BluetoothDevice target = mDevices.get(pos).getDevice();
+            BluetoothDevice target = mDevices.get(pos);
             boolean r = mGatt.removeBond(target);
             Log.d("Remove bond:" + r);
             resetList();
@@ -335,7 +334,7 @@ public class ActivityDevicesList extends Activity {
         record.put(sAddr, device.getAddress());
         record.put(sExtra, type);
         mRecords.add(record);
-        mDevices.add(new BLEDevice(device));
+        mDevices.add(device);
         this.runOnUiThread(new Runnable() {
             public void run() {
                 mAdapter.notifyDataSetChanged();

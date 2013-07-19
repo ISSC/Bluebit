@@ -2,7 +2,6 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.data.BLEDevice;
 import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;
@@ -73,8 +72,7 @@ public class ActivityDeviceDetail extends ListActivity {
         mListener = new GattListener();
         initAdapter();
 
-        BLEDevice device = intent.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-        mDevice = device.getDevice();
+        mDevice = intent.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
         init(mDevice);
     }
 

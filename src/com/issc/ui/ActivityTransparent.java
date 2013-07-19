@@ -2,7 +2,6 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.data.BLEDevice;
 import com.issc.impl.GattProxy;
 import com.issc.impl.GattTransaction;
 import com.issc.R;
@@ -124,8 +123,8 @@ public class ActivityTransparent extends Activity implements
 
         mMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
         registerForContextMenu(mMsg);
-        BLEDevice device = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-        mDevice = device.getDevice();
+
+        mDevice = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
 
         mListener = new GattListener();
         initSpinners();

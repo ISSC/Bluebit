@@ -2,7 +2,6 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.data.BLEDevice;
 import com.issc.impl.FunctionAdapter;
 import com.issc.impl.GattProxy;
 import com.issc.R;
@@ -66,8 +65,7 @@ public class ActivityFunctionPicker extends ListActivity {
         mListener = new GattListener();
         initAdapter();
 
-        BLEDevice device = intent.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-        mDevice = device.getDevice();
+        mDevice = intent.getParcelableExtra(Bluebit.CHOSEN_DEVICE);
 
         TextView tv = (TextView) findViewById(R.id.picker_dev_name);
         tv.setText(mDevice.getName());
@@ -181,8 +179,7 @@ public class ActivityFunctionPicker extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int pos, long id) {
         Intent i = mAdapter.createIntent(pos);
-        BLEDevice device = new BLEDevice(mDevice);
-        i.putExtra(Bluebit.CHOSEN_DEVICE, device);
+        i.putExtra(Bluebit.CHOSEN_DEVICE, mDevice);
         startActivity(i);
     }
 

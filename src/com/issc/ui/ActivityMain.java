@@ -3,7 +3,6 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.data.BLEDevice;
 import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;

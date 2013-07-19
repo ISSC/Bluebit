@@ -236,28 +236,6 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
-    private void onFoundDevice(BluetoothDevice device) {
-        if (isInList(mRecords, device)) {
-            Log.d(device.getName() + " already be in list, skip it");
-        } else {
-            appendDevice(device, "");
-        }
-    }
-
-    private boolean isInList(List<Map<String, Object>> list, BluetoothDevice device) {
-        synchronized(list) {
-            Iterator<Map<String, Object>> it = list.iterator();
-            while(it.hasNext()) {
-                Map<String, Object> item = it.next();
-                if (item.get(sAddr).toString().equals(device.getAddress())) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
     private void appendBondDevices() {
         Set<BluetoothDevice> bonded = Util.getBondedDevices();
         if (bonded != null) {
@@ -265,9 +243,7 @@ public class ActivityDevicesList extends Activity {
             while(it.hasNext()) {
                 BluetoothDevice device = it.next();
                 Log.d("Bonded device:" + device.getName() + ", " + device.getAddress());
-                if (!isInList(mRecords, device)) {
-                    appendDevice(device, "bonded");
-                }
+                appendDevice(device, "bonded");
             }
         }
 
@@ -284,18 +260,39 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
-    private void appendDevice(BluetoothDevice device, String type) {
+    private void appendDevice(final BluetoothDevice device, final String type) {
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                uiAppendDevice(device, type);
+            }
+        });
+    }
+
+    /* There is just only one UI thread so it guarantee single thread. */
+    private void uiAppendDevice(BluetoothDevice device, String type) {
+        if (uiIsInList(device)) {
+            return;
+        }
+
         final Map<String, Object> record = new HashMap<String, Object>();
         record.put(sName, device.getName());
         record.put(sAddr, device.getAddress());
         record.put(sDevice, device);
         record.put(sExtra, type);
-        this.runOnUiThread(new Runnable() {
-            public void run() {
-                mRecords.add(record);
-                mAdapter.notifyDataSetChanged();
+        mRecords.add(record);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private boolean uiIsInList(BluetoothDevice device) {
+        Iterator<Map<String, Object>> it = mRecords.iterator();
+        while(it.hasNext()) {
+            Map<String, Object> item = it.next();
+            if (item.get(sAddr).toString().equals(device.getAddress())) {
+                return true;
             }
-        });
+        }
+
+        return false;
     }
 
     class ItemClickListener implements OnItemClickListener {
@@ -325,7 +322,7 @@ public class ActivityDevicesList extends Activity {
 
         @Override
         public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            onFoundDevice(device);
+            appendDevice(device, "");
         }
     }
 }

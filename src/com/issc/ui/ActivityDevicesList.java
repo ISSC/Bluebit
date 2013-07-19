@@ -56,11 +56,10 @@ public class ActivityDevicesList extends Activity {
 
     private BaseAdapter mAdapter;
     private List<Map<String, Object>> mRecords;
-    private List<BluetoothDevice> mDevices;
     private final static String sName = "_name";
     private final static String sAddr = "_address";
     private final static String sExtra = "_come_from";
-    private final static String sSavedDevices = "_devices_info_in_bundle";
+    private final static String sDevice = "_bluetooth_device";
 
     private final static int SCAN_DIALOG = 1;
 
@@ -91,7 +90,6 @@ public class ActivityDevicesList extends Activity {
         int[] to = {R.id.row_title, R.id.row_description, R.id.row_extra};
 
         mRecords = new ArrayList<Map<String, Object>>();
-        mDevices = new ArrayList<BluetoothDevice>();
         mAdapter = new SimpleAdapter(
                     this,
                     mRecords,
@@ -191,14 +189,14 @@ public class ActivityDevicesList extends Activity {
         int id = item.getItemId();
         if (id == MENU_DETAIL) {
             Intent i = new Intent(this, ActivityDeviceDetail.class);
-            i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
+            i.putExtra(Bluebit.CHOSEN_DEVICE, (BluetoothDevice)mRecords.get(pos).get(sDevice));
             startActivity(i);
         } else if (id == MENU_CHOOSE) {
             Intent i = new Intent(this, ActivityFunctionPicker.class);
-            i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(pos));
+            i.putExtra(Bluebit.CHOSEN_DEVICE, (BluetoothDevice)mRecords.get(pos).get(sDevice));
             startActivity(i);
         } else if (id == MENU_RMBOND) {
-            BluetoothDevice target = mDevices.get(pos);
+            BluetoothDevice target = (BluetoothDevice)mRecords.get(pos).get(sDevice);
             boolean r = mGatt.removeBond(target);
             Log.d("Remove bond:" + r);
             resetList();
@@ -211,7 +209,6 @@ public class ActivityDevicesList extends Activity {
         mRecords.clear();
         mAdapter.notifyDataSetChanged();
 
-        mDevices.clear();
         showDialog(SCAN_DIALOG);
 
         if (mGatt != null) {
@@ -224,7 +221,6 @@ public class ActivityDevicesList extends Activity {
     }
 
     private void resetList() {
-        mDevices.clear();
         mRecords.clear();
         appendDevices(mGatt.getConnectedDevices(), "connected");
         appendBondDevices();
@@ -289,14 +285,14 @@ public class ActivityDevicesList extends Activity {
     }
 
     private void appendDevice(BluetoothDevice device, String type) {
-        Map<String, Object> record = new HashMap<String, Object>();
+        final Map<String, Object> record = new HashMap<String, Object>();
         record.put(sName, device.getName());
         record.put(sAddr, device.getAddress());
+        record.put(sDevice, device);
         record.put(sExtra, type);
-        mRecords.add(record);
-        mDevices.add(device);
         this.runOnUiThread(new Runnable() {
             public void run() {
+                mRecords.add(record);
                 mAdapter.notifyDataSetChanged();
             }
         });
@@ -309,7 +305,7 @@ public class ActivityDevicesList extends Activity {
                                     int position,
                                     long id) {
             Intent i = new Intent(ActivityDevicesList.this, ActivityFunctionPicker.class);
-            i.putExtra(Bluebit.CHOSEN_DEVICE, mDevices.get(position));
+            i.putExtra(Bluebit.CHOSEN_DEVICE, (BluetoothDevice)mRecords.get(position).get(sDevice));
             startActivity(i);
 
         }

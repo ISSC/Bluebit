@@ -168,13 +168,13 @@ public class ActivityDeviceDetail extends ListActivity {
                 value.length(),
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        Map<String, Object> entry = new HashMap<String, Object>();
+        final Map<String, Object> entry = new HashMap<String, Object>();
         entry.put(sKey, key);
         entry.put(sVal, span);
-        mEntries.add(entry);
 
         runOnUiThread(new Runnable() {
             public void run() {
+                mEntries.add(entry);
                 mAdapter.notifyDataSetChanged();
             }
         });

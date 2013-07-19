@@ -199,9 +199,6 @@ public class ActivityDevicesList extends Activity {
 
     private void startDiscovery() {
         Log.d("Scanning Devices");
-        mRecords.clear();
-        mAdapter.notifyDataSetChanged();
-
         showDialog(SCAN_DIALOG);
 
         if (mGatt != null) {
@@ -214,10 +211,14 @@ public class ActivityDevicesList extends Activity {
     }
 
     private void resetList() {
-        mRecords.clear();
-        appendDevices(mGatt.getConnectedDevices(), "connected");
-        appendBondDevices();
-        mAdapter.notifyDataSetChanged();
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                mRecords.clear();
+                appendDevices(mGatt.getConnectedDevices(), "connected");
+                appendBondDevices();
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private void stopDiscovery() {

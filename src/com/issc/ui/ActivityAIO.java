@@ -68,7 +68,6 @@ public class ActivityAIO extends Activity
 
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
-    private final static int CONSUME_TRANSACTION        = 0x1002;
 
     private final int[] INDEX = {
         5, // LED 1
@@ -200,10 +199,6 @@ public class ActivityAIO extends Activity
         }
 
         onSetAnalogValue();
-
-        //if (fromUser) {
-        //    onSetAnalogValue();
-        //}
     }
 
     public void onToggleClicked(View v) {
@@ -295,9 +290,6 @@ public class ActivityAIO extends Activity
                 if (mConnectionDialog != null && mConnectionDialog.isShowing()) {
                     dismissDialog(CONNECTION_DIALOG);
                 }
-            } else if (tag == CONSUME_TRANSACTION) {
-                // mQueue itself will consume next transaction
-                //mQueue.process();
             }
         }
     }
@@ -421,7 +413,6 @@ public class ActivityAIO extends Activity
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
             Log.d("on consumed!!");
             mQueue.onConsumed();
-            updateView(CONSUME_TRANSACTION, null);
         }
     }
 }

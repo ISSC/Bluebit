@@ -99,6 +99,9 @@ public class ActivityTransparent extends Activity implements
     private int mSuccess = 0;
     private int mFail    = 0;
 
+    private final static int MAX_LINES = 50;
+    private ArrayList<CharSequence> mLogBuf;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,6 +131,8 @@ public class ActivityTransparent extends Activity implements
 
         mListener = new GattListener();
         initSpinners();
+
+        mLogBuf = new ArrayList<CharSequence>();
     }
 
     @Override
@@ -196,6 +201,7 @@ public class ActivityTransparent extends Activity implements
     public boolean onContextItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == MENU_CLEAR) {
+            mLogBuf.clear();
             mMsg.setText("");
             mMsg.scrollTo(0, 0);
         }
@@ -415,7 +421,11 @@ public class ActivityTransparent extends Activity implements
         if (info == null) {
             info = new Bundle();
         }
-        //mViewHandler.removeMessages(tag);
+
+        // remove previous log since the latest log
+        // already contains needed information.
+        mViewHandler.removeMessages(tag);
+
         Message msg = mViewHandler.obtainMessage(tag);
         msg.what = tag;
         msg.setData(info);
@@ -447,8 +457,7 @@ public class ActivityTransparent extends Activity implements
             } else if (tag == APPEND_MESSAGE) {
                 CharSequence content = bundle.getCharSequence(INFO_CONTENT);
                 if (content != null) {
-                    mMsg.append(content);
-                    mMsg.append("\n");
+                    appendMsg(content);
 
                     /*fot automaticaly scrolling to end*/
                     final int amount = mMsg.getLayout().getLineTop(mMsg.getLineCount())
@@ -459,6 +468,22 @@ public class ActivityTransparent extends Activity implements
                 }
             }
         }
+    }
+
+    private void appendMsg(CharSequence msg) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(msg);
+        sb.append("\n");
+        mLogBuf.add(sb);
+        if (mLogBuf.size() > MAX_LINES) {
+            mLogBuf.remove(0);
+        }
+
+        StringBuffer text = new StringBuffer();
+        for (int i = 0; i < mLogBuf.size(); i++) {
+            text.append(mLogBuf.get(i));
+        }
+        mMsg.setText(text);
     }
 
     private void onConnected() {

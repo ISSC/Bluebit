@@ -72,6 +72,14 @@ public class ActivityFunctionPicker extends ListActivity {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mGatt != null) {
+            mGatt.cancelConnection(mDevice);
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         GattProxy proxy = GattProxy.get(this);

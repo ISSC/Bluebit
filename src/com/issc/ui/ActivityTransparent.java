@@ -591,10 +591,11 @@ public class ActivityTransparent extends Activity implements
                 mFail += charac.getValue().length;
             }
 
-            String s = String.format("%d bytes, success= %d, fail= %d",
+            String s = String.format("%d bytes, success= %d, fail= %d, pending= %d",
                     charac.getValue().length,
                     mSuccess,
-                    mFail);
+                    mFail,
+                    mQueue.size());
             msgShow("wrote:", s);
             mQueue.onConsumed();
             updateView(CONSUME_TRANSACTION, null);

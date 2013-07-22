@@ -38,6 +38,12 @@ public class TransactionQueue {
         process();
     }
 
+    public int size() {
+        synchronized(mQueue) {
+            return mQueue.size();
+        }
+    }
+
     public void clear() {
         synchronized(mQueue) {
             mQueue.clear();
@@ -118,7 +124,7 @@ public class TransactionQueue {
                     }
 
                     // found transaction
-                    Log.d("ask consumer to transact one transaction");
+                    Log.d("ask consumer to transact one transaction, pending=" + mQueue.size());
                     mConsumer.onTransact(mWorkingTransaction);
                 }
             }

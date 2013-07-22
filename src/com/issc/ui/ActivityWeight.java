@@ -503,6 +503,11 @@ public class ActivityWeight extends Activity implements
                 for (int i = 0; i < data.length; i++) {
                     Log.d(String.format("[%d]: 0x%02x", i, data[i]));
                 }
+
+                if (data.length >= 2 && data[1] == Bluebit.CMD_WRITE_MEMORY[0]) {
+                    // finished writing memory
+                    updateView(HIDE_LOADER, null);
+                }
             } else {
                 Log.d("Unknown chr:" + chrc.getUuid().toString());
             }
@@ -519,13 +524,6 @@ public class ActivityWeight extends Activity implements
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
             Log.d("on chr write:" + status);
             mQueue.onConsumed();
-            byte[] value = charac.getValue();
-            ByteBuffer cmd = ByteBuffer.allocate(Bluebit.CMD_WRITE_MEMORY.length);
-            cmd.put(value, 0, cmd.limit());
-            if (Arrays.equals(cmd.array(), Bluebit.CMD_WRITE_MEMORY)) {
-                // finished writing memory
-                updateView(HIDE_LOADER, null);
-            }
         }
 
         @Override

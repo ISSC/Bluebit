@@ -204,17 +204,26 @@ public class ActivityDevicesList extends Activity {
         if (mGatt != null) {
             /* connected device will not be ignored when scanning */
             resetList();
+            appendConnectedDevices();
             mGatt.startScan();
         } else {
             Log.e("No Gatt instance");
         }
     }
 
+    private void appendConnectedDevices() {
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                appendDevices(mGatt.getConnectedDevices(), "connected");
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
     private void resetList() {
         this.runOnUiThread(new Runnable() {
             public void run() {
                 mRecords.clear();
-                appendDevices(mGatt.getConnectedDevices(), "connected");
                 appendBondDevices();
                 mAdapter.notifyDataSetChanged();
             }

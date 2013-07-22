@@ -63,7 +63,7 @@ public class ActivityTransparent extends Activity implements
 
     private TransactionQueue mQueue;
 
-    private final static int PAYLOAD_MAX = 90; // 90 bytes might be max
+    private final static int PAYLOAD_MAX = 20; // 90 bytes might be max
 
     private final static int CONNECTION_DIALOG = 1;
     private final static int TIMER_DIALOG      = 2;

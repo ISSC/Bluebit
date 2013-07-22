@@ -137,7 +137,7 @@ public class ActivityDevicesList extends Activity {
     }
 
     public void onClickBtnScan(View v) {
-        startDiscovery();
+        startScan();
     }
 
     @Override
@@ -147,7 +147,7 @@ public class ActivityDevicesList extends Activity {
             mScanningDialog.setMessage(this.getString(R.string.scanning));
             mScanningDialog.setOnCancelListener(new Dialog.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
-                    stopDiscovery();
+                    stopScan();
                 }
             });
             return mScanningDialog;
@@ -197,7 +197,7 @@ public class ActivityDevicesList extends Activity {
         return true;
     }
 
-    private void startDiscovery() {
+    private void startScan() {
         Log.d("Scanning Devices");
         showDialog(SCAN_DIALOG);
 
@@ -230,7 +230,7 @@ public class ActivityDevicesList extends Activity {
         });
     }
 
-    private void stopDiscovery() {
+    private void stopScan() {
         Log.d("Stop scanning");
         if (mGatt != null) {
             mGatt.stopScan();

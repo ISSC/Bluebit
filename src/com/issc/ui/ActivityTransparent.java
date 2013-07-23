@@ -12,6 +12,7 @@ import com.issc.util.TransactionQueue;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.List;
@@ -38,6 +39,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TabHost;
@@ -71,12 +73,14 @@ public class ActivityTransparent extends Activity implements
     private final static int MENU_CLEAR  = 0x501;
 
     private final static String INFO_CONTENT = "the_information_body";
+    private final static String ECHO_ENABLED = "echo_function_is_enabled";
 
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
     private final static int CONSUME_TRANSACTION        = 0x1002;
     private final static int DISMISS_TIMER_DIALOG       = 0x1003;
     private final static int APPEND_MESSAGE             = 0x1004;
+    private final static int ECHO_STATE                 = 0x1005;
 
 
     private TabHost mTabHost;
@@ -84,6 +88,7 @@ public class ActivityTransparent extends Activity implements
     private EditText mInput;
     private Button   mBtnSend;
     private ToggleButton mToggleResponse;
+    private CompoundButton mEchoIndicator;
 
     private Spinner mSpinnerDelta;
     private Spinner mSpinnerSize;
@@ -113,6 +118,7 @@ public class ActivityTransparent extends Activity implements
         mInput   = (EditText)findViewById(R.id.trans_input);
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
         mToggleResponse = (ToggleButton)findViewById(R.id.trans_type);
+        mEchoIndicator = (CompoundButton)findViewById(R.id.echo_indicator);
 
         mViewHandler = new ViewHandler();
 
@@ -466,6 +472,8 @@ public class ActivityTransparent extends Activity implements
                         mMsg.scrollTo(0, amount);
                     }
                 }
+            } else if (tag == ECHO_STATE) {
+                mEchoIndicator.setChecked(bundle.getBoolean(ECHO_ENABLED, false));
             }
         }
     }
@@ -599,6 +607,22 @@ public class ActivityTransparent extends Activity implements
             msgShow("wrote:", s);
             mQueue.onConsumed();
             updateView(CONSUME_TRANSACTION, null);
+        }
+
+        @Override
+        public void onDescriptorWrite(BluetoothGattDescriptor dsc, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                byte[] value = dsc.getValue();
+                if (Arrays.equals(value, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
+                    Bundle state = new Bundle();
+                    state.putBoolean(ECHO_ENABLED, true);
+                    updateView(ECHO_STATE, state);
+                } else if (Arrays.equals(value, BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)) {
+                    Bundle state = new Bundle();
+                    state.putBoolean(ECHO_ENABLED, false);
+                    updateView(ECHO_STATE, state);
+                }
+            }
         }
     }
 }

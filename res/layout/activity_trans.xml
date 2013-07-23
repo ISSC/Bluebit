@@ -139,6 +139,20 @@
 						android:layout_weight="1"
 						android:text="To transfer data back automatically"
 						android:layout_marginLeft="@dimen/large_gutter"
+						android:layout_marginTop="@dimen/large_gutter"
+						android:layout_marginBottom="@dimen/large_gutter"
+						/>
+				</TableRow>
+				<TableRow
+					>
+					<CheckBox
+						android:id="@+id/echo_indicator"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:text="Enabled"
+						android:layout_margin="@dimen/large_gutter"
+						android:enabled="false"
 						/>
 				</TableRow>
 			</TableLayout>

@@ -260,7 +260,7 @@ public class ActivityTransparent extends Activity implements
         } else {
             String recv = new String(data);
             msgShow("recv:", recv);
-            write(recv);
+            write(data);
             msgShow("echo:", recv);
         }
         Bundle msg = new Bundle();

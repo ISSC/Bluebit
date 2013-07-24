@@ -139,6 +139,10 @@ public class ActivityTransparent extends Activity implements
         initSpinners();
 
         mLogBuf = new ArrayList<CharSequence>();
+
+        GattProxy proxy = GattProxy.get(this);
+        proxy.addListener(mListener);
+        proxy.retrieveGatt(mListener);
     }
 
     @Override
@@ -146,6 +150,10 @@ public class ActivityTransparent extends Activity implements
         super.onDestroy();
         mQueue.clear();
         mViewHandler.removeCallbacksAndMessages(null);
+
+        GattProxy proxy = GattProxy.get(this);
+        proxy.rmListener(mListener);
+        mQueue.clear();
     }
 
     private void initSpinners() {
@@ -179,17 +187,11 @@ public class ActivityTransparent extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.addListener(mListener);
-        proxy.retrieveGatt(mListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.rmListener(mListener);
-        mQueue.clear();
     }
 
     @Override

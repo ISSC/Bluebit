@@ -87,6 +87,7 @@ public class ActivityTransparent extends Activity implements
     private TextView mMsg;
     private EditText mInput;
     private Button   mBtnSend;
+    private ToggleButton mToggleEcho;
     private ToggleButton mToggleResponse;
     private CompoundButton mEchoIndicator;
 
@@ -117,6 +118,7 @@ public class ActivityTransparent extends Activity implements
         mMsg     = (TextView)findViewById(R.id.trans_msg);
         mInput   = (EditText)findViewById(R.id.trans_input);
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
+        mToggleEcho     = (ToggleButton)findViewById(R.id.echo_toggle);
         mToggleResponse = (ToggleButton)findViewById(R.id.trans_type);
         mEchoIndicator = (CompoundButton)findViewById(R.id.echo_indicator);
 
@@ -127,8 +129,6 @@ public class ActivityTransparent extends Activity implements
         addTab(mTabHost, "Tab1", "Raw", R.id.tab_raw);
         addTab(mTabHost, "Tab2", "Timer", R.id.tab_timer);
         addTab(mTabHost, "Tab3", "Echo", R.id.tab_echo);
-
-        mTabHost.setOnTabChangedListener(new TabListener());
 
         mMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
         registerForContextMenu(mMsg);
@@ -247,6 +247,10 @@ public class ActivityTransparent extends Activity implements
 
     public void onClickType(View v) {
         onSetType(mToggleResponse.isChecked());
+    }
+
+    public void onClickEcho(View v) {
+        onSetEcho(mToggleEcho.isChecked());
     }
 
     private void onSetType(boolean withResponse) {
@@ -520,19 +524,6 @@ public class ActivityTransparent extends Activity implements
         updateView(SHOW_CONNECTION_DIALOG, null);
         mQueue.clear();
         mGatt.connect(mDevice, false);
-    }
-
-    class TabListener implements TabHost.OnTabChangeListener {
-        @Override
-        public void onTabChanged(String tabId) {
-            if (tabId.equals("Tab3")) {
-                Log.d("Enable Echo");
-                onSetEcho(true);
-            } else {
-                Log.d("Disable Echo");
-                onSetEcho(false);
-            }
-        }
     }
 
     class GattListener extends GattProxy.ListenerHelper {

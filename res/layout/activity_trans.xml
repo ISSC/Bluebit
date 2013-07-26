@@ -132,6 +132,28 @@
 				android:orientation="vertical"
 				>
 				<TableRow
+					android:layout_marginTop="@dimen/large_gutter"
+					>
+					<TextView
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:text="Set Echo"
+						android:layout_marginLeft="@dimen/large_gutter"
+						style="@style/row_text"
+						/>
+					<ToggleButton
+						android:id="@+id/echo_toggle"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textOn="@string/on"
+						android:textOff="@string/off"
+						android:layout_marginLeft="@dimen/large_gutter"
+						android:onClick="onClickEcho"
+						android:checked="false"
+						/>
+				</TableRow>
+				<TableRow
 					>
 					<TextView
 						android:layout_width="match_parent"

@@ -517,6 +517,7 @@ public class ActivityTransparent extends Activity implements
         mTransTx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_TX);
         mTransRx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_RX);
         Log.d(String.format("found Tx:%b, Rx:%b", mTransTx != null, mTransRx != null));
+        onSetEcho(mToggleEcho.isChecked());
     }
 
     private void onDisconnected() {

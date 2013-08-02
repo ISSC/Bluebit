@@ -30,11 +30,11 @@ import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 
 public class ActivityAIO extends Activity
     implements SeekBar.OnSeekBarChangeListener,
@@ -53,11 +53,11 @@ public class ActivityAIO extends Activity
 
     private List<GattService> mServices;
     private GattService mServiceAIO;
-    private BluetoothGattCharacteristic mChrDOut;
-    private BluetoothGattCharacteristic mChrCustomAOut1;
-    private BluetoothGattCharacteristic mChrAOut1;
-    private BluetoothGattCharacteristic mChrAOut2;
-    private BluetoothGattCharacteristic mChrAOut3;
+    private GattCharacteristic mChrDOut;
+    private GattCharacteristic mChrCustomAOut1;
+    private GattCharacteristic mChrAOut1;
+    private GattCharacteristic mChrAOut2;
+    private GattCharacteristic mChrAOut3;
     private ToggleButton[] mToggles;
 
     private TransactionQueue mQueue;
@@ -226,7 +226,7 @@ public class ActivityAIO extends Activity
     @Override
     public void onControllDigital(byte[] ctrl) {
         GattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
-        BluetoothGattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
+        GattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
 
         GattTransaction t = new GattTransaction(chr, ctrl);
         mQueue.add(t);
@@ -318,10 +318,10 @@ public class ActivityAIO extends Activity
         mServices.addAll(mGatt.getServices(mDevice));
 
         mServiceAIO = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
-        List<BluetoothGattCharacteristic> chrs = mServiceAIO.getCharacteristics();
-        Iterator<BluetoothGattCharacteristic> it = chrs.iterator();
+        List<GattCharacteristic> chrs = mServiceAIO.getCharacteristics();
+        Iterator<GattCharacteristic> it = chrs.iterator();
         while (it.hasNext()) {
-            BluetoothGattCharacteristic chr = it.next();
+            GattCharacteristic chr = it.next();
             UUID uuid = chr.getUuid();
             if (uuid.equals(Bluebit.CHR_DIGITAL_OUT)) {
                 mChrDOut = chr;
@@ -342,10 +342,10 @@ public class ActivityAIO extends Activity
         }
 
         GattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
-        List<BluetoothGattCharacteristic> pChrs = proprietary.getCharacteristics();
+        List<GattCharacteristic> pChrs = proprietary.getCharacteristics();
         it = pChrs.iterator();
         while (it.hasNext()) {
-            BluetoothGattCharacteristic chr = it.next();
+            GattCharacteristic chr = it.next();
             if (chr.getUuid().equals(Bluebit.CUSTOM_CHR_AO1_DESC)) {
                 mChrCustomAOut1 = chr;
             }
@@ -401,7 +401,7 @@ public class ActivityAIO extends Activity
         }
 
         @Override
-        public void onCharacteristicRead(BluetoothGattCharacteristic charac, int status) {
+        public void onCharacteristicRead(GattCharacteristic charac, int status) {
             Log.d("read char, uuid=" + charac.getUuid().toString());
             byte[] value = charac.getValue();
             Log.d("get value, byte length:" + value.length);
@@ -411,7 +411,7 @@ public class ActivityAIO extends Activity
         }
 
         @Override
-        public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
+        public void onCharacteristicWrite(GattCharacteristic charac, int status) {
             Log.d("on consumed!!");
             mQueue.onConsumed();
         }

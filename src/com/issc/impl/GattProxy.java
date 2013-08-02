@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
@@ -159,9 +160,10 @@ public class GattProxy {
         @Override
         public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
             synchronized(mListeners) {
+                GattCharacteristic c = new GattCharacteristic(chrc);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicChanged(chrc);
+                    it.next().onCharacteristicChanged(c);
                 }
             }
         }
@@ -169,9 +171,10 @@ public class GattProxy {
         @Override
         public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status) {
             synchronized(mListeners) {
+                GattCharacteristic c = new GattCharacteristic(chrc);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicRead(chrc, status);
+                    it.next().onCharacteristicRead(c, status);
                 }
             }
         }
@@ -179,9 +182,10 @@ public class GattProxy {
         @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status) {
             synchronized(mListeners) {
+                GattCharacteristic c = new GattCharacteristic(chrc);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicWrite(chrc, status);
+                    it.next().onCharacteristicWrite(c, status);
                 }
             }
         }
@@ -263,9 +267,9 @@ public class GattProxy {
 
         /* to keep compatibility to Samsung SDK */
         public void onAppRegistered(int status);
-        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc);
-        public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status);
-        public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status);
+        public void onCharacteristicChanged(GattCharacteristic chrc);
+        public void onCharacteristicRead(GattCharacteristic chrc, int status);
+        public void onCharacteristicWrite(GattCharacteristic chrc, int status);
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState);
         public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status);
         public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status);
@@ -288,15 +292,15 @@ public class GattProxy {
             Log.d(String.format("%s, onAppRegistered, status:%d", iTag, status));
         }
 
-        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
+        public void onCharacteristicChanged(GattCharacteristic chrc) {
             Log.d(String.format("%s, onCharChanged", iTag));
         }
 
-        public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status) {
+        public void onCharacteristicRead(GattCharacteristic chrc, int status) {
             Log.d(String.format("%s, onCharacteristicRead, status:%d", iTag, status));
         }
 
-        public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status) {
+        public void onCharacteristicWrite(GattCharacteristic chrc, int status) {
             Log.d(String.format("%s, onCharacteristicWrite, status:%d", iTag, status));
         }
 

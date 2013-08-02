@@ -47,11 +47,11 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 
 public class ActivityTransparent extends Activity implements
@@ -100,8 +100,8 @@ public class ActivityTransparent extends Activity implements
     private int[] mValueSize;
     private int[] mValueRepeat;
 
-    private BluetoothGattCharacteristic mTransTx;
-    private BluetoothGattCharacteristic mTransRx;
+    private GattCharacteristic mTransTx;
+    private GattCharacteristic mTransRx;
 
     private int mSuccess = 0;
     private int mFail    = 0;
@@ -354,8 +354,8 @@ public class ActivityTransparent extends Activity implements
         t.chr.setValue(t.value);
         if (t.isWrite) {
             int type = mToggleResponse.isChecked() ?
-                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT:
-                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
+                GattCharacteristic.WRITE_TYPE_DEFAULT:
+                GattCharacteristic.WRITE_TYPE_NO_RESPONSE;
             t.chr.setWriteType(type);
             mGatt.writeCharacteristic(t.chr);
         } else {
@@ -568,7 +568,7 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
-        public void onCharacteristicRead(BluetoothGattCharacteristic charac, int status) {
+        public void onCharacteristicRead(GattCharacteristic charac, int status) {
             Log.d("read char, uuid=" + charac.getUuid().toString());
             byte[] value = charac.getValue();
             Log.d("get value, byte length:" + value.length);
@@ -579,7 +579,7 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
-        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
+        public void onCharacteristicChanged(GattCharacteristic chrc) {
             Log.d("on chr changed" );
             if (chrc.getUuid().equals(Bluebit.CHR_ISSC_TRANS_TX)) {
                 onEcho(chrc.getValue());
@@ -587,7 +587,7 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
-        public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
+        public void onCharacteristicWrite(GattCharacteristic charac, int status) {
             if (status == Gatt.GATT_SUCCESS) {
                 mSuccess +=charac.getValue().length;
             } else {

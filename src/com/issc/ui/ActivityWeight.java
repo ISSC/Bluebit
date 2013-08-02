@@ -46,11 +46,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 
 public class ActivityWeight extends Activity implements
@@ -81,10 +81,10 @@ public class ActivityWeight extends Activity implements
 
     private BluetoothDevice mDevice;
     private GattService        mFFF0;
-    private BluetoothGattCharacteristic mFFF4;
+    private GattCharacteristic mFFF4;
     private BluetoothGattDescriptor     mCCC;
     private GattService        mProprietary;
-    private BluetoothGattCharacteristic mAirPatch;
+    private GattCharacteristic mAirPatch;
 
     private TransactionQueue mQueue;
 
@@ -490,7 +490,7 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
+        public void onCharacteristicChanged(GattCharacteristic chrc) {
             Log.d("on chr changed");
             if (chrc.getUuid().equals(mFFF4.getUuid())) {
                 Log.d("Got Weight value, update view");
@@ -515,14 +515,14 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onCharacteristicRead(BluetoothGattCharacteristic charac, int status) {
+        public void onCharacteristicRead(GattCharacteristic charac, int status) {
             Log.d("on chr read:" + status);
             byte[] value = charac.getValue();
             mQueue.onConsumed();
         }
 
         @Override
-        public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
+        public void onCharacteristicWrite(GattCharacteristic charac, int status) {
             Log.d("on chr write:" + status);
             mQueue.onConsumed();
         }

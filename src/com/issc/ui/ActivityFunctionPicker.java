@@ -33,11 +33,11 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 
 public class ActivityFunctionPicker extends ListActivity {
 
@@ -168,10 +168,10 @@ public class ActivityFunctionPicker extends ListActivity {
     private void appendService(GattService srv) {
         Log.d("append Service:" + srv.getUuid().toString());
         appendUuid(srv.getUuid());
-        List<BluetoothGattCharacteristic> list = srv.getCharacteristics();
-        Iterator<BluetoothGattCharacteristic> it = list.iterator();
+        List<GattCharacteristic> list = srv.getCharacteristics();
+        Iterator<GattCharacteristic> it = list.iterator();
         while (it.hasNext()) {
-            BluetoothGattCharacteristic chr = it.next();
+            GattCharacteristic chr = it.next();
             Log.d("  append chr:" + chr.getUuid().toString());
             appendUuid(chr.getUuid());
         }

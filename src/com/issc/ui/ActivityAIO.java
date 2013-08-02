@@ -30,11 +30,11 @@ import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityAIO extends Activity
     implements SeekBar.OnSeekBarChangeListener,
@@ -51,8 +51,8 @@ public class ActivityAIO extends Activity
     protected SeekBar mRed, mGreen, mBlue;
     protected int mRedVal, mGreenVal, mBlueVal;
 
-    private List<BluetoothGattService> mServices;
-    private BluetoothGattService mServiceAIO;
+    private List<GattService> mServices;
+    private GattService mServiceAIO;
     private BluetoothGattCharacteristic mChrDOut;
     private BluetoothGattCharacteristic mChrCustomAOut1;
     private BluetoothGattCharacteristic mChrAOut1;
@@ -95,7 +95,7 @@ public class ActivityAIO extends Activity
         mQueue = new TransactionQueue(this);
 
         mDevice = getIntent().getParcelableExtra(Bluebit.CHOSEN_DEVICE);
-        mServices = new ArrayList<BluetoothGattService>();
+        mServices = new ArrayList<GattService>();
         mViewHandler = new ViewHandler();
         mListener = new GattListener();
 
@@ -225,7 +225,7 @@ public class ActivityAIO extends Activity
 
     @Override
     public void onControllDigital(byte[] ctrl) {
-        BluetoothGattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
+        GattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
         BluetoothGattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
 
         GattTransaction t = new GattTransaction(chr, ctrl);
@@ -296,7 +296,7 @@ public class ActivityAIO extends Activity
     }
 
     private void onConnected() {
-        List<BluetoothGattService> list = mGatt.getServices(mDevice);
+        List<GattService> list = mGatt.getServices(mDevice);
         if ((list == null) || (list.size() == 0)) {
             Log.d("no services, do discovery");
             mGatt.discoverServices(mDevice);
@@ -341,7 +341,7 @@ public class ActivityAIO extends Activity
             }
         }
 
-        BluetoothGattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
+        GattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
         List<BluetoothGattCharacteristic> pChrs = proprietary.getCharacteristics();
         it = pChrs.iterator();
         while (it.hasNext()) {

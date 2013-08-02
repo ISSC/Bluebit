@@ -46,12 +46,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityWeight extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
@@ -80,10 +80,10 @@ public class ActivityWeight extends Activity implements
     private final static UUID mUuidFFF4 = Util.uuidFromStr("FFF4");
 
     private BluetoothDevice mDevice;
-    private BluetoothGattService        mFFF0;
+    private GattService        mFFF0;
     private BluetoothGattCharacteristic mFFF4;
     private BluetoothGattDescriptor     mCCC;
-    private BluetoothGattService        mProprietary;
+    private GattService        mProprietary;
     private BluetoothGattCharacteristic mAirPatch;
 
     private TransactionQueue mQueue;
@@ -220,7 +220,7 @@ public class ActivityWeight extends Activity implements
     }
 
     private void onConnected() {
-        List<BluetoothGattService> list = mGatt.getServices(mDevice);
+        List<GattService> list = mGatt.getServices(mDevice);
         if ((list == null) || (list.size() == 0)) {
             Log.d("no services, do discovery");
             mGatt.discoverServices(mDevice);
@@ -356,10 +356,10 @@ public class ActivityWeight extends Activity implements
         mCCC  = null;
         mProprietary = null;
 
-        List<BluetoothGattService> list = mGatt.getServices(mDevice);
-        Iterator<BluetoothGattService> it = list.iterator();
+        List<GattService> list = mGatt.getServices(mDevice);
+        Iterator<GattService> it = list.iterator();
         while(it.hasNext()) {
-            BluetoothGattService srv = it.next();
+            GattService srv = it.next();
             if (srv.getUuid().equals(mUuidFFF0)) {
                 mFFF0 = srv;
                 mFFF4 = mFFF0.getCharacteristic(mUuidFFF4);

@@ -33,11 +33,11 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityFunctionPicker extends ListActivity {
 
@@ -119,7 +119,7 @@ public class ActivityFunctionPicker extends ListActivity {
         if (mGatt != null) {
             if (mGatt.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
                 Log.d("connected");
-                List<BluetoothGattService> list = mGatt.getServices(mDevice);
+                List<GattService> list = mGatt.getServices(mDevice);
                 if ((list == null) || (list.size() == 0)) {
                     Log.d("start discovery");
                     mGatt.discoverServices(mDevice);
@@ -155,17 +155,17 @@ public class ActivityFunctionPicker extends ListActivity {
         stopDiscovery();
         mDiscovered = true;
         if (mGatt != null) {
-            List<BluetoothGattService> srvs = mGatt.getServices(device);
+            List<GattService> srvs = mGatt.getServices(device);
             Log.d("discovered result:" + srvs.size());
-            Iterator<BluetoothGattService> it = srvs.iterator();
+            Iterator<GattService> it = srvs.iterator();
             while (it.hasNext()) {
-                BluetoothGattService s = it.next();
+                GattService s = it.next();
                 appendService(s);
             }
         }
     }
 
-    private void appendService(BluetoothGattService srv) {
+    private void appendService(GattService srv) {
         Log.d("append Service:" + srv.getUuid().toString());
         appendUuid(srv.getUuid());
         List<BluetoothGattCharacteristic> list = srv.getCharacteristics();

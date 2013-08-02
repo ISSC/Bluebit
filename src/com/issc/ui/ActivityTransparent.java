@@ -47,12 +47,12 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class ActivityTransparent extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
@@ -502,7 +502,7 @@ public class ActivityTransparent extends Activity implements
     }
 
     private void onConnected() {
-        List<BluetoothGattService> list = mGatt.getServices(mDevice);
+        List<GattService> list = mGatt.getServices(mDevice);
         if ((list == null) || (list.size() == 0)) {
             Log.d("no services, do discovery");
             mGatt.discoverServices(mDevice);
@@ -514,7 +514,7 @@ public class ActivityTransparent extends Activity implements
     private void onDiscovered() {
         updateView(DISMISS_CONNECTION_DIALOG, null);
 
-        BluetoothGattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
+        GattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
         mTransTx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_TX);
         mTransRx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_RX);
         Log.d(String.format("found Tx:%b, Rx:%b", mTransTx != null, mTransRx != null));

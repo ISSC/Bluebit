@@ -17,6 +17,7 @@ import android.os.Bundle;
 
 import com.issc.gatt.Gatt;
 import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
@@ -203,9 +204,10 @@ public class GattProxy {
         @Override
         public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
             synchronized(mListeners) {
+                GattDescriptor dsc = new GattDescriptor(descriptor);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onDescriptorRead(descriptor, status);
+                    it.next().onDescriptorRead(dsc, status);
                 }
             }
         }
@@ -213,9 +215,10 @@ public class GattProxy {
         @Override
         public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
             synchronized(mListeners) {
+                GattDescriptor dsc = new GattDescriptor(descriptor);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onDescriptorWrite(descriptor, status);
+                    it.next().onDescriptorWrite(dsc, status);
                 }
             }
         }
@@ -271,8 +274,8 @@ public class GattProxy {
         public void onCharacteristicRead(GattCharacteristic chrc, int status);
         public void onCharacteristicWrite(GattCharacteristic chrc, int status);
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState);
-        public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status);
-        public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status);
+        public void onDescriptorRead(GattDescriptor descriptor, int status);
+        public void onDescriptorWrite(GattDescriptor descriptor, int status);
         public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status);
         public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord);
         public void onServicesDiscovered(BluetoothDevice device, int status);
@@ -308,11 +311,11 @@ public class GattProxy {
             Log.d(String.format("%s, onConnectionStateChange, status:%d, newState:%d", iTag, status, newState));
         }
 
-        public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
+        public void onDescriptorRead(GattDescriptor descriptor, int status) {
             Log.d(String.format("%s, onDescriptorRead, status:%d", iTag, status));
         }
 
-        public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
+        public void onDescriptorWrite(GattDescriptor descriptor, int status) {
             Log.d(String.format("%s, onDescriptorWrite, status:%d", iTag, status));
         }
 

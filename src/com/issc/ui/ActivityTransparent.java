@@ -48,11 +48,11 @@ import android.widget.ToggleButton;
 
 import com.issc.gatt.Gatt;
 import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 
 public class ActivityTransparent extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
@@ -284,8 +284,8 @@ public class ActivityTransparent extends Activity implements
     private void enableNotification() {
         boolean set = mGatt.setCharacteristicNotification(mTransTx, true);
         Log.d("set notification:" + set);
-        BluetoothGattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
-        dsc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        GattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
+        dsc.setValue(GattDescriptor.ENABLE_NOTIFICATION_VALUE);
         boolean success = mGatt.writeDescriptor(dsc);
         Log.d("writing enable descriptor:" + success);
     }
@@ -293,8 +293,8 @@ public class ActivityTransparent extends Activity implements
     private void disableNotification() {
         boolean set = mGatt.setCharacteristicNotification(mTransTx, false);
         Log.d("set notification:" + set);
-        BluetoothGattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
-        dsc.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE );
+        GattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
+        dsc.setValue(GattDescriptor.DISABLE_NOTIFICATION_VALUE );
         boolean success = mGatt.writeDescriptor(dsc);
         Log.d("writing disable descriptor:" + success);
     }
@@ -605,14 +605,14 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
-        public void onDescriptorWrite(BluetoothGattDescriptor dsc, int status) {
+        public void onDescriptorWrite(GattDescriptor dsc, int status) {
             if (status == Gatt.GATT_SUCCESS) {
                 byte[] value = dsc.getValue();
-                if (Arrays.equals(value, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
+                if (Arrays.equals(value, GattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
                     Bundle state = new Bundle();
                     state.putBoolean(ECHO_ENABLED, true);
                     updateView(ECHO_STATE, state);
-                } else if (Arrays.equals(value, BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)) {
+                } else if (Arrays.equals(value, GattDescriptor.DISABLE_NOTIFICATION_VALUE)) {
                     Bundle state = new Bundle();
                     state.putBoolean(ECHO_ENABLED, false);
                     updateView(ECHO_STATE, state);

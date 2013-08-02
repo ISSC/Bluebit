@@ -35,10 +35,10 @@ import android.widget.TextView;
 
 import com.issc.gatt.Gatt;
 import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 
 public class ActivityDeviceDetail extends ListActivity {
 
@@ -214,13 +214,13 @@ public class ActivityDeviceDetail extends ListActivity {
         }
         append(getString(R.string.title_chr), sb.toString(), R.color.normal);
 
-        Iterator<BluetoothGattDescriptor> it = ch.getDescriptors().iterator();
+        Iterator<GattDescriptor> it = ch.getDescriptors().iterator();
         while (it.hasNext()) {
             appendDescriptor(it.next());
         }
     }
 
-    private void appendDescriptor(BluetoothGattDescriptor desc) {
+    private void appendDescriptor(GattDescriptor desc) {
         StringBuilder sb = new StringBuilder();
         sb.append(desc.getUuid().toString());
         byte[] value = desc.getValue();

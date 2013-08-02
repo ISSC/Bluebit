@@ -47,11 +47,11 @@ import android.widget.Toast;
 
 import com.issc.gatt.Gatt;
 import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 
 public class ActivityWeight extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
@@ -82,7 +82,7 @@ public class ActivityWeight extends Activity implements
     private BluetoothDevice mDevice;
     private GattService        mFFF0;
     private GattCharacteristic mFFF4;
-    private BluetoothGattDescriptor     mCCC;
+    private GattDescriptor     mCCC;
     private GattService        mProprietary;
     private GattCharacteristic mAirPatch;
 
@@ -235,7 +235,7 @@ public class ActivityWeight extends Activity implements
         diggServices();
         mGatt.setCharacteristicNotification(mFFF4, true);
         GattTransaction t = new GattTransaction(mCCC,
-                BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                GattDescriptor.ENABLE_NOTIFICATION_VALUE);
         mQueue.add(t);
 
         enableAirPatch();
@@ -263,11 +263,11 @@ public class ActivityWeight extends Activity implements
         }
 
         mGatt.setCharacteristicNotification(mAirPatch, true);
-        BluetoothGattDescriptor ccc =
+        GattDescriptor ccc =
             mAirPatch.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
 
         GattTransaction t = new GattTransaction(ccc,
-                BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                GattDescriptor.ENABLE_NOTIFICATION_VALUE);
         Log.d("enable notification for proprietary");
         mQueue.add(t);
 
@@ -528,13 +528,13 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onDescriptorRead(BluetoothGattDescriptor desc, int status) {
+        public void onDescriptorRead(GattDescriptor desc, int status) {
             Log.d("on desc read:" + status);
             mQueue.onConsumed();
         }
 
         @Override
-        public void onDescriptorWrite(BluetoothGattDescriptor desc, int status) {
+        public void onDescriptorWrite(GattDescriptor desc, int status) {
             Log.d("on desc write:" + status);
             mQueue.onConsumed();
         }

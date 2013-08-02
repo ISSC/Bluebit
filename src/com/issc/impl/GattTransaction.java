@@ -7,14 +7,14 @@ import com.issc.util.TransactionQueue;
 import com.issc.util.TransactionQueue.Transaction;
 
 import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
 
 public class GattTransaction implements Transaction {
 
     public GattCharacteristic chr;
-    public BluetoothGattDescriptor     desc;
+    public GattDescriptor     desc;
     public byte[] value;
     public boolean isWrite;
     public long timeout;
@@ -45,19 +45,19 @@ public class GattTransaction implements Transaction {
         return (chr != null);
     }
 
-    public GattTransaction(BluetoothGattDescriptor d, byte[] v) {
+    public GattTransaction(GattDescriptor d, byte[] v) {
         this(d, v, true);
     }
 
-    public GattTransaction(BluetoothGattDescriptor d, byte[] v, long t) {
+    public GattTransaction(GattDescriptor d, byte[] v, long t) {
         this(d, v, true, t);
     }
 
-    public GattTransaction(BluetoothGattDescriptor d, byte[] v, boolean w) {
+    public GattTransaction(GattDescriptor d, byte[] v, boolean w) {
         this(d, v, w, Transaction.TIMEOUT_NONE);
     }
 
-    public GattTransaction(BluetoothGattDescriptor d,
+    public GattTransaction(GattDescriptor d,
             byte[] v,
             boolean w,
             long t) {

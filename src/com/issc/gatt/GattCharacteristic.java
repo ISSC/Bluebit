@@ -4,6 +4,7 @@ package com.issc.gatt;
 import com.issc.Bluebit;
 import com.issc.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,12 +37,18 @@ public class GattCharacteristic {
         return mChr;
     }
 
-    public BluetoothGattDescriptor getDescriptor(UUID uuid) {
-        return mChr.getDescriptor(uuid);
+    public GattDescriptor getDescriptor(UUID uuid) {
+        return new GattDescriptor(mChr.getDescriptor(uuid));
     }
 
-    public List<BluetoothGattDescriptor> getDescriptors() {
-        return mChr.getDescriptors();
+    public List<GattDescriptor> getDescriptors() {
+        List<BluetoothGattDescriptor> dscs = mChr.getDescriptors();
+        ArrayList<GattDescriptor> list = new ArrayList<GattDescriptor>();
+        for (BluetoothGattDescriptor dsc: dscs) {
+            list.add(new GattDescriptor(dsc));
+        }
+
+        return list;
     }
 
     public Integer getIntValue(int type, int offset) {

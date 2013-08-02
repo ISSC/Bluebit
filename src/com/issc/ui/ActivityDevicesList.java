@@ -45,9 +45,6 @@ import android.widget.Toast;
 
 import com.issc.gatt.Gatt;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-
 public class ActivityDevicesList extends Activity {
 
     private ListView mListView;

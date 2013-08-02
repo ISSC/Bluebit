@@ -38,8 +38,6 @@ import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
-
 public class ActivityDeviceDetail extends ListActivity {
 
     private final static String sKey = "key";

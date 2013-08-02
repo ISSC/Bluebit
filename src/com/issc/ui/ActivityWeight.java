@@ -50,9 +50,6 @@ import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-
 public class ActivityWeight extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
 

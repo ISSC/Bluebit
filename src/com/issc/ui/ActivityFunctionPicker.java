@@ -36,9 +36,6 @@ import com.issc.gatt.Gatt;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattService;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-
 public class ActivityFunctionPicker extends ListActivity {
 
     private BluetoothDevice mDevice;

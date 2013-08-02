@@ -4,6 +4,7 @@ package com.issc.gatt;
 import com.issc.Bluebit;
 import com.issc.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,12 +56,18 @@ public class Gatt {
         return mGatt.getConnectionState(device);
     }
 
-    public BluetoothGattService getService(BluetoothDevice device, UUID uuid) {
-        return mGatt.getService(device, uuid);
+    public GattService getService(BluetoothDevice device, UUID uuid) {
+        return new GattService(mGatt.getService(device, uuid));
     }
 
-    public List<BluetoothGattService> getServices(BluetoothDevice device) {
-        return mGatt.getServices(device);
+    public List<GattService> getServices(BluetoothDevice device) {
+        List<BluetoothGattService> srvs = mGatt.getServices(device);
+        ArrayList<GattService> list = new ArrayList<GattService>();
+        for (BluetoothGattService srv: srvs) {
+            list.add(new GattService(srv));
+        }
+
+        return list;
     }
 
     public boolean isBLEDevice(BluetoothDevice device) {

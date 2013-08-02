@@ -78,8 +78,8 @@ public class Gatt {
         return mGatt.readCharacteristic(chr.getCharacteristic());
     }
 
-    public boolean readDescriptor(BluetoothGattDescriptor descriptor) {
-        return mGatt.readDescriptor(descriptor);
+    public boolean readDescriptor(GattDescriptor dsc) {
+        return mGatt.readDescriptor(dsc.getDescriptor());
     }
 
     public boolean registerApp(BluetoothGattCallback callback) {
@@ -110,8 +110,8 @@ public class Gatt {
         return mGatt.writeCharacteristic(chr.getCharacteristic());
     }
 
-    public boolean writeDescriptor(BluetoothGattDescriptor descriptor) {
-        return mGatt.writeDescriptor(descriptor);
+    public boolean writeDescriptor(GattDescriptor dsc) {
+        return mGatt.writeDescriptor(dsc.getDescriptor());
     }
 }
 

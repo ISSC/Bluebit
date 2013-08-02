@@ -74,8 +74,8 @@ public class Gatt {
         return mGatt.isBLEDevice(device);
     }
 
-    public boolean readCharacteristic(BluetoothGattCharacteristic characteristic) {
-        return mGatt.readCharacteristic(characteristic);
+    public boolean readCharacteristic(GattCharacteristic chr) {
+        return mGatt.readCharacteristic(chr.getCharacteristic());
     }
 
     public boolean readDescriptor(BluetoothGattDescriptor descriptor) {
@@ -90,8 +90,8 @@ public class Gatt {
         return mGatt.removeBond(device);
     }
 
-    public boolean setCharacteristicNotification(BluetoothGattCharacteristic chr, boolean enable) {
-        return mGatt.setCharacteristicNotification(chr, enable);
+    public boolean setCharacteristicNotification(GattCharacteristic chr, boolean enable) {
+        return mGatt.setCharacteristicNotification(chr.getCharacteristic(), enable);
     }
 
     public boolean startScan() {
@@ -106,8 +106,8 @@ public class Gatt {
         mGatt.unregisterApp();
     }
 
-    public boolean writeCharacteristic(BluetoothGattCharacteristic chr) {
-        return mGatt.writeCharacteristic(chr);
+    public boolean writeCharacteristic(GattCharacteristic chr) {
+        return mGatt.writeCharacteristic(chr.getCharacteristic());
     }
 
     public boolean writeDescriptor(BluetoothGattDescriptor descriptor) {

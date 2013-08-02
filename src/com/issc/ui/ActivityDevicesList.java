@@ -43,7 +43,8 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
+import com.issc.gatt.Gatt;
+
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 
@@ -67,7 +68,7 @@ public class ActivityDevicesList extends Activity {
     private final static int MENU_CHOOSE = 1;
     private final static int MENU_RMBOND = 2;
 
-    private BluetoothGatt mGatt;
+    private Gatt mGatt;
     private GattProxy.Listener mListener;
 
     @Override
@@ -317,7 +318,7 @@ public class ActivityDevicesList extends Activity {
         }
 
         @Override
-        public void onRetrievedGatt(BluetoothGatt gatt) {
+        public void onRetrievedGatt(Gatt gatt) {
             Log.d(String.format("onRetrievedGatt"));
             mGatt = gatt;
             resetList();

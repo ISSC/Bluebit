@@ -29,7 +29,8 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
+import com.issc.gatt.Gatt;
+
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
@@ -41,7 +42,7 @@ public class ActivityAIO extends Activity
     AlgorithmAIO.Controllable {
 
     private BluetoothDevice mDevice;
-    private BluetoothGatt mGatt;
+    private Gatt mGatt;
     private GattProxy.Listener mListener;
 
     private ProgressDialog mConnectionDialog;
@@ -366,7 +367,7 @@ public class ActivityAIO extends Activity
         }
 
         @Override
-        public void onRetrievedGatt(BluetoothGatt gatt) {
+        public void onRetrievedGatt(Gatt gatt) {
             Log.d(String.format("onRetrievedGatt"));
             mGatt = gatt;
 

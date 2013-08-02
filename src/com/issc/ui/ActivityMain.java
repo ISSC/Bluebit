@@ -39,11 +39,11 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
+import com.issc.gatt.Gatt;
 
 public class ActivityMain extends Activity {
 
-    private BluetoothGatt mGatt;
+    private Gatt mGatt;
     private GattProxy.Listener mListener;
 
     @Override
@@ -138,7 +138,7 @@ public class ActivityMain extends Activity {
         }
 
         @Override
-        public void onRetrievedGatt(BluetoothGatt gatt) {
+        public void onRetrievedGatt(Gatt gatt) {
             super.onRetrievedGatt(gatt);
             mGatt = gatt;
         }

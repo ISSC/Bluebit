@@ -45,7 +45,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
+import com.issc.gatt.Gatt;
+
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
@@ -55,7 +56,7 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 public class ActivityWeight extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
 
-    private BluetoothGatt mGatt;
+    private Gatt mGatt;
     private GattProxy.Listener mListener;
 
     private final static double LB_BASE = 2.2046; // 1 kg is about 2.2046 lb
@@ -459,7 +460,7 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onRetrievedGatt(BluetoothGatt gatt) {
+        public void onRetrievedGatt(Gatt gatt) {
             Log.d(String.format("onRetrievedGatt"));
             mGatt = gatt;
             scanTarget();

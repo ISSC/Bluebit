@@ -15,6 +15,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.issc.gatt.Gatt;
+
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
@@ -34,8 +36,8 @@ public class GattProxy {
     private BluetoothGattCallback mCallback;
     private SystemProfileServiceListener mSystemListener;
 
-    private BluetoothGatt mGatt = null;
-    private BluetoothGatt mOngoingGatt = null;
+    private Gatt mGatt = null;
+    private Gatt mOngoingGatt = null;
     private List<Listener> mListeners;
     private List<Listener> mRetrievers;
 
@@ -86,7 +88,7 @@ public class GattProxy {
     synchronized public void releaseGatt() {
         if (mGatt != null) {
             Log.d("Gatt Releasing");
-            BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT, mGatt);
+            BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT, mGatt.getGatt());
 
             /* This is a hack because we are supposed to do this in
              * onServiceDisconnected. But, holy F! it never be called */
@@ -124,7 +126,7 @@ public class GattProxy {
             Log.d("registering callback to system service.");
             if (profile == BluetoothGattAdapter.GATT) {
                 /* Gatt is not completely ready */
-                mOngoingGatt = (BluetoothGatt) proxy;
+                mOngoingGatt = new Gatt((BluetoothGatt) proxy);
                 mOngoingGatt.registerApp(mCallback);
             }
         }
@@ -257,7 +259,7 @@ public class GattProxy {
          * Gatt Proxy will be kept until this instance be destroy or the method
          * {@link GattProxy#releaseGatt()} be called.
          * */
-        public void onRetrievedGatt(BluetoothGatt gatt);
+        public void onRetrievedGatt(Gatt gatt);
 
         /* to keep compatibility to Samsung SDK */
         public void onAppRegistered(int status);
@@ -278,7 +280,7 @@ public class GattProxy {
             iTag = tag;
         }
 
-        public void onRetrievedGatt(BluetoothGatt gatt) {
+        public void onRetrievedGatt(Gatt gatt) {
             Log.d(String.format("%s, onRetrievedGatt", iTag));
         }
 

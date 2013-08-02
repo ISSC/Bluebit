@@ -32,7 +32,8 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
+import com.issc.gatt.Gatt;
+
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
@@ -43,7 +44,7 @@ public class ActivityFunctionPicker extends ListActivity {
     private BluetoothDevice mDevice;
     private FunctionAdapter mAdapter;
 
-    private BluetoothGatt mGatt;
+    private Gatt mGatt;
     private GattProxy.Listener mListener;
 
     private final static int DISCOVERY_DIALOG = 1;
@@ -197,7 +198,7 @@ public class ActivityFunctionPicker extends ListActivity {
         }
 
         @Override
-        public void onRetrievedGatt(BluetoothGatt gatt) {
+        public void onRetrievedGatt(Gatt gatt) {
             Log.d(String.format("onRetrievedGatt"));
             mGatt = gatt;
             if (mAdapter.getCount() == 0) {

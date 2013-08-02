@@ -46,7 +46,8 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
+import com.issc.gatt.Gatt;
+
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
@@ -56,7 +57,7 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 public class ActivityTransparent extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
     private BluetoothDevice mDevice;
-    private BluetoothGatt mGatt;
+    private Gatt mGatt;
     private GattProxy.Listener mListener;
 
     private ProgressDialog mConnectionDialog;
@@ -534,7 +535,7 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
-        public void onRetrievedGatt(BluetoothGatt gatt) {
+        public void onRetrievedGatt(Gatt gatt) {
             Log.d(String.format("onRetrievedGatt"));
             mGatt = gatt;
 
@@ -587,7 +588,7 @@ public class ActivityTransparent extends Activity implements
 
         @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic charac, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
+            if (status == Gatt.GATT_SUCCESS) {
                 mSuccess +=charac.getValue().length;
             } else {
                 mFail += charac.getValue().length;
@@ -605,7 +606,7 @@ public class ActivityTransparent extends Activity implements
 
         @Override
         public void onDescriptorWrite(BluetoothGattDescriptor dsc, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
+            if (status == Gatt.GATT_SUCCESS) {
                 byte[] value = dsc.getValue();
                 if (Arrays.equals(value, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
                     Bundle state = new Bundle();

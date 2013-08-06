@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.issc.gatt.Gatt;
+import com.issc.gatt.Gatt.Listener;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 
@@ -251,84 +252,6 @@ public class GattProxy {
                     it.next().onServicesDiscovered(device, status);
                 }
             }
-        }
-    }
-
-    public interface Listener {
-        /**
-         * To Retrieve ready-to-use Gatt Proxy.
-         *
-         * It will be called if
-         * 1) This class got Profile Proxy from system
-         * 2) and this class registered its own callback to System Proxy.
-         *
-         * Since this instance of class, GattProxy, is a singleton object, the
-         * Gatt Proxy will be kept until this instance be destroy or the method
-         * {@link GattProxy#releaseGatt()} be called.
-         * */
-        public void onRetrievedGatt(Gatt gatt);
-
-        /* to keep compatibility to Samsung SDK */
-        public void onAppRegistered(int status);
-        public void onCharacteristicChanged(GattCharacteristic chrc);
-        public void onCharacteristicRead(GattCharacteristic chrc, int status);
-        public void onCharacteristicWrite(GattCharacteristic chrc, int status);
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState);
-        public void onDescriptorRead(GattDescriptor descriptor, int status);
-        public void onDescriptorWrite(GattDescriptor descriptor, int status);
-        public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status);
-        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord);
-        public void onServicesDiscovered(BluetoothDevice device, int status);
-    }
-
-    public static class ListenerHelper implements Listener {
-        String iTag;
-        public ListenerHelper(String tag) {
-            iTag = tag;
-        }
-
-        public void onRetrievedGatt(Gatt gatt) {
-            Log.d(String.format("%s, onRetrievedGatt", iTag));
-        }
-
-        public void onAppRegistered(int status) {
-            Log.d(String.format("%s, onAppRegistered, status:%d", iTag, status));
-        }
-
-        public void onCharacteristicChanged(GattCharacteristic chrc) {
-            Log.d(String.format("%s, onCharChanged", iTag));
-        }
-
-        public void onCharacteristicRead(GattCharacteristic chrc, int status) {
-            Log.d(String.format("%s, onCharacteristicRead, status:%d", iTag, status));
-        }
-
-        public void onCharacteristicWrite(GattCharacteristic chrc, int status) {
-            Log.d(String.format("%s, onCharacteristicWrite, status:%d", iTag, status));
-        }
-
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
-            Log.d(String.format("%s, onConnectionStateChange, status:%d, newState:%d", iTag, status, newState));
-        }
-
-        public void onDescriptorRead(GattDescriptor descriptor, int status) {
-            Log.d(String.format("%s, onDescriptorRead, status:%d", iTag, status));
-        }
-
-        public void onDescriptorWrite(GattDescriptor descriptor, int status) {
-            Log.d(String.format("%s, onDescriptorWrite, status:%d", iTag, status));
-        }
-
-        public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status) {
-            Log.d(String.format("%s, onReadRemoteRssi, rssi:%d", iTag, rssi));
-        }
-
-        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            Log.d(String.format("%s, onScanResult, rssi:%d", iTag, rssi));
-        }
-
-        public void onServicesDiscovered(BluetoothDevice device, int status) {
-            Log.d(String.format("%s, onServicesDiscovered", iTag));
         }
     }
 }

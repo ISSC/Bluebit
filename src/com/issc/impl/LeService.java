@@ -8,12 +8,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 
 import com.issc.gatt.Gatt;
 import com.issc.gatt.Gatt.Listener;
@@ -31,11 +34,10 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
  *
  * This singleton will try to keep the Gatt instance to be used via each Activity.
  */
-public class GattProxy {
+public class LeService extends Service {
 
-    private static GattProxy mMe = null;
+    private IBinder mBinder;
 
-    private Context mAppContext;
     private BluetoothGattCallback mCallback;
     private SystemProfileServiceListener mSystemListener;
 
@@ -44,20 +46,20 @@ public class GattProxy {
     private List<Listener> mListeners;
     private List<Retriever> mRetrievers;
 
-    private GattProxy(Context app) {
-        super();
-        mAppContext = app.getApplicationContext();
+    @Override
+    public void onCreate() {
+        super.onCreate();
         mCallback   = new TheCallback();
         mListeners  = new ArrayList<Listener>();
         mRetrievers = new ArrayList<Retriever>();
         mSystemListener = new SystemProfileServiceListener();
+
+        mBinder = new LocalBinder();
     }
 
-    synchronized static public GattProxy get(Context ctx) {
-        if (mMe == null) {
-            mMe = new GattProxy(ctx);
-        }
-        return mMe;
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
     }
 
     public boolean addListener(Listener l) {
@@ -81,7 +83,7 @@ public class GattProxy {
             Log.d("add to retrievers");
             mRetrievers.add(rtr);
             if (mOngoingGatt == null) {
-                BluetoothGattAdapter.getProfileProxy(mAppContext,
+                BluetoothGattAdapter.getProfileProxy(this,
                         mSystemListener, BluetoothGattAdapter.GATT);
             }
             return false;
@@ -102,7 +104,6 @@ public class GattProxy {
     private void syncReleaseGatt() {
         mGatt.unregisterApp();
         mGatt = null;
-        mMe = null;
     }
 
     synchronized private void onGattReady() {
@@ -255,9 +256,15 @@ public class GattProxy {
         }
     }
 
+    public class LocalBinder extends Binder {
+        public LeService getService() {
+            return LeService.this;
+        }
+    }
+
     public interface Retriever {
         /**
-         * To Retrieve ready-to-use Gatt Proxy.
+         * To Retrieve ready-to-use Gatt Service.
          *
          * It will be called if
          * 1) This class got Profile Proxy from system
@@ -265,7 +272,7 @@ public class GattProxy {
          *
          * Since this instance of class, GattProxy, is a singleton object, the
          * Gatt Proxy will be kept until this instance be destroy or the method
-         * {@link GattProxy#releaseGatt()} be called.
+         * {@link LeService#releaseGatt()} be called.
          * */
         public void onRetrievedGatt(Gatt gatt);
     }

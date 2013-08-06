@@ -133,7 +133,14 @@ public class ActivityWeight extends Activity implements
         super.onResume();
         GattProxy proxy = GattProxy.get(this);
         proxy.addListener(mListener);
-        proxy.retrieveGatt(mListener);
+        proxy.retrieveGatt(new GattProxy.Retriever() {
+            @Override
+            public void onRetrievedGatt(Gatt gatt) {
+                Log.d(String.format("onRetrievedGatt"));
+                mGatt = gatt;
+                scanTarget();
+            }
+        });
     }
 
     @Override
@@ -454,13 +461,6 @@ public class ActivityWeight extends Activity implements
     class GattListener extends Gatt.ListenerHelper {
         GattListener() {
             super("ActivityWeight");
-        }
-
-        @Override
-        public void onRetrievedGatt(Gatt gatt) {
-            Log.d(String.format("onRetrievedGatt"));
-            mGatt = gatt;
-            scanTarget();
         }
 
         @Override

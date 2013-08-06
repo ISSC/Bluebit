@@ -76,7 +76,13 @@ public class ActivityDeviceDetail extends ListActivity {
         super.onResume();
         GattProxy proxy = GattProxy.get(this);
         proxy.addListener(mListener);
-        proxy.retrieveGatt(mListener);
+        proxy.retrieveGatt(new GattProxy.Retriever() {
+            @Override
+            public void onRetrievedGatt(Gatt gatt) {
+                Log.d(String.format("onRetrievedGatt"));
+                mGatt = gatt;
+            }
+        });
     }
 
     @Override
@@ -245,12 +251,6 @@ public class ActivityDeviceDetail extends ListActivity {
 
         GattListener() {
             super("ActivityDeviceDetail");
-        }
-
-        @Override
-        public void onRetrievedGatt(Gatt gatt) {
-            Log.d(String.format("onRetrievedGatt"));
-            mGatt = gatt;
         }
 
         @Override

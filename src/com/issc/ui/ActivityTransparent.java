@@ -140,7 +140,21 @@ public class ActivityTransparent extends Activity implements
 
         GattProxy proxy = GattProxy.get(this);
         proxy.addListener(mListener);
-        proxy.retrieveGatt(mListener);
+        proxy.retrieveGatt(new GattProxy.Retriever() {
+            @Override
+            public void onRetrievedGatt(Gatt gatt) {
+                Log.d(String.format("onRetrievedGatt"));
+                mGatt = gatt;
+
+                int conn = mGatt.getConnectionState(mDevice);
+                if (conn == BluetoothProfile.STATE_DISCONNECTED) {
+                    onDisconnected();
+                } else {
+                    Log.d("already connected");
+                    onConnected();
+                }
+            }
+        });
     }
 
     @Override
@@ -529,20 +543,6 @@ public class ActivityTransparent extends Activity implements
 
         GattListener() {
             super("ActivityTransparent");
-        }
-
-        @Override
-        public void onRetrievedGatt(Gatt gatt) {
-            Log.d(String.format("onRetrievedGatt"));
-            mGatt = gatt;
-
-            int conn = mGatt.getConnectionState(mDevice);
-            if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                onDisconnected();
-            } else {
-                Log.d("already connected");
-                onConnected();
-            }
         }
 
         @Override

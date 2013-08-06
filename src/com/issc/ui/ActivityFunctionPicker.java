@@ -82,7 +82,16 @@ public class ActivityFunctionPicker extends ListActivity {
         super.onResume();
         GattProxy proxy = GattProxy.get(this);
         proxy.addListener(mListener);
-        proxy.retrieveGatt(mListener);
+        proxy.retrieveGatt(new GattProxy.Retriever() {
+            @Override
+            public void onRetrievedGatt(Gatt gatt) {
+                Log.d(String.format("onRetrievedGatt"));
+                mGatt = gatt;
+                if (mAdapter.getCount() == 0) {
+                    connectToDevice();
+                }
+            }
+        });
     }
 
     @Override
@@ -192,15 +201,6 @@ public class ActivityFunctionPicker extends ListActivity {
     class GattListener extends Gatt.ListenerHelper {
         GattListener() {
             super("ActivityFunctionPicker");
-        }
-
-        @Override
-        public void onRetrievedGatt(Gatt gatt) {
-            Log.d(String.format("onRetrievedGatt"));
-            mGatt = gatt;
-            if (mAdapter.getCount() == 0) {
-                connectToDevice();
-            }
         }
 
         @Override

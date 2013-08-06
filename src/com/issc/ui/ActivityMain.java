@@ -75,7 +75,12 @@ public class ActivityMain extends Activity {
         super.onResume();
         GattProxy proxy = GattProxy.get(this);
         proxy.addListener(mListener);
-        proxy.retrieveGatt(mListener);
+        proxy.retrieveGatt(new GattProxy.Retriever() {
+            @Override
+            public void onRetrievedGatt(Gatt gatt) {
+                mGatt = gatt;
+            }
+        });
     }
 
     @Override
@@ -135,12 +140,6 @@ public class ActivityMain extends Activity {
     class GattListener extends Gatt.ListenerHelper {
         GattListener() {
             super("ActivityMain");
-        }
-
-        @Override
-        public void onRetrievedGatt(Gatt gatt) {
-            super.onRetrievedGatt(gatt);
-            mGatt = gatt;
         }
     }
 }

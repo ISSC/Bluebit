@@ -115,19 +115,6 @@ public class Gatt {
     }
 
     public interface Listener {
-        /**
-         * To Retrieve ready-to-use Gatt Proxy.
-         *
-         * It will be called if
-         * 1) This class got Profile Proxy from system
-         * 2) and this class registered its own callback to System Proxy.
-         *
-         * Since this instance of class, GattProxy, is a singleton object, the
-         * Gatt Proxy will be kept until this instance be destroy or the method
-         * {@link GattProxy#releaseGatt()} be called.
-         * */
-        public void onRetrievedGatt(Gatt gatt);
-
         /* to keep compatibility to Samsung SDK */
         public void onAppRegistered(int status);
         public void onCharacteristicChanged(GattCharacteristic chrc);
@@ -145,10 +132,6 @@ public class Gatt {
         String iTag;
         public ListenerHelper(String tag) {
             iTag = tag;
-        }
-
-        public void onRetrievedGatt(Gatt gatt) {
-            Log.d(String.format("%s, onRetrievedGatt", iTag));
         }
 
         public void onAppRegistered(int status) {

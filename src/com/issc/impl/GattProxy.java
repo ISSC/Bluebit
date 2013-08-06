@@ -42,14 +42,14 @@ public class GattProxy {
     private Gatt mGatt = null;
     private Gatt mOngoingGatt = null;
     private List<Listener> mListeners;
-    private List<Listener> mRetrievers;
+    private List<Retriever> mRetrievers;
 
     private GattProxy(Context app) {
         super();
         mAppContext = app.getApplicationContext();
         mCallback   = new TheCallback();
         mListeners  = new ArrayList<Listener>();
-        mRetrievers = new ArrayList<Listener>();
+        mRetrievers = new ArrayList<Retriever>();
         mSystemListener = new SystemProfileServiceListener();
     }
 
@@ -72,14 +72,14 @@ public class GattProxy {
         }
     }
 
-    synchronized public boolean retrieveGatt(Listener lstnr) {
+    synchronized public boolean retrieveGatt(Retriever rtr) {
         if (mGatt != null) {
             // already connected to service, return it
-            syncOnRetrievedGatt(lstnr);
+            syncOnRetrievedGatt(rtr);
             return true;
         } else {
             Log.d("add to retrievers");
-            mRetrievers.add(lstnr);
+            mRetrievers.add(rtr);
             if (mOngoingGatt == null) {
                 BluetoothGattAdapter.getProfileProxy(mAppContext,
                         mSystemListener, BluetoothGattAdapter.GATT);
@@ -109,7 +109,7 @@ public class GattProxy {
         mGatt = mOngoingGatt;
         mOngoingGatt = null;
         if (mRetrievers.size() != 0) {
-            Iterator<Listener> it = mRetrievers.iterator();
+            Iterator<Retriever> it = mRetrievers.iterator();
             while(it.hasNext()) {
                 syncOnRetrievedGatt(it.next());
             }
@@ -117,8 +117,8 @@ public class GattProxy {
         }
     }
 
-    private void syncOnRetrievedGatt(Listener lstnr) {
-        lstnr.onRetrievedGatt(mGatt);
+    private void syncOnRetrievedGatt(Retriever rtr) {
+        rtr.onRetrievedGatt(mGatt);
     }
 
     class SystemProfileServiceListener implements BluetoothProfile.ServiceListener {
@@ -253,5 +253,20 @@ public class GattProxy {
                 }
             }
         }
+    }
+
+    public interface Retriever {
+        /**
+         * To Retrieve ready-to-use Gatt Proxy.
+         *
+         * It will be called if
+         * 1) This class got Profile Proxy from system
+         * 2) and this class registered its own callback to System Proxy.
+         *
+         * Since this instance of class, GattProxy, is a singleton object, the
+         * Gatt Proxy will be kept until this instance be destroy or the method
+         * {@link GattProxy#releaseGatt()} be called.
+         * */
+        public void onRetrievedGatt(Gatt gatt);
     }
 }

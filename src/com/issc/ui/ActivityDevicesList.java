@@ -66,7 +66,7 @@ public class ActivityDevicesList extends Activity {
     private final static int MENU_RMBOND = 2;
 
     private Gatt mGatt;
-    private GattProxy.Listener mListener;
+    private Gatt.Listener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -309,7 +309,7 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
-    class GattListener extends GattProxy.ListenerHelper {
+    class GattListener extends Gatt.ListenerHelper {
         GattListener() {
             super("ActivityDevicesList");
         }

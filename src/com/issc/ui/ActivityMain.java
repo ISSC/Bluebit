@@ -44,7 +44,7 @@ import com.issc.gatt.Gatt;
 public class ActivityMain extends Activity {
 
     private Gatt mGatt;
-    private GattProxy.Listener mListener;
+    private Gatt.Listener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +132,7 @@ public class ActivityMain extends Activity {
         }
     }
 
-    class GattListener extends GattProxy.ListenerHelper {
+    class GattListener extends Gatt.ListenerHelper {
         GattListener() {
             super("ActivityMain");
         }

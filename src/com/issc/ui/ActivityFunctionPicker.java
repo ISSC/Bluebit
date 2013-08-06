@@ -42,7 +42,7 @@ public class ActivityFunctionPicker extends ListActivity {
     private FunctionAdapter mAdapter;
 
     private Gatt mGatt;
-    private GattProxy.Listener mListener;
+    private Gatt.Listener mListener;
 
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
@@ -189,7 +189,7 @@ public class ActivityFunctionPicker extends ListActivity {
         startActivity(i);
     }
 
-    class GattListener extends GattProxy.ListenerHelper {
+    class GattListener extends Gatt.ListenerHelper {
         GattListener() {
             super("ActivityFunctionPicker");
         }

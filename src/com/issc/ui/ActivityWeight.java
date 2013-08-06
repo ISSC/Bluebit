@@ -54,7 +54,7 @@ public class ActivityWeight extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
 
     private Gatt mGatt;
-    private GattProxy.Listener mListener;
+    private Gatt.Listener mListener;
 
     private final static double LB_BASE = 2.2046; // 1 kg is about 2.2046 lb
     private final static double ST_BASE = 0.1574; // 1 kg is about 0.1574 st
@@ -451,7 +451,7 @@ public class ActivityWeight extends Activity implements
         }
     }
 
-    class GattListener extends GattProxy.ListenerHelper {
+    class GattListener extends Gatt.ListenerHelper {
         GattListener() {
             super("ActivityWeight");
         }

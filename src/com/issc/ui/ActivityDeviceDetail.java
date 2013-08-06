@@ -48,7 +48,7 @@ public class ActivityDeviceDetail extends ListActivity {
     private SimpleAdapter mAdapter;
 
     private Gatt mGatt;
-    private GattProxy.Listener mListener;
+    private Gatt.Listener mListener;
 
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
@@ -241,7 +241,7 @@ public class ActivityDeviceDetail extends ListActivity {
         }
     }
 
-    class GattListener extends GattProxy.ListenerHelper {
+    class GattListener extends Gatt.ListenerHelper {
 
         GattListener() {
             super("ActivityDeviceDetail");

@@ -40,7 +40,7 @@ public class ActivityAIO extends Activity
 
     private BluetoothDevice mDevice;
     private Gatt mGatt;
-    private GattProxy.Listener mListener;
+    private Gatt.Listener mListener;
 
     private ProgressDialog mConnectionDialog;
     private ProgressDialog mAutomationDialog;
@@ -357,7 +357,7 @@ public class ActivityAIO extends Activity
         onSetDigitalValue();
     }
 
-    class GattListener extends GattProxy.ListenerHelper {
+    class GattListener extends Gatt.ListenerHelper {
 
         GattListener() {
             super("ActivityAIO");

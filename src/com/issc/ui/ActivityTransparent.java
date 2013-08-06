@@ -55,7 +55,7 @@ public class ActivityTransparent extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
     private BluetoothDevice mDevice;
     private Gatt mGatt;
-    private GattProxy.Listener mListener;
+    private Gatt.Listener mListener;
 
     private ProgressDialog mConnectionDialog;
     private ProgressDialog mTimerDialog;
@@ -525,7 +525,7 @@ public class ActivityTransparent extends Activity implements
         mGatt.connect(mDevice, false);
     }
 
-    class GattListener extends GattProxy.ListenerHelper {
+    class GattListener extends Gatt.ListenerHelper {
 
         GattListener() {
             super("ActivityTransparent");

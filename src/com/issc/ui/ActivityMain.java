@@ -3,7 +3,8 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.impl.GattProxy;
+import com.issc.gatt.Gatt;
+import com.issc.impl.LeService;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -19,10 +20,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -39,18 +43,21 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.issc.gatt.Gatt;
-
 public class ActivityMain extends Activity {
 
+    private LeService mService;
     private Gatt mGatt;
     private Gatt.Listener mListener;
+    private SrvConnection mConn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mListener = new GattListener();
+        mConn = new SrvConnection();
+
+        startService(new Intent(this, LeService.class));
     }
 
     @Override
@@ -66,28 +73,21 @@ public class ActivityMain extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        GattProxy proxy = GattProxy.get(ActivityMain.this);
-        proxy.releaseGatt();
+        stopService(new Intent(this, LeService.class));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.addListener(mListener);
-        proxy.retrieveGatt(new GattProxy.Retriever() {
-            @Override
-            public void onRetrievedGatt(Gatt gatt) {
-                mGatt = gatt;
-            }
-        });
+        bindService(new Intent(this, LeService.class), mConn, 0);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.rmListener(mListener);
+        mService.rmListener(mListener);
+        mService = null;
+        unbindService(mConn);
     }
 
     @Override
@@ -140,6 +140,25 @@ public class ActivityMain extends Activity {
     class GattListener extends Gatt.ListenerHelper {
         GattListener() {
             super("ActivityMain");
+        }
+    }
+
+    class SrvConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = ((LeService.LocalBinder)service).getService();
+            mService.addListener(mListener);
+            mService.retrieveGatt(new LeService.Retriever() {
+                @Override
+                public void onRetrievedGatt(Gatt gatt) {
+                    mGatt = gatt;
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("Gatt Service disconnected");
         }
     }
 }

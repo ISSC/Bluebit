@@ -2,7 +2,11 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.impl.GattProxy;
+import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
+import com.issc.gatt.GattService;
+import com.issc.impl.LeService;
 import com.issc.impl.GattTransaction;
 import com.issc.R;
 import com.issc.util.Log;
@@ -22,12 +26,15 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.text.method.ScrollingMovementMethod;
 import android.view.ContextMenu;
@@ -46,16 +53,14 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.issc.gatt.Gatt;
-import com.issc.gatt.GattCharacteristic;
-import com.issc.gatt.GattDescriptor;
-import com.issc.gatt.GattService;
-
 public class ActivityTransparent extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
+
+    private LeService mService;
     private BluetoothDevice mDevice;
     private Gatt mGatt;
     private Gatt.Listener mListener;
+    private SrvConnection mConn;
 
     private ProgressDialog mConnectionDialog;
     private ProgressDialog mTimerDialog;
@@ -138,23 +143,8 @@ public class ActivityTransparent extends Activity implements
 
         mLogBuf = new ArrayList<CharSequence>();
 
-        GattProxy proxy = GattProxy.get(this);
-        proxy.addListener(mListener);
-        proxy.retrieveGatt(new GattProxy.Retriever() {
-            @Override
-            public void onRetrievedGatt(Gatt gatt) {
-                Log.d(String.format("onRetrievedGatt"));
-                mGatt = gatt;
-
-                int conn = mGatt.getConnectionState(mDevice);
-                if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                    onDisconnected();
-                } else {
-                    Log.d("already connected");
-                    onConnected();
-                }
-            }
-        });
+        /* Transparent is not a leaf activity. connect service in onCreate*/
+        bindService(new Intent(this, LeService.class), mConn, 0);
     }
 
     @Override
@@ -163,9 +153,10 @@ public class ActivityTransparent extends Activity implements
         mQueue.clear();
         mViewHandler.removeCallbacksAndMessages(null);
 
-        GattProxy proxy = GattProxy.get(this);
-        proxy.rmListener(mListener);
-        mQueue.clear();
+        /* Transparent is not a leaf activity. disconnect/unregister-listener in onDestroy*/
+        mService.rmListener(mListener);
+        mService = null;
+        unbindService(mConn);
     }
 
     private void initSpinners() {
@@ -194,16 +185,6 @@ public class ActivityTransparent extends Activity implements
                 this, textArrayId, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
     }
 
     @Override
@@ -615,6 +596,34 @@ public class ActivityTransparent extends Activity implements
                     updateView(ECHO_STATE, state);
                 }
             }
+        }
+    }
+
+    class SrvConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = ((LeService.LocalBinder)service).getService();
+            mService.addListener(mListener);
+            mService.retrieveGatt(new LeService.Retriever() {
+                @Override
+                public void onRetrievedGatt(Gatt gatt) {
+                    Log.d(String.format("onRetrievedGatt"));
+                    mGatt = gatt;
+
+                    int conn = mGatt.getConnectionState(mDevice);
+                    if (conn == BluetoothProfile.STATE_DISCONNECTED) {
+                        onDisconnected();
+                    } else {
+                        Log.d("already connected");
+                        onConnected();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("Gatt Service disconnected");
         }
     }
 }

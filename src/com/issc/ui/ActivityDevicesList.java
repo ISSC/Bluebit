@@ -3,7 +3,8 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.impl.GattProxy;
+import com.issc.gatt.Gatt;
+import com.issc.impl.LeService;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -22,11 +23,14 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -42,8 +46,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.issc.gatt.Gatt;
 
 public class ActivityDevicesList extends Activity {
 
@@ -65,8 +67,10 @@ public class ActivityDevicesList extends Activity {
     private final static int MENU_CHOOSE = 1;
     private final static int MENU_RMBOND = 2;
 
+    private LeService mService;
     private Gatt mGatt;
     private Gatt.Listener mListener;
+    private SrvConnection mConn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +85,26 @@ public class ActivityDevicesList extends Activity {
 
         mListener = new GattListener();
         initAdapter();
+        mConn = new SrvConnection();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bindService(new Intent(this, LeService.class), mConn, 0);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mService.rmListener(mListener);
+        mService = null;
+        unbindService(mConn);
     }
 
     private void initAdapter() {
@@ -112,33 +136,6 @@ public class ActivityDevicesList extends Activity {
     @Override
     public void onStop() {
         super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.addListener(mListener);
-        proxy.retrieveGatt(new GattProxy.Retriever() {
-            @Override
-            public void onRetrievedGatt(Gatt gatt) {
-                Log.d(String.format("onRetrievedGatt"));
-                mGatt = gatt;
-                resetList();
-            }
-        });
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.rmListener(mListener);
     }
 
     public void onClickBtnScan(View v) {
@@ -324,6 +321,26 @@ public class ActivityDevicesList extends Activity {
         @Override
         public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
             appendDevice(device, "");
+        }
+    }
+
+    class SrvConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = ((LeService.LocalBinder)service).getService();
+            mService.addListener(mListener);
+            mService.retrieveGatt(new LeService.Retriever() {
+                @Override
+                public void onRetrievedGatt(Gatt gatt) {
+                    mGatt = gatt;
+                    resetList();
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("Gatt Service disconnected");
         }
     }
 }

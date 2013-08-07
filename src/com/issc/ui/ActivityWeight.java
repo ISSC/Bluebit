@@ -3,7 +3,11 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
-import com.issc.impl.GattProxy;
+import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
+import com.issc.gatt.GattService;
+import com.issc.impl.LeService;
 import com.issc.impl.GattTransaction;
 import com.issc.R;
 import com.issc.util.Log;
@@ -28,11 +32,14 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -45,16 +52,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.issc.gatt.Gatt;
-import com.issc.gatt.GattCharacteristic;
-import com.issc.gatt.GattDescriptor;
-import com.issc.gatt.GattService;
-
 public class ActivityWeight extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
 
+    private LeService mService;
     private Gatt mGatt;
     private Gatt.Listener mListener;
+    private SrvConnection mConn;
 
     private final static double LB_BASE = 2.2046; // 1 kg is about 2.2046 lb
     private final static double ST_BASE = 0.1574; // 1 kg is about 0.1574 st
@@ -107,8 +111,9 @@ public class ActivityWeight extends Activity implements
 
         mQueue = new TransactionQueue(this);
 
-        mListener = new GattListener();
         mViewHandler = new ViewHandler();
+        mListener = new GattListener();
+        mConn = new SrvConnection();
     }
 
     @Override
@@ -124,33 +129,23 @@ public class ActivityWeight extends Activity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        GattProxy proxy = GattProxy.get(ActivityWeight.this);
         mQueue.clear();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.addListener(mListener);
-        proxy.retrieveGatt(new GattProxy.Retriever() {
-            @Override
-            public void onRetrievedGatt(Gatt gatt) {
-                Log.d(String.format("onRetrievedGatt"));
-                mGatt = gatt;
-                scanTarget();
-            }
-        });
+        bindService(new Intent(this, GattService.class), mConn, 0);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         stopScanningTarget();
-        GattProxy proxy = GattProxy.get(this);
         mGatt.cancelConnection(mDevice);
-        proxy.rmListener(mListener);
+        mService.rmListener(mListener);
         mQueue.clear();
+        unbindService(mConn);
     }
 
     public void onClickName(View v) {
@@ -539,6 +534,27 @@ public class ActivityWeight extends Activity implements
         @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {
             onDiscovered();
+        }
+    }
+
+    class SrvConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = ((LeService.LocalBinder)service).getService();
+            mService.addListener(mListener);
+            mService.retrieveGatt(new LeService.Retriever() {
+                @Override
+                public void onRetrievedGatt(Gatt gatt) {
+                    Log.d(String.format("onRetrievedGatt"));
+                    mGatt = gatt;
+                    scanTarget();
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("Gatt Service disconnected");
         }
     }
 }

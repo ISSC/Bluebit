@@ -2,8 +2,11 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
+import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattService;
+import com.issc.impl.LeService;
 import com.issc.impl.AlgorithmAIO;
-import com.issc.impl.GattProxy;
 import com.issc.impl.GattTransaction;
 import com.issc.R;
 import com.issc.util.Log;
@@ -20,18 +23,17 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.ToggleButton;
-
-import com.issc.gatt.Gatt;
-import com.issc.gatt.GattCharacteristic;
-import com.issc.gatt.GattService;
 
 public class ActivityAIO extends Activity
     implements SeekBar.OnSeekBarChangeListener,
@@ -39,8 +41,10 @@ public class ActivityAIO extends Activity
     AlgorithmAIO.Controllable {
 
     private BluetoothDevice mDevice;
+    private LeService mService;
     private Gatt mGatt;
     private Gatt.Listener mListener;
+    private SrvConnection mConn;
 
     private ProgressDialog mConnectionDialog;
     private ProgressDialog mAutomationDialog;
@@ -97,6 +101,9 @@ public class ActivityAIO extends Activity
         mListener = new GattListener();
 
         setToggles();
+
+        mConn = new SrvConnection();
+        startService(new Intent(this, GattService.class));
     }
 
     @Override
@@ -104,6 +111,22 @@ public class ActivityAIO extends Activity
         super.onDestroy();
         mQueue.clear();
         mViewHandler.removeCallbacksAndMessages(null);
+        stopService(new Intent(this, GattService.class));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bindService(new Intent(this, GattService.class), mConn, 0);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mQueue.clear();
+        mService.rmListener(mListener);
+        mService = null;
+        unbindService(mConn);
     }
 
     private void setToggles() {
@@ -121,35 +144,32 @@ public class ActivityAIO extends Activity
     protected void onActivityResult(int request, int result, Intent data) {
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.addListener(mListener);
-        proxy.retrieveGatt(new GattProxy.Retriever() {
-            @Override
-            public void onRetrievedGatt(Gatt gatt) {
-                Log.d(String.format("onRetrievedGatt"));
-                mGatt = gatt;
+    class SrvConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = ((LeService.LocalBinder)service).getService();
+            mService.addListener(mListener);
+            mService.retrieveGatt(new LeService.Retriever() {
+                @Override
+                public void onRetrievedGatt(Gatt gatt) {
+                    Log.d(String.format("onRetrievedGatt"));
+                    mGatt = gatt;
 
-                int conn = mGatt.getConnectionState(mDevice);
-                if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                    onDisconnected();
-                } else {
-                    Log.d("already connected");
-                    onConnected();
+                    int conn = mGatt.getConnectionState(mDevice);
+                    if (conn == BluetoothProfile.STATE_DISCONNECTED) {
+                        onDisconnected();
+                    } else {
+                        Log.d("already connected");
+                        onConnected();
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        GattProxy proxy = GattProxy.get(this);
-        proxy.rmListener(mListener);
-        mQueue.clear();
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("Gatt Service disconnected");
+        }
     }
 
     public void onClickAutoPattern1(View v) {

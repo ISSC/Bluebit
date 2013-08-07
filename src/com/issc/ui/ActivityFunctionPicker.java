@@ -2,8 +2,11 @@
 package com.issc.ui;
 
 import com.issc.Bluebit;
+import com.issc.gatt.Gatt;
+import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattService;
+import com.issc.impl.LeService;
 import com.issc.impl.FunctionAdapter;
-import com.issc.impl.GattProxy;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -22,9 +25,12 @@ import android.app.ListActivity;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.view.View;
 import android.widget.BaseAdapter;
@@ -32,17 +38,15 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.issc.gatt.Gatt;
-import com.issc.gatt.GattCharacteristic;
-import com.issc.gatt.GattService;
-
 public class ActivityFunctionPicker extends ListActivity {
 
     private BluetoothDevice mDevice;
     private FunctionAdapter mAdapter;
 
+    private LeService mService;
     private Gatt mGatt;
     private Gatt.Listener mListener;
+    private SrvConnection mConn;
 
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
@@ -67,6 +71,8 @@ public class ActivityFunctionPicker extends ListActivity {
 
         TextView tv = (TextView) findViewById(R.id.picker_dev_name);
         tv.setText(mDevice.getName());
+
+        mConn = new SrvConnection();
     }
 
     @Override
@@ -75,30 +81,20 @@ public class ActivityFunctionPicker extends ListActivity {
         if (mGatt != null) {
             mGatt.cancelConnection(mDevice);
         }
+        mService = null;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.addListener(mListener);
-        proxy.retrieveGatt(new GattProxy.Retriever() {
-            @Override
-            public void onRetrievedGatt(Gatt gatt) {
-                Log.d(String.format("onRetrievedGatt"));
-                mGatt = gatt;
-                if (mAdapter.getCount() == 0) {
-                    connectToDevice();
-                }
-            }
-        });
+        bindService(new Intent(this, LeService.class), mConn, 0);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        GattProxy proxy = GattProxy.get(this);
-        proxy.rmListener(mListener);
+        mService.rmListener(mListener);
+        unbindService(mConn);
     }
 
     @Override
@@ -223,6 +219,28 @@ public class ActivityFunctionPicker extends ListActivity {
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d("disconnected!!!");
             }
+        }
+    }
+
+    class SrvConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = ((LeService.LocalBinder)service).getService();
+            mService.addListener(mListener);
+            mService.retrieveGatt(new LeService.Retriever() {
+                @Override
+                public void onRetrievedGatt(Gatt gatt) {
+                    mGatt = gatt;
+                    if (mAdapter.getCount() == 0) {
+                        connectToDevice();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("Gatt Service disconnected");
         }
     }
 }

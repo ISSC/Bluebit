@@ -117,6 +117,7 @@ public class Gatt {
     public interface Listener {
         /* This function will be called if ready to use Gatt functions */
         public void onGattReady();
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord);
         public void onCharacteristicChanged(GattCharacteristic chrc);
         public void onCharacteristicRead(GattCharacteristic chrc, int status);
         public void onCharacteristicWrite(GattCharacteristic chrc, int status);
@@ -124,7 +125,6 @@ public class Gatt {
         public void onDescriptorRead(GattDescriptor descriptor, int status);
         public void onDescriptorWrite(GattDescriptor descriptor, int status);
         public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status);
-        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord);
         public void onServicesDiscovered(BluetoothDevice device, int status);
     }
 
@@ -166,7 +166,7 @@ public class Gatt {
             Log.d(String.format("%s, onReadRemoteRssi, rssi:%d", iTag, rssi));
         }
 
-        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             Log.d(String.format("%s, onScanResult, rssi:%d", iTag, rssi));
         }
 

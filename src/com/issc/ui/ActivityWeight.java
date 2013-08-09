@@ -460,7 +460,7 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             Log.d("Scanned:" + device.getAddress());
             if (isTheTarget(device, scanRecord)) {
                 onFoundTarget(device, scanRecord);

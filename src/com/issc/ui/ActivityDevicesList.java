@@ -323,7 +323,7 @@ public class ActivityDevicesList extends Activity {
         }
 
         @Override
-        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             appendDevice(device, "");
         }
     }

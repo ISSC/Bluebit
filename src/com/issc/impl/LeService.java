@@ -310,7 +310,7 @@ public class LeService extends Service {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onScanResult(device, rssi, scanRecord);
+                    it.next().onLeScan(device, rssi, scanRecord);
                 }
             }
         }

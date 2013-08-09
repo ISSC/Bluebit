@@ -43,20 +43,29 @@ public class LeService extends Service {
     private BluetoothGattCallback mCallback;
     private SystemProfileServiceListener mSystemListener;
 
+    private boolean mGattReady = false;
     private Gatt mGatt = null;
-    private Gatt mOngoingGatt = null;
     private List<Listener> mListeners;
-    private List<Retriever> mRetrievers;
+    private List<Listener> mPending;
+    private Object mLock;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mLock = new Object();
         mCallback   = new TheCallback();
         mListeners  = new ArrayList<Listener>();
-        mRetrievers = new ArrayList<Retriever>();
+        mPending    = new ArrayList<Listener>();
         mSystemListener = new SystemProfileServiceListener();
 
         mBinder = new LocalBinder();
+        init();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releaseGatt();
     }
 
     @Override
@@ -64,64 +73,59 @@ public class LeService extends Service {
         return mBinder;
     }
 
-    public boolean addListener(Listener l) {
-        synchronized(mListeners) {
-            return mListeners.add(l);
+    private void init() {
+        /* for samsung, try to init Gatt when this Service created*/
+        BluetoothGattAdapter.getProfileProxy(this,
+                mSystemListener, BluetoothGattAdapter.GATT);
+    }
+
+    public void addListener(Listener l) {
+        synchronized(mLock) {
+            mListeners.add(l);
+            if (mGattReady) {
+                l.onGattReady();
+            } else {
+                mPending.add(l);
+            }
         }
     }
 
     public boolean rmListener(Listener l) {
-        synchronized(mListeners) {
+        synchronized(mLock) {
             return mListeners.remove(l);
         }
     }
 
-    synchronized public boolean retrieveGatt(Retriever rtr) {
-        if (mGatt != null) {
-            // already connected to service, return it
-            syncOnRetrievedGatt(rtr);
-            return true;
-        } else {
-            Log.d("add to retrievers");
-            mRetrievers.add(rtr);
-            if (mOngoingGatt == null) {
-                BluetoothGattAdapter.getProfileProxy(this,
-                        mSystemListener, BluetoothGattAdapter.GATT);
+    private void onGattReady() {
+        synchronized(mLock) {
+            mGattReady = true;
+            if (mPending.size() != 0) {
+                Iterator<Listener> it = mPending.iterator();
+                while(it.hasNext()) {
+                    it.next().onGattReady();
+                }
+                mPending.clear();
             }
-            return false;
         }
     }
 
-    synchronized public void releaseGatt() {
-        if (mGatt != null) {
-            Log.d("Gatt Releasing");
-            BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT, mGatt.getGatt());
+    private void releaseGatt() {
+        synchronized(mLock) {
+            mGattReady = false;
+            if (mGatt != null) {
+                Log.d("Gatt Releasing");
+                BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT, mGatt.getGatt());
 
-            /* This is a hack because we are supposed to do this in
-             * onServiceDisconnected. But, holy F! it never be called */
-            syncReleaseGatt();
+                /* This is a hack because we are supposed to do this in
+                 * onServiceDisconnected. But, holy F! it never be called */
+                syncReleaseGatt();
+            }
         }
     }
 
     private void syncReleaseGatt() {
         mGatt.unregisterApp();
         mGatt = null;
-    }
-
-    synchronized private void onGattReady() {
-        mGatt = mOngoingGatt;
-        mOngoingGatt = null;
-        if (mRetrievers.size() != 0) {
-            Iterator<Retriever> it = mRetrievers.iterator();
-            while(it.hasNext()) {
-                syncOnRetrievedGatt(it.next());
-            }
-            mRetrievers.clear();
-        }
-    }
-
-    private void syncOnRetrievedGatt(Retriever rtr) {
-        rtr.onRetrievedGatt(mGatt);
     }
 
     public boolean startScan() {
@@ -196,8 +200,8 @@ public class LeService extends Service {
             Log.d("registering callback to system service.");
             if (profile == BluetoothGattAdapter.GATT) {
                 /* Gatt is not completely ready */
-                mOngoingGatt = new Gatt((BluetoothGatt) proxy);
-                mOngoingGatt.registerApp(mCallback);
+                mGatt = new Gatt((BluetoothGatt) proxy);
+                mGatt.registerApp(mCallback);
             }
         }
 
@@ -326,20 +330,5 @@ public class LeService extends Service {
         public LeService getService() {
             return LeService.this;
         }
-    }
-
-    public interface Retriever {
-        /**
-         * To Retrieve ready-to-use Gatt Service.
-         *
-         * It will be called if
-         * 1) This class got Profile Proxy from system
-         * 2) and this class registered its own callback to System Proxy.
-         *
-         * Since this instance of class, GattProxy, is a singleton object, the
-         * Gatt Proxy will be kept until this instance be destroy or the method
-         * {@link LeService#releaseGatt()} be called.
-         * */
-        public void onRetrievedGatt(Gatt gatt);
     }
 }

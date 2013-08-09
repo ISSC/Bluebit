@@ -115,8 +115,8 @@ public class Gatt {
     }
 
     public interface Listener {
-        /* to keep compatibility to Samsung SDK */
-        public void onAppRegistered(int status);
+        /* This function will be called if ready to use Gatt functions */
+        public void onGattReady();
         public void onCharacteristicChanged(GattCharacteristic chrc);
         public void onCharacteristicRead(GattCharacteristic chrc, int status);
         public void onCharacteristicWrite(GattCharacteristic chrc, int status);
@@ -134,8 +134,8 @@ public class Gatt {
             iTag = tag;
         }
 
-        public void onAppRegistered(int status) {
-            Log.d(String.format("%s, onAppRegistered, status:%d", iTag, status));
+        public void onGattReady() {
+            Log.d(String.format("%s, onGattReady", iTag));
         }
 
         public void onCharacteristicChanged(GattCharacteristic chrc) {

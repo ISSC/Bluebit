@@ -7,6 +7,7 @@ import com.issc.util.Log;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -22,6 +23,7 @@ import com.issc.gatt.Gatt;
 import com.issc.gatt.Gatt.Listener;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
+import com.issc.gatt.GattService;
 
 import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
 import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
@@ -120,6 +122,70 @@ public class LeService extends Service {
 
     private void syncOnRetrievedGatt(Retriever rtr) {
         rtr.onRetrievedGatt(mGatt);
+    }
+
+    public boolean startScan() {
+        return mGatt.startScan();
+    }
+
+    public void stopScan() {
+        mGatt.stopScan();
+    }
+
+    public boolean connect(BluetoothDevice device, boolean auto) {
+        return mGatt.connect(device, auto);
+    }
+
+    public void disconnect(BluetoothDevice device) {
+        mGatt.cancelConnection(device);
+    }
+
+    public List<BluetoothDevice> getConnectedDevices() {
+        return mGatt.getConnectedDevices();
+    }
+
+    public boolean discoverServices(BluetoothDevice device) {
+        return mGatt.discoverServices(device);
+    }
+
+    public int getConnectionState(BluetoothDevice device) {
+        return mGatt.getConnectionState(device);
+    }
+
+    public GattService getService(BluetoothDevice device, UUID uuid) {
+        return mGatt.getService(device, uuid);
+    }
+
+    public List<GattService> getServices(BluetoothDevice device) {
+        return mGatt.getServices(device);
+    }
+
+    public boolean isBLEDevice(BluetoothDevice device) {
+        return mGatt.isBLEDevice(device);
+    }
+
+    public boolean readCharacteristic(GattCharacteristic chr) {
+        return mGatt.readCharacteristic(chr);
+    }
+
+    public boolean writeCharacteristic(GattCharacteristic chr) {
+        return mGatt.writeCharacteristic(chr);
+    }
+
+    public boolean readDescriptor(GattDescriptor dsc) {
+        return mGatt.readDescriptor(dsc);
+    }
+
+    public boolean writeDescriptor(GattDescriptor dsc) {
+        return mGatt.writeDescriptor(dsc);
+    }
+
+    public boolean removeBond(BluetoothDevice device) {
+        return mGatt.removeBond(device);
+    }
+
+    public boolean setCharacteristicNotification(GattCharacteristic chr, boolean enable) {
+        return mGatt.setCharacteristicNotification(chr, enable);
     }
 
     class SystemProfileServiceListener implements BluetoothProfile.ServiceListener {

@@ -526,6 +526,19 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
+        public void onGattReady() {
+            Log.d(String.format("onRetrievedGatt"));
+
+            int conn = mService.getConnectionState(mDevice);
+            if (conn == BluetoothProfile.STATE_DISCONNECTED) {
+                onDisconnected();
+            } else {
+                Log.d("already connected");
+                onConnected();
+            }
+        }
+
+        @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             if (!mDevice.getAddress().equals(device.getAddress())) {
                 // not the device I care about
@@ -603,20 +616,6 @@ public class ActivityTransparent extends Activity implements
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
-            mService.retrieveGatt(new LeService.Retriever() {
-                @Override
-                public void onRetrievedGatt(Gatt gatt) {
-                    Log.d(String.format("onRetrievedGatt"));
-
-                    int conn = mService.getConnectionState(mDevice);
-                    if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                        onDisconnected();
-                    } else {
-                        Log.d("already connected");
-                        onConnected();
-                    }
-                }
-            });
         }
 
         @Override

@@ -102,7 +102,6 @@ public class ActivityAIO extends Activity
         setToggles();
 
         mConn = new SrvConnection();
-        startService(new Intent(this, GattService.class));
     }
 
     @Override
@@ -110,13 +109,12 @@ public class ActivityAIO extends Activity
         super.onDestroy();
         mQueue.clear();
         mViewHandler.removeCallbacksAndMessages(null);
-        stopService(new Intent(this, GattService.class));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        bindService(new Intent(this, GattService.class), mConn, 0);
+        bindService(new Intent(this, LeService.class), mConn, 0);
     }
 
     @Override
@@ -148,20 +146,6 @@ public class ActivityAIO extends Activity
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
-            mService.retrieveGatt(new LeService.Retriever() {
-                @Override
-                public void onRetrievedGatt(Gatt gatt) {
-                    Log.d(String.format("onRetrievedGatt"));
-
-                    int conn = mService.getConnectionState(mDevice);
-                    if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                        onDisconnected();
-                    } else {
-                        Log.d("already connected");
-                        onConnected();
-                    }
-                }
-            });
         }
 
         @Override
@@ -393,6 +377,19 @@ public class ActivityAIO extends Activity
 
         GattListener() {
             super("ActivityAIO");
+        }
+
+        @Override
+        public void onGattReady() {
+            Log.d(String.format("onGattReady"));
+
+            int conn = mService.getConnectionState(mDevice);
+            if (conn == BluetoothProfile.STATE_DISCONNECTED) {
+                onDisconnected();
+            } else {
+                Log.d("already connected");
+                onConnected();
+            }
         }
 
         @Override

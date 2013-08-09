@@ -277,11 +277,6 @@ public class ActivityDeviceDetail extends ListActivity {
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
-            mService.retrieveGatt(new LeService.Retriever() {
-                @Override
-                public void onRetrievedGatt(Gatt gatt) {
-                }
-            });
         }
 
         @Override

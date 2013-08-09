@@ -199,6 +199,13 @@ public class ActivityFunctionPicker extends ListActivity {
         }
 
         @Override
+        public void onGattReady() {
+            if (mAdapter.getCount() == 0) {
+                connectToDevice();
+            }
+        }
+
+        @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {
             onDiscovered(device);
         }
@@ -226,14 +233,6 @@ public class ActivityFunctionPicker extends ListActivity {
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
-            mService.retrieveGatt(new LeService.Retriever() {
-                @Override
-                public void onRetrievedGatt(Gatt gatt) {
-                    if (mAdapter.getCount() == 0) {
-                        connectToDevice();
-                    }
-                }
-            });
         }
 
         @Override

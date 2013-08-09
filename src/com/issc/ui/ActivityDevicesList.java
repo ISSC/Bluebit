@@ -68,7 +68,6 @@ public class ActivityDevicesList extends Activity {
     private final static int MENU_RMBOND = 2;
 
     private LeService mService;
-    private Gatt mGatt;
     private Gatt.Listener mListener;
     private SrvConnection mConn;
 
@@ -192,7 +191,7 @@ public class ActivityDevicesList extends Activity {
             startActivity(i);
         } else if (id == MENU_RMBOND) {
             BluetoothDevice target = (BluetoothDevice)mRecords.get(pos).get(sDevice);
-            boolean r = mGatt.removeBond(target);
+            boolean r = mService.removeBond(target);
             Log.d("Remove bond:" + r);
             resetList();
         }
@@ -203,11 +202,11 @@ public class ActivityDevicesList extends Activity {
         Log.d("Scanning Devices");
         showDialog(SCAN_DIALOG);
 
-        if (mGatt != null) {
+        if (mService != null) {
             /* connected device will not be ignored when scanning */
             resetList();
             appendConnectedDevices();
-            mGatt.startScan();
+            mService.startScan();
         } else {
             Log.e("No Gatt instance");
         }
@@ -216,7 +215,7 @@ public class ActivityDevicesList extends Activity {
     private void appendConnectedDevices() {
         this.runOnUiThread(new Runnable() {
             public void run() {
-                appendDevices(mGatt.getConnectedDevices(), "connected");
+                appendDevices(mService.getConnectedDevices(), "connected");
                 mAdapter.notifyDataSetChanged();
             }
         });
@@ -234,8 +233,8 @@ public class ActivityDevicesList extends Activity {
 
     private void stopScan() {
         Log.d("Stop scanning");
-        if (mGatt != null) {
-            mGatt.stopScan();
+        if (mService!= null) {
+            mService.stopScan();
         } else {
             Log.e("No Gatt instance");
         }
@@ -332,7 +331,6 @@ public class ActivityDevicesList extends Activity {
             mService.retrieveGatt(new LeService.Retriever() {
                 @Override
                 public void onRetrievedGatt(Gatt gatt) {
-                    mGatt = gatt;
                     resetList();
                 }
             });

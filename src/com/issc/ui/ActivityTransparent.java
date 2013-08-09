@@ -58,7 +58,6 @@ public class ActivityTransparent extends Activity implements
 
     private LeService mService;
     private BluetoothDevice mDevice;
-    private Gatt mGatt;
     private Gatt.Listener mListener;
     private SrvConnection mConn;
 
@@ -274,20 +273,20 @@ public class ActivityTransparent extends Activity implements
     }
 
     private void enableNotification() {
-        boolean set = mGatt.setCharacteristicNotification(mTransTx, true);
+        boolean set = mService.setCharacteristicNotification(mTransTx, true);
         Log.d("set notification:" + set);
         GattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
         dsc.setValue(GattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        boolean success = mGatt.writeDescriptor(dsc);
+        boolean success = mService.writeDescriptor(dsc);
         Log.d("writing enable descriptor:" + success);
     }
 
     private void disableNotification() {
-        boolean set = mGatt.setCharacteristicNotification(mTransTx, false);
+        boolean set = mService.setCharacteristicNotification(mTransTx, false);
         Log.d("set notification:" + set);
         GattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
         dsc.setValue(GattDescriptor.DISABLE_NOTIFICATION_VALUE );
-        boolean success = mGatt.writeDescriptor(dsc);
+        boolean success = mService.writeDescriptor(dsc);
         Log.d("writing disable descriptor:" + success);
     }
 
@@ -349,9 +348,9 @@ public class ActivityTransparent extends Activity implements
                 GattCharacteristic.WRITE_TYPE_DEFAULT:
                 GattCharacteristic.WRITE_TYPE_NO_RESPONSE;
             t.chr.setWriteType(type);
-            mGatt.writeCharacteristic(t.chr);
+            mService.writeCharacteristic(t.chr);
         } else {
-            mGatt.readCharacteristic(t.chr);
+            mService.readCharacteristic(t.chr);
         }
     }
 
@@ -494,10 +493,10 @@ public class ActivityTransparent extends Activity implements
     }
 
     private void onConnected() {
-        List<GattService> list = mGatt.getServices(mDevice);
+        List<GattService> list = mService.getServices(mDevice);
         if ((list == null) || (list.size() == 0)) {
             Log.d("no services, do discovery");
-            mGatt.discoverServices(mDevice);
+            mService.discoverServices(mDevice);
         } else {
             onDiscovered();
         }
@@ -506,7 +505,7 @@ public class ActivityTransparent extends Activity implements
     private void onDiscovered() {
         updateView(DISMISS_CONNECTION_DIALOG, null);
 
-        GattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
+        GattService proprietary = mService.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
         mTransTx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_TX);
         mTransRx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_RX);
         Log.d(String.format("found Tx:%b, Rx:%b", mTransTx != null, mTransRx != null));
@@ -517,7 +516,7 @@ public class ActivityTransparent extends Activity implements
         Log.d("disconnected, connecting to device");
         updateView(SHOW_CONNECTION_DIALOG, null);
         mQueue.clear();
-        mGatt.connect(mDevice, false);
+        mService.connect(mDevice, false);
     }
 
     class GattListener extends Gatt.ListenerHelper {
@@ -608,9 +607,8 @@ public class ActivityTransparent extends Activity implements
                 @Override
                 public void onRetrievedGatt(Gatt gatt) {
                     Log.d(String.format("onRetrievedGatt"));
-                    mGatt = gatt;
 
-                    int conn = mGatt.getConnectionState(mDevice);
+                    int conn = mService.getConnectionState(mDevice);
                     if (conn == BluetoothProfile.STATE_DISCONNECTED) {
                         onDisconnected();
                     } else {

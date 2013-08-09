@@ -46,7 +46,6 @@ import android.widget.Toast;
 public class ActivityMain extends Activity {
 
     private LeService mService;
-    private Gatt mGatt;
     private Gatt.Listener mListener;
     private SrvConnection mConn;
 
@@ -148,12 +147,6 @@ public class ActivityMain extends Activity {
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
-            mService.retrieveGatt(new LeService.Retriever() {
-                @Override
-                public void onRetrievedGatt(Gatt gatt) {
-                    mGatt = gatt;
-                }
-            });
         }
 
         @Override

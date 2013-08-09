@@ -42,7 +42,6 @@ public class ActivityAIO extends Activity
 
     private BluetoothDevice mDevice;
     private LeService mService;
-    private Gatt mGatt;
     private Gatt.Listener mListener;
     private SrvConnection mConn;
 
@@ -153,9 +152,8 @@ public class ActivityAIO extends Activity
                 @Override
                 public void onRetrievedGatt(Gatt gatt) {
                     Log.d(String.format("onRetrievedGatt"));
-                    mGatt = gatt;
 
-                    int conn = mGatt.getConnectionState(mDevice);
+                    int conn = mService.getConnectionState(mDevice);
                     if (conn == BluetoothProfile.STATE_DISCONNECTED) {
                         onDisconnected();
                     } else {
@@ -241,7 +239,7 @@ public class ActivityAIO extends Activity
     public void onTransact(GattTransaction t) {
         t.chr.setValue(t.value);
         if (t.isWrite) {
-            mGatt.writeCharacteristic(t.chr);
+            mService.writeCharacteristic(t.chr);
         }
     }
 
@@ -256,7 +254,7 @@ public class ActivityAIO extends Activity
 
     @Override
     public void onControllDigital(byte[] ctrl) {
-        GattService srv = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
+        GattService srv = mService.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
         GattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
 
         GattTransaction t = new GattTransaction(chr, ctrl);
@@ -327,10 +325,10 @@ public class ActivityAIO extends Activity
     }
 
     private void onConnected() {
-        List<GattService> list = mGatt.getServices(mDevice);
+        List<GattService> list = mService.getServices(mDevice);
         if ((list == null) || (list.size() == 0)) {
             Log.d("no services, do discovery");
-            mGatt.discoverServices(mDevice);
+            mService.discoverServices(mDevice);
         } else {
             onDiscovered();
         }
@@ -340,15 +338,15 @@ public class ActivityAIO extends Activity
         Log.d("disconnected, connecting to device");
         mQueue.clear();
         updateView(SHOW_CONNECTION_DIALOG, null);
-        mGatt.connect(mDevice, false);
+        mService.connect(mDevice, false);
     }
 
     private void onDiscovered() {
         updateView(DISMISS_CONNECTION_DIALOG, null);
         mServices.clear();
-        mServices.addAll(mGatt.getServices(mDevice));
+        mServices.addAll(mService.getServices(mDevice));
 
-        mServiceAIO = mGatt.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
+        mServiceAIO = mService.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
         List<GattCharacteristic> chrs = mServiceAIO.getCharacteristics();
         Iterator<GattCharacteristic> it = chrs.iterator();
         while (it.hasNext()) {
@@ -372,7 +370,7 @@ public class ActivityAIO extends Activity
             }
         }
 
-        GattService proprietary = mGatt.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
+        GattService proprietary = mService.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
         List<GattCharacteristic> pChrs = proprietary.getCharacteristics();
         it = pChrs.iterator();
         while (it.hasNext()) {

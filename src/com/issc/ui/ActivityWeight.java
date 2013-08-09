@@ -56,7 +56,6 @@ public class ActivityWeight extends Activity implements
     TransactionQueue.Consumer<GattTransaction> {
 
     private LeService mService;
-    private Gatt mGatt;
     private Gatt.Listener mListener;
     private SrvConnection mConn;
 
@@ -142,7 +141,7 @@ public class ActivityWeight extends Activity implements
     protected void onPause() {
         super.onPause();
         stopScanningTarget();
-        mGatt.cancelConnection(mDevice);
+        mService.disconnect(mDevice);
         mService.rmListener(mListener);
         mQueue.clear();
         unbindService(mConn);
@@ -190,18 +189,14 @@ public class ActivityWeight extends Activity implements
     }
 
     private void connect() {
-        mGatt.connect(mDevice, false);
+        mService.connect(mDevice, false);
     }
 
     private void scanTarget() {
         mDevice = null;
-        if (mGatt != null) {
+        if (mService != null) {
             Log.d("Scanning Target");
-            // does not work yet.
-            //UUID[] uuids = new UUID[1];
-            //uuids[0] = mAdvData;
-            //mGatt.startScan(uuids);
-            mGatt.startScan();
+            mService.startScan();
             updateView(SHOW_LOADER, null);
         } else {
             Log.e("No Gatt instance");
@@ -211,18 +206,18 @@ public class ActivityWeight extends Activity implements
     private void stopScanningTarget() {
         Log.d("Stop scanning");
         updateView(HIDE_LOADER, null);
-        if (mGatt != null) {
-            mGatt.stopScan();
+        if (mService != null) {
+            mService.stopScan();
         } else {
             Log.e("No Gatt instance");
         }
     }
 
     private void onConnected() {
-        List<GattService> list = mGatt.getServices(mDevice);
+        List<GattService> list = mService.getServices(mDevice);
         if ((list == null) || (list.size() == 0)) {
             Log.d("no services, do discovery");
-            mGatt.discoverServices(mDevice);
+            mService.discoverServices(mDevice);
         } else {
             onDiscovered();
         }
@@ -232,7 +227,7 @@ public class ActivityWeight extends Activity implements
         Log.d("Discovered services, enable notification");
         mQueue.clear();
         diggServices();
-        mGatt.setCharacteristicNotification(mFFF4, true);
+        mService.setCharacteristicNotification(mFFF4, true);
         GattTransaction t = new GattTransaction(mCCC,
                 GattDescriptor.ENABLE_NOTIFICATION_VALUE);
         mQueue.add(t);
@@ -261,7 +256,7 @@ public class ActivityWeight extends Activity implements
             return;
         }
 
-        mGatt.setCharacteristicNotification(mAirPatch, true);
+        mService.setCharacteristicNotification(mAirPatch, true);
         GattDescriptor ccc =
             mAirPatch.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
 
@@ -335,16 +330,16 @@ public class ActivityWeight extends Activity implements
             if (t.isWrite) {
                 Log.d("gatt writing characteristic");
                 t.chr.setValue(t.value);
-                mGatt.writeCharacteristic(t.chr);
+                mService.writeCharacteristic(t.chr);
             } else {
                 t.chr.setValue(t.value);
-                boolean r = mGatt.readCharacteristic(t.chr);
+                boolean r = mService.readCharacteristic(t.chr);
                 Log.d("gatt reading characteristic:" + r);
             }
         } else if (t.isForDescriptor()) {
             if (t.isWrite) {
                 t.desc.setValue(t.value);
-                mGatt.writeDescriptor(t.desc);
+                mService.writeDescriptor(t.desc);
             }
         }
     }
@@ -355,7 +350,7 @@ public class ActivityWeight extends Activity implements
         mCCC  = null;
         mProprietary = null;
 
-        List<GattService> list = mGatt.getServices(mDevice);
+        List<GattService> list = mService.getServices(mDevice);
         Iterator<GattService> it = list.iterator();
         while(it.hasNext()) {
             GattService srv = it.next();
@@ -546,7 +541,6 @@ public class ActivityWeight extends Activity implements
                 @Override
                 public void onRetrievedGatt(Gatt gatt) {
                     Log.d(String.format("onRetrievedGatt"));
-                    mGatt = gatt;
                     scanTarget();
                 }
             });

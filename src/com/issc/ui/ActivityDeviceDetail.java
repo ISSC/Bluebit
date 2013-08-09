@@ -50,7 +50,6 @@ public class ActivityDeviceDetail extends ListActivity {
     private SimpleAdapter mAdapter;
 
     private LeService mService;
-    private Gatt mGatt;
     private Gatt.Listener mListener;
     private SrvConnection mConn;
 
@@ -106,18 +105,18 @@ public class ActivityDeviceDetail extends ListActivity {
     }
 
     private void startDiscovery() {
-        if (mGatt != null) {
+        if (mService!= null) {
             showDialog(DISCOVERY_DIALOG);
-            if (mGatt.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
-                List<GattService> list = mGatt.getServices(mDevice);
+            if (mService.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
+                List<GattService> list = mService.getServices(mDevice);
                 if ((list == null) || (list.size() == 0)) {
                     Log.d("start discovery");
-                    mGatt.discoverServices(mDevice);
+                    mService.discoverServices(mDevice);
                 } else {
                     onDiscovered(mDevice);
                 }
             } else {
-                mGatt.connect(mDevice, false);
+                mService.connect(mDevice, false);
             }
         }
 
@@ -125,8 +124,8 @@ public class ActivityDeviceDetail extends ListActivity {
 
     private void stopDiscovery() {
         dismissDialog(DISCOVERY_DIALOG);
-        if (mGatt != null) {
-            mGatt.cancelConnection(mDevice);
+        if (mService != null) {
+            mService.disconnect(mDevice);
         }
     }
 
@@ -149,7 +148,7 @@ public class ActivityDeviceDetail extends ListActivity {
 
 
     public void onClickBtnMore(View v) {
-        if (mGatt != null) {
+        if (mService!= null) {
             startDiscovery();
         }
     }
@@ -185,8 +184,8 @@ public class ActivityDeviceDetail extends ListActivity {
 
     private void onDiscovered(BluetoothDevice device) {
         Log.d("on discovered:");
-        if (mGatt != null) {
-            List<GattService> srvs = mGatt.getServices(device);
+        if (mService!= null) {
+            List<GattService> srvs = mService.getServices(device);
             Iterator<GattService> it = srvs.iterator();
             while (it.hasNext()) {
                 appendServices(it.next());
@@ -261,13 +260,13 @@ public class ActivityDeviceDetail extends ListActivity {
         public void onConnectionStateChange(BluetoothDevice device,
                 int status, int newState) {
 
-            if (mGatt == null) {
+            if (mService == null) {
                 Log.d("There is no Gatt to be used, skip");
                 return;
             }
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                mGatt.discoverServices(mDevice);
+                mService.discoverServices(mDevice);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             }
         }
@@ -281,7 +280,6 @@ public class ActivityDeviceDetail extends ListActivity {
             mService.retrieveGatt(new LeService.Retriever() {
                 @Override
                 public void onRetrievedGatt(Gatt gatt) {
-                    mGatt = gatt;
                 }
             });
         }

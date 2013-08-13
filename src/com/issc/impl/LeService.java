@@ -2,6 +2,11 @@
 package com.issc.impl;
 
 import com.issc.Bluebit;
+import com.issc.gatt.Gatt;
+import com.issc.gatt.Gatt.Listener;
+import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
+import com.issc.gatt.GattService;
 import com.issc.util.Log;
 
 import java.util.ArrayList;
@@ -19,18 +24,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 
-import com.issc.gatt.Gatt;
-import com.issc.gatt.Gatt.Listener;
-import com.issc.gatt.GattCharacteristic;
-import com.issc.gatt.GattDescriptor;
-import com.issc.gatt.GattService;
-
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattAdapter;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
-
 /**
  * This class is a wrapper and singleton to solve Samsung BLE conneciton problem.
  *
@@ -40,11 +33,10 @@ public class LeService extends Service {
 
     private IBinder mBinder;
 
-    private BluetoothGattCallback mCallback;
-    private SystemProfileServiceListener mSystemListener;
-
     private boolean mGattReady = false;
     private Gatt mGatt = null;
+    private Gatt.Listener mCallback;
+
     private List<Listener> mListeners;
     private List<Listener> mPending;
     private Object mLock;
@@ -56,10 +48,10 @@ public class LeService extends Service {
         mCallback   = new TheCallback();
         mListeners  = new ArrayList<Listener>();
         mPending    = new ArrayList<Listener>();
-        mSystemListener = new SystemProfileServiceListener();
 
         mBinder = new LocalBinder();
-        init();
+        mGatt = new Gatt();
+        mGatt.connectGatt(this, false, mCallback);
     }
 
     @Override
@@ -71,12 +63,6 @@ public class LeService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-
-    private void init() {
-        /* for samsung, try to init Gatt when this Service created*/
-        BluetoothGattAdapter.getProfileProxy(this,
-                mSystemListener, BluetoothGattAdapter.GATT);
     }
 
     public void addListener(Listener l) {
@@ -96,7 +82,7 @@ public class LeService extends Service {
         }
     }
 
-    private void onGattReady() {
+    private void onGattReadyInternal() {
         synchronized(mLock) {
             mGattReady = true;
             if (mPending.size() != 0) {
@@ -112,20 +98,9 @@ public class LeService extends Service {
     private void releaseGatt() {
         synchronized(mLock) {
             mGattReady = false;
-            if (mGatt != null) {
-                Log.d("Gatt Releasing");
-                BluetoothGattAdapter.closeProfileProxy(BluetoothGattAdapter.GATT, mGatt.getGatt());
-
-                /* This is a hack because we are supposed to do this in
-                 * onServiceDisconnected. But, holy F! it never be called */
-                syncReleaseGatt();
-            }
+            mGatt.close();
+            mGatt = null;
         }
-    }
-
-    private void syncReleaseGatt() {
-        mGatt.unregisterApp();
-        mGatt = null;
     }
 
     public boolean startScan() {
@@ -192,73 +167,41 @@ public class LeService extends Service {
         return mGatt.setCharacteristicNotification(chr, enable);
     }
 
-    class SystemProfileServiceListener implements BluetoothProfile.ServiceListener {
 
-        @Override
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d("connection to service of System Profile created");
-            Log.d("registering callback to system service.");
-            if (profile == BluetoothGattAdapter.GATT) {
-                /* Gatt is not completely ready */
-                mGatt = new Gatt((BluetoothGatt) proxy);
-                mGatt.registerApp(mCallback);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(int profile) {
-            // Unfortunately, this callback seems never been called
-            // from SDK for unknown reason.
-            Log.d("connection to service of System Profile removed");
-            Log.d("you cannot use Gatt anymore in this application");
-            if (profile == BluetoothGattAdapter.GATT) {
-            }
-        }
-
-    }
-
-    /* This is the only one callback that register to GATT Profile. It dispatch each
+    /* This is the only one callback that register to GATT. It dispatch each
      * of returen value to listeners. */
-    class TheCallback extends BluetoothGattCallback {
+    class TheCallback implements Gatt.Listener {
         @Override
-        public void onAppRegistered(int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("GattProxy Regitered its callback to BluetoothGATT Profile");
-                onGattReady();
-            } else {
-                Log.e("Register callback to GATT failed!!");
-            }
+        public void onGattReady() {
+            onGattReadyInternal();
         }
 
         @Override
-        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
+        public void onCharacteristicChanged(GattCharacteristic chrc) {
             synchronized(mListeners) {
-                GattCharacteristic c = new GattCharacteristic(chrc);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicChanged(c);
+                    it.next().onCharacteristicChanged(chrc);
                 }
             }
         }
 
         @Override
-        public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status) {
+        public void onCharacteristicRead(GattCharacteristic chrc, int status) {
             synchronized(mListeners) {
-                GattCharacteristic c = new GattCharacteristic(chrc);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicRead(c, status);
+                    it.next().onCharacteristicRead(chrc, status);
                 }
             }
         }
 
         @Override
-        public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status) {
+        public void onCharacteristicWrite(GattCharacteristic chrc, int status) {
             synchronized(mListeners) {
-                GattCharacteristic c = new GattCharacteristic(chrc);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicWrite(c, status);
+                    it.next().onCharacteristicWrite(chrc, status);
                 }
             }
         }
@@ -274,23 +217,21 @@ public class LeService extends Service {
         }
 
         @Override
-        public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
+        public void onDescriptorRead(GattDescriptor descriptor, int status) {
             synchronized(mListeners) {
-                GattDescriptor dsc = new GattDescriptor(descriptor);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onDescriptorRead(dsc, status);
+                    it.next().onDescriptorRead(descriptor, status);
                 }
             }
         }
 
         @Override
-        public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
+        public void onDescriptorWrite(GattDescriptor descriptor, int status) {
             synchronized(mListeners) {
-                GattDescriptor dsc = new GattDescriptor(descriptor);
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onDescriptorWrite(dsc, status);
+                    it.next().onDescriptorWrite(descriptor, status);
                 }
             }
         }
@@ -306,7 +247,7 @@ public class LeService extends Service {
         }
 
         @Override
-        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {

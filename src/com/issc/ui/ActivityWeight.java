@@ -233,7 +233,6 @@ public class ActivityWeight extends Activity implements
         mQueue.add(t);
 
         enableAirPatch();
-        readName();
     }
 
     private boolean isProprietary() {
@@ -249,34 +248,6 @@ public class ActivityWeight extends Activity implements
         byte[] enable = {(byte)0x03};
         GattTransaction t = new GattTransaction(mAirPatch, enable);
         mQueue.add(t);
-    }
-
-    private void readName() {
-        if (!isProprietary()) {
-            return;
-        }
-
-        mService.setCharacteristicNotification(mAirPatch, true);
-        GattDescriptor ccc =
-            mAirPatch.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
-
-        GattTransaction t = new GattTransaction(ccc,
-                GattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        Log.d("enable notification for proprietary");
-        mQueue.add(t);
-
-        final int max = 16;
-        ByteBuffer e2prom = ByteBuffer.allocate(
-                Bluebit.CMD_READ_E2PROM.length +
-                Bluebit.ADDR_E2PROM_NAME.length +
-                1  // 1 byte for length
-                );
-        e2prom.put(Bluebit.CMD_READ_E2PROM);   // read e2prom
-        e2prom.put(Bluebit.ADDR_E2PROM_NAME);  // 0x000b -> addr of name on e2prom
-        e2prom.put((byte)max);
-        GattTransaction t1 = new GattTransaction(mAirPatch, e2prom.array());
-        Log.d("read name by proprietary");
-        mQueue.add(t1);
     }
 
     private void writeName(CharSequence name) {

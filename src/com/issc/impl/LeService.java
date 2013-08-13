@@ -7,6 +7,7 @@ import com.issc.gatt.Gatt.Listener;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
+import com.issc.impl.samsung.SamsungGatt;
 import com.issc.util.Log;
 
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class LeService extends Service {
         mPending    = new ArrayList<Listener>();
 
         mBinder = new LocalBinder();
-        mGatt = new Gatt();
+        mGatt = new SamsungGatt();
         mGatt.connectGatt(this, false, mCallback);
     }
 

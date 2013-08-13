@@ -308,7 +308,13 @@ public class AlgorithmAIO {
     }
 
     public interface Controllable {
+        /**
+         * Callback for Algorighm to handle operations of digital LED
+         */
         public void onControllDigital(byte[] ctrl);
+        /**
+         * Callback for Algorighm to handle operations of PWM Light
+         */
         public void onControllPWM(int r, int g, int b, byte[][] ctrl);
         public void onStopControll();
     }

@@ -62,7 +62,7 @@ public class ActivityWeight extends Activity implements
     private final static double LB_BASE = 2.2046; // 1 kg is about 2.2046 lb
     private final static double ST_BASE = 0.1574; // 1 kg is about 0.1574 st
 
-    private final static int UPDATE_VALUE = 0x9527;
+    private final static int UPDATE_VALUE = 0x9527; // random-unique number
     private final static int UPDATE_NAME  = 0x1984;
     private final static int SHOW_LOADER  = 0x2013;
     private final static int HIDE_LOADER  = 0x2014;
@@ -71,8 +71,6 @@ public class ActivityWeight extends Activity implements
     private final static String NAME_IN_MSG  = "name_message_instance";
 
     private final static String SEARCH_PATTERN = "Electronic Scales";
-
-    private final static UUID mAdvData = Util.uuidFromStr("FFF0");
 
     /* use 0xFFF4 descriptor of 0xFFF0 characteristic to enable
      * notification from target */
@@ -116,16 +114,6 @@ public class ActivityWeight extends Activity implements
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         mQueue.clear();
@@ -141,12 +129,15 @@ public class ActivityWeight extends Activity implements
     protected void onPause() {
         super.onPause();
         stopScanningTarget();
-        mService.disconnect(mDevice);
         mService.rmListener(mListener);
+        mService.disconnect(mDevice);
         mQueue.clear();
         unbindService(mConn);
     }
 
+    /**
+     * Prompt a dialog for input to change name of device.
+     */
     public void onClickName(View v) {
         if (!isProprietary()) {
             Toast.makeText(this, "This device does not support changing name",
@@ -188,29 +179,21 @@ public class ActivityWeight extends Activity implements
         writeName(newName);
     }
 
-    private void connect() {
+    private void connectDevice() {
         mService.connect(mDevice, false);
     }
 
     private void scanTarget() {
         mDevice = null;
-        if (mService != null) {
-            Log.d("Scanning Target");
-            mService.startScan();
-            updateView(SHOW_LOADER, null);
-        } else {
-            Log.e("No Gatt instance");
-        }
+        Log.d("Scanning Target");
+        mService.startScan();
+        updateView(SHOW_LOADER, null);
     }
 
     private void stopScanningTarget() {
         Log.d("Stop scanning");
         updateView(HIDE_LOADER, null);
-        if (mService != null) {
-            mService.stopScan();
-        } else {
-            Log.e("No Gatt instance");
-        }
+        mService.stopScan();
     }
 
     private void onConnected() {
@@ -223,10 +206,20 @@ public class ActivityWeight extends Activity implements
         }
     }
 
+    private void onDisconnected() {
+        mFFF0 = null;
+        mFFF4 = null;
+        mCCC = null;
+        mProprietary = null;
+        scanTarget();
+    }
+
     private void onDiscovered() {
         Log.d("Discovered services, enable notification");
         mQueue.clear();
         diggServices();
+
+        // enable notification to get update from Weight Scale
         mService.setCharacteristicNotification(mFFF4, true);
         GattTransaction t = new GattTransaction(mCCC,
                 GattDescriptor.ENABLE_NOTIFICATION_VALUE);
@@ -239,6 +232,12 @@ public class ActivityWeight extends Activity implements
         return (mProprietary != null) && (mAirPatch != null);
     }
 
+    /**
+     * To enable Air Patch for ISSC device.
+     *
+     * If connected to a ISSC device, we could use Air Patch via
+     * proprietary service.
+     */
     private void enableAirPatch() {
         if (!isProprietary()) {
             return;
@@ -250,6 +249,11 @@ public class ActivityWeight extends Activity implements
         mQueue.add(t);
     }
 
+    /**
+     * Change name of ISSC device.
+     *
+     * By using ISSC proprietary service.
+     */
     private void writeName(CharSequence name) {
         if (!isProprietary()) {
             Log.d("not proprietary, do not write name");
@@ -258,6 +262,8 @@ public class ActivityWeight extends Activity implements
         updateView(SHOW_LOADER, null);
         Log.d("proprietary, write name:" + name);
 
+        // Get name and put into byte array, padding with zero
+        // if the name is not long enough.
         final int max = Bluebit.NAME_MAX_SIZE;
         final byte empty = (byte)0x00;
         byte[] nameData = name.toString().getBytes();
@@ -270,6 +276,7 @@ public class ActivityWeight extends Activity implements
             }
         }
 
+        // update E2PROM
         ByteBuffer e2prom = ByteBuffer.allocate(
                 Bluebit.CMD_WRITE_E2PROM.length +
                 Bluebit.ADDR_E2PROM_NAME.length +
@@ -282,6 +289,7 @@ public class ActivityWeight extends Activity implements
         GattTransaction t1 = new GattTransaction(mAirPatch, e2prom.array());
         mQueue.add(t1);
 
+        // update RAM to update immediately.
         ByteBuffer memory = ByteBuffer.allocate(
                 Bluebit.CMD_WRITE_MEMORY.length +
                 Bluebit.ADDR_MEMORY_NAME.length +
@@ -295,26 +303,10 @@ public class ActivityWeight extends Activity implements
         mQueue.add(t2);
     }
 
-    @Override
-    public void onTransact(GattTransaction t) {
-        if (t.isForCharacteristic()) {
-            if (t.isWrite) {
-                Log.d("gatt writing characteristic");
-                t.chr.setValue(t.value);
-                mService.writeCharacteristic(t.chr);
-            } else {
-                t.chr.setValue(t.value);
-                boolean r = mService.readCharacteristic(t.chr);
-                Log.d("gatt reading characteristic:" + r);
-            }
-        } else if (t.isForDescriptor()) {
-            if (t.isWrite) {
-                t.desc.setValue(t.value);
-                mService.writeDescriptor(t.desc);
-            }
-        }
-    }
 
+    /**
+     * To get needed Gatt Service/Characteristic from Device.
+     */
     private void diggServices() {
         mFFF0 = null;
         mFFF4 = null;
@@ -336,22 +328,19 @@ public class ActivityWeight extends Activity implements
         }
     }
 
-    private void onDisconnected() {
-        mFFF0 = null;
-        mFFF4 = null;
-        mCCC = null;
-        mProprietary = null;
-        scanTarget();
-    }
-
     private void onFoundTarget(BluetoothDevice dev, byte[] records) {
         if (mDevice == null) {
             mDevice = dev;
             stopScanningTarget();
-            connect();
+            connectDevice();
         }
     }
 
+    /**
+     * To check whether the device is our target.
+     *
+     * The device which advertising data with SEARCH_PATTERN is our target.
+     */
     private boolean isTheTarget(BluetoothDevice device, byte[] records) {
         String response = new String(records);
         if (response.contains(SEARCH_PATTERN)) {
@@ -360,6 +349,9 @@ public class ActivityWeight extends Activity implements
         return false;
     }
 
+    /**
+     * Send message to handler of UI thread.
+     */
     public void updateView(int tag, Bundle info) {
         if (info == null) {
             info = new Bundle();
@@ -375,27 +367,6 @@ public class ActivityWeight extends Activity implements
         Bundle info = new Bundle();
         info.putInt(VALUE_IN_MSG, value);
         updateView(UPDATE_VALUE, info);
-    }
-
-    private void onUpdateValue(int value) {
-        double f = (double)value;
-        double carry = 10.0; // if we got 102, it means 10.2 kg
-        double kg = f / carry;
-        double lb = (f * LB_BASE) / carry;
-        double st = (f * ST_BASE) / carry;
-
-        mKg.setText(sDF.format(kg));
-        mLb.setText(sDF.format(lb));
-        mSt.setText(sDF.format(st));
-    }
-
-    private void updateValue(final float num) {
-
-        runOnUiThread(new Runnable() {
-            public void run() {
-                mKg.setText("" + num);
-            }
-        });
     }
 
     class ViewHandler extends Handler {
@@ -415,6 +386,41 @@ public class ActivityWeight extends Activity implements
                 mLoader.setVisibility(View.VISIBLE);
             } else if (tag == HIDE_LOADER) {
                 mLoader.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+    /**
+     * Update UI for latest value.
+     */
+    private void onUpdateValue(int value) {
+        double f = (double)value;
+        double carry = 10.0; // if we got 102, it means 10.2 kg
+        double kg = f / carry;
+        double lb = (f * LB_BASE) / carry;
+        double st = (f * ST_BASE) / carry;
+
+        mKg.setText(sDF.format(kg));
+        mLb.setText(sDF.format(lb));
+        mSt.setText(sDF.format(st));
+    }
+
+    @Override
+    public void onTransact(GattTransaction t) {
+        if (t.isForCharacteristic()) {
+            if (t.isWrite) {
+                Log.d("gatt writing characteristic");
+                t.chr.setValue(t.value);
+                mService.writeCharacteristic(t.chr);
+            } else {
+                t.chr.setValue(t.value);
+                boolean r = mService.readCharacteristic(t.chr);
+                Log.d("gatt reading characteristic:" + r);
+            }
+        } else if (t.isForDescriptor()) {
+            if (t.isWrite) {
+                t.desc.setValue(t.value);
+                mService.writeDescriptor(t.desc);
             }
         }
     }

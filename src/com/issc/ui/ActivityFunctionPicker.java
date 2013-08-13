@@ -11,18 +11,14 @@ import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.ListActivity;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.ComponentName;
@@ -33,11 +29,13 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.view.View;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+/**
+ * Let user pick a function supported by device.
+ */
 public class ActivityFunctionPicker extends ListActivity {
 
     private BluetoothDevice mDevice;
@@ -49,8 +47,6 @@ public class ActivityFunctionPicker extends ListActivity {
 
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
-
-    private boolean mDiscovered = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -111,38 +107,13 @@ public class ActivityFunctionPicker extends ListActivity {
         return null;
     }
 
-    private void connectToDevice() {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                showDialog(DISCOVERY_DIALOG);
-            }
-        });
-        if (mService != null) {
-            if (mService.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
-                Log.d("connected");
-                List<GattService> list = mService.getServices(mDevice);
-                if ((list == null) || (list.size() == 0)) {
-                    Log.d("start discovery");
-                    mService.discoverServices(mDevice);
-                } else {
-                    onDiscovered(mDevice);
-                }
-            } else {
-                boolean init = mService.connect(mDevice, false);
-                Log.d("connecting to device, is this BLE? " + mService.isBLEDevice(mDevice));
-                Log.d("does connection initialize successfully? " + init);
-            }
-        } else {
-            Log.e("mService is null!!");
-        }
-    }
-
-    private void stopDiscovery() {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                dismissDialog(DISCOVERY_DIALOG);
-            }
-        });
+    @Override
+    protected void onListItemClick(ListView l, View v, int pos, long id) {
+        // the adapter knows which activity could handle the chosen function,
+        // so retrieve intent from Adapter.
+        Intent i = mAdapter.createIntent(pos);
+        i.putExtra(Bluebit.CHOSEN_DEVICE, mDevice);
+        startActivity(i);
     }
 
     private void initAdapter() {
@@ -150,11 +121,30 @@ public class ActivityFunctionPicker extends ListActivity {
         setListAdapter(mAdapter);
     }
 
+    private void connectToDevice() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                showDialog(DISCOVERY_DIALOG);
+            }
+        });
+        if (mService.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
+            Log.d("already connected to device");
+            List<GattService> list = mService.getServices(mDevice);
+            if ((list == null) || (list.size() == 0)) {
+                Log.d("start discovering services");
+                mService.discoverServices(mDevice);
+            } else {
+                onDiscovered(mDevice);
+            }
+        } else {
+            boolean init = mService.connect(mDevice, false);
+            Log.d("Try to connec to device, successfully? " + init);
+        }
+    }
 
     private void onDiscovered(BluetoothDevice device) {
         Log.d("on discovered:");
         stopDiscovery();
-        mDiscovered = true;
         if (mService != null) {
             List<GattService> srvs = mService.getServices(device);
             Log.d("discovered result:" + srvs.size());
@@ -166,6 +156,18 @@ public class ActivityFunctionPicker extends ListActivity {
         }
     }
 
+    private void stopDiscovery() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                dismissDialog(DISCOVERY_DIALOG);
+            }
+        });
+    }
+
+    /**
+     * Add found GattService to Adapter to decide what functions
+     * does this bluetooth device support.
+     */
     private void appendService(GattService srv) {
         Log.d("append Service:" + srv.getUuid().toString());
         appendUuid(srv.getUuid());
@@ -178,19 +180,18 @@ public class ActivityFunctionPicker extends ListActivity {
         }
     }
 
+    /**
+     * Append an UUID to Adapter.
+     *
+     * The Adapter decides what functions could be used when we provides
+     * a list of UUIDs.
+     */
     private void appendUuid(final UUID uuid) {
         runOnUiThread(new Runnable() {
             public void run() {
                 mAdapter.addUuidInUiThread(uuid);
             }
         });
-    }
-
-    @Override
-    protected void onListItemClick(ListView l, View v, int pos, long id) {
-        Intent i = mAdapter.createIntent(pos);
-        i.putExtra(Bluebit.CHOSEN_DEVICE, mDevice);
-        startActivity(i);
     }
 
     class GattListener extends Gatt.ListenerHelper {
@@ -200,6 +201,7 @@ public class ActivityFunctionPicker extends ListActivity {
 
         @Override
         public void onGattReady() {
+            // If Adapter is empty, means we never do discovering
             if (mAdapter.getCount() == 0) {
                 connectToDevice();
             }

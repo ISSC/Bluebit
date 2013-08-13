@@ -22,6 +22,7 @@
 	<string name="device_menu_title">Bluetooth Device</string>
 	<string name="device_menu_choose">Choose this device</string>
 	<string name="device_menu_detail">Detail information</string>
+	<string name="device_menu_rm_bond">Remove Bond</string>
 
 	<string name="detail_name">Name</string>
 	<string name="detail_addr">Address</string>

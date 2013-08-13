@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.ListActivity;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.ComponentName;
@@ -36,10 +35,14 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
-import android.widget.BaseAdapter;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+/**
+ * List details of a BLE device.
+ *
+ * Includes its name, address and provided GattServices, GattCharacteristics.
+ */
 public class ActivityDeviceDetail extends ListActivity {
 
     private final static String sKey = "key";
@@ -104,6 +107,34 @@ public class ActivityDeviceDetail extends ListActivity {
         return null;
     }
 
+    private void initAdapter() {
+        String[] from = {sKey, sVal};
+        int[] to = {R.id.row_title, R.id.row_description};
+
+        mEntries = new ArrayList<Map<String, Object>>();
+        mAdapter = new SimpleAdapter(
+                    this,
+                    mEntries,
+                    R.layout.row_detail,
+                    from,
+                    to
+                );
+
+        mAdapter.setViewBinder(new MyBinder());
+        setListAdapter(mAdapter);
+    }
+
+    private void init(BluetoothDevice device) {
+        append(getString(R.string.detail_name), device.getName());
+        append(getString(R.string.detail_addr), device.getAddress());
+    }
+
+    public void onClickBtnMore(View v) {
+        if (mService != null) {
+            startDiscovery();
+        }
+    }
+
     private void startDiscovery() {
         if (mService!= null) {
             showDialog(DISCOVERY_DIALOG);
@@ -129,35 +160,71 @@ public class ActivityDeviceDetail extends ListActivity {
         }
     }
 
-    private void initAdapter() {
-        String[] from = {sKey, sVal};
-        int[] to = {R.id.row_title, R.id.row_description};
-
-        mEntries = new ArrayList<Map<String, Object>>();
-        mAdapter = new SimpleAdapter(
-                    this,
-                    mEntries,
-                    R.layout.row_detail,
-                    from,
-                    to
-                );
-
-        mAdapter.setViewBinder(new MyBinder());
-        setListAdapter(mAdapter);
-    }
-
-
-    public void onClickBtnMore(View v) {
+    private void onDiscovered(BluetoothDevice device) {
+        Log.d("on discovered:");
         if (mService!= null) {
-            startDiscovery();
+            List<GattService> srvs = mService.getServices(device);
+            Iterator<GattService> it = srvs.iterator();
+            while (it.hasNext()) {
+                appendServices(it.next());
+            }
         }
     }
 
-    private void init(BluetoothDevice device) {
-        append(getString(R.string.detail_name), device.getName());
-        append(getString(R.string.detail_addr), device.getAddress());
+    /**
+     * To list supported Gatt Services.
+     */
+    private void appendServices(GattService srv) {
+        append(getString(R.string.title_srv), srv.getUuid().toString(), R.color.important);
+        List<GattCharacteristic> chars = srv.getCharacteristics();
+        Iterator<GattCharacteristic> it = chars.iterator();
+        while (it.hasNext()) {
+            appendCharacteristic(it.next());
+        }
     }
 
+    /**
+     * To list supported Gatt Characteristics.
+     */
+    private void appendCharacteristic(GattCharacteristic ch) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ch.getUuid().toString());
+        byte[] value = ch.getValue();
+        if (value != null) {
+            sb.append("(");
+            for (int i = 0; i < value.length; i++) {
+                sb.append(String.format(" 0x%02x", value[i]));
+            }
+            sb.append(")");
+        }
+        append(getString(R.string.title_chr), sb.toString(), R.color.normal);
+
+        Iterator<GattDescriptor> it = ch.getDescriptors().iterator();
+        while (it.hasNext()) {
+            appendDescriptor(it.next());
+        }
+    }
+
+    /**
+     * To list supported Gatt Descriptors.
+     */
+    private void appendDescriptor(GattDescriptor desc) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(desc.getUuid().toString());
+        byte[] value = desc.getValue();
+        if (value != null) {
+            sb.append("(");
+            for (int i = 0; i < value.length; i++) {
+                sb.append(String.format(" 0x%02x", value[i]));
+            }
+            sb.append(")");
+        }
+        append(getString(R.string.title_dsc), sb.toString(), R.color.trivial);
+    }
+
+    /**
+     * Append a row to List with specific style.
+     */
     private void append(String key, String value) {
         append(key, value, R.color.black);
     }
@@ -182,60 +249,10 @@ public class ActivityDeviceDetail extends ListActivity {
         });
     }
 
-    private void onDiscovered(BluetoothDevice device) {
-        Log.d("on discovered:");
-        if (mService!= null) {
-            List<GattService> srvs = mService.getServices(device);
-            Iterator<GattService> it = srvs.iterator();
-            while (it.hasNext()) {
-                appendServices(it.next());
-            }
-        }
-    }
-
-    private void appendServices(GattService srv) {
-        append(getString(R.string.title_srv), srv.getUuid().toString(), R.color.important);
-        List<GattCharacteristic> chars = srv.getCharacteristics();
-        Iterator<GattCharacteristic> it = chars.iterator();
-        while (it.hasNext()) {
-            appendCharacteristic(it.next());
-        }
-    }
-
-    private void appendCharacteristic(GattCharacteristic ch) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ch.getUuid().toString());
-        byte[] value = ch.getValue();
-        if (value != null) {
-            sb.append("(");
-            for (int i = 0; i < value.length; i++) {
-                sb.append(String.format(" 0x%02x", value[i]));
-            }
-            sb.append(")");
-        }
-        append(getString(R.string.title_chr), sb.toString(), R.color.normal);
-
-        Iterator<GattDescriptor> it = ch.getDescriptors().iterator();
-        while (it.hasNext()) {
-            appendDescriptor(it.next());
-        }
-    }
-
-    private void appendDescriptor(GattDescriptor desc) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(desc.getUuid().toString());
-        byte[] value = desc.getValue();
-        if (value != null) {
-            sb.append("(");
-            for (int i = 0; i < value.length; i++) {
-                sb.append(String.format(" 0x%02x", value[i]));
-            }
-            sb.append(")");
-        }
-        append(getString(R.string.title_dsc), sb.toString(), R.color.trivial);
-    }
-
     class MyBinder implements SimpleAdapter.ViewBinder {
+        // By default, SimpleAdapter just invoke toString to fill content of TextView.
+        // However, the data might be spannable-string, so use setText instead of
+        // using toString to avoid information losing.
         public boolean setViewValue(View view, Object data, String textRepresentation) {
             if (view instanceof TextView) {
                 ((TextView)view).setText((CharSequence)data);

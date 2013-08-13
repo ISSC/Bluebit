@@ -17,17 +17,13 @@ import java.util.Map;
 import java.util.Set;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -39,14 +35,18 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
 
+/**
+ * To scan BLE devices around user.
+ *
+ * The scanned results will be put into a List.
+ * We can select one of these devices to discover services of it.
+ * Or to get more detail by long-pressing.
+ */
 public class ActivityDevicesList extends Activity {
 
     private ListView mListView;
@@ -95,12 +95,14 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        // once we bound to LeService, register our listener
         bindService(new Intent(this, LeService.class), mConn, 0);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        // this activity is invisible, remove listener
         mService.rmListener(mListener);
         mService = null;
         unbindService(mConn);
@@ -123,26 +125,13 @@ public class ActivityDevicesList extends Activity {
         mListView.setEmptyView(findViewById(R.id.empty));
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
     public void onClickBtnScan(View v) {
         startScan();
     }
 
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
+        /* To show a loading icon when scanning */
         if (id == SCAN_DIALOG) {
             mScanningDialog = new ProgressDialog(this);
             mScanningDialog.setMessage(this.getString(R.string.scanning));
@@ -157,12 +146,6 @@ public class ActivityDevicesList extends Activity {
     }
 
     @Override
-    protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
-        if (id == SCAN_DIALOG) {
-        }
-    }
-
-    @Override
     public void onCreateContextMenu(ContextMenu menu,
                                         View v,
                                         ContextMenuInfo info) {
@@ -171,7 +154,7 @@ public class ActivityDevicesList extends Activity {
             menu.setHeaderTitle(R.string.device_menu_title);
             menu.add(0, MENU_DETAIL, Menu.NONE, R.string.device_menu_detail);
             menu.add(0, MENU_CHOOSE, Menu.NONE, R.string.device_menu_choose);
-            menu.add(0, MENU_RMBOND, Menu.NONE, "Remove bond");
+            menu.add(0, MENU_RMBOND, Menu.NONE, R.string.device_menu_rm_bond);
         }
     }
 
@@ -183,14 +166,18 @@ public class ActivityDevicesList extends Activity {
         int id = item.getItemId();
         if (id == MENU_DETAIL) {
             Intent i = new Intent(this, ActivityDeviceDetail.class);
-            i.putExtra(Bluebit.CHOSEN_DEVICE, (BluetoothDevice)mRecords.get(pos).get(sDevice));
+            i.putExtra(Bluebit.CHOSEN_DEVICE,
+                    (BluetoothDevice)mRecords.get(pos).get(sDevice));
             startActivity(i);
         } else if (id == MENU_CHOOSE) {
             Intent i = new Intent(this, ActivityFunctionPicker.class);
-            i.putExtra(Bluebit.CHOSEN_DEVICE, (BluetoothDevice)mRecords.get(pos).get(sDevice));
+            i.putExtra(Bluebit.CHOSEN_DEVICE,
+                    (BluetoothDevice)mRecords.get(pos).get(sDevice));
             startActivity(i);
         } else if (id == MENU_RMBOND) {
-            BluetoothDevice target = (BluetoothDevice)mRecords.get(pos).get(sDevice);
+            BluetoothDevice target =
+                (BluetoothDevice)mRecords.get(pos).get(sDevice);
+
             boolean r = mService.removeBond(target);
             Log.d("Remove bond:" + r);
             resetList();
@@ -202,14 +189,15 @@ public class ActivityDevicesList extends Activity {
         Log.d("Scanning Devices");
         showDialog(SCAN_DIALOG);
 
-        if (mService != null) {
-            /* connected device will not be ignored when scanning */
-            resetList();
-            appendConnectedDevices();
-            mService.startScan();
-        } else {
-            Log.e("No Gatt instance");
-        }
+        // connected device will be ingored when scanning.
+        resetList();
+        appendConnectedDevices();
+        mService.startScan();
+    }
+
+    private void stopScan() {
+        Log.d("Stop scanning");
+        mService.stopScan();
     }
 
     private void appendConnectedDevices() {
@@ -221,6 +209,12 @@ public class ActivityDevicesList extends Activity {
         });
     }
 
+    /**
+     * Clear and append bond device to List.
+     *
+     * We should list bond device although we might not connect to it, so user
+     * is able to remove bond.
+     */
     private void resetList() {
         this.runOnUiThread(new Runnable() {
             public void run() {
@@ -229,15 +223,6 @@ public class ActivityDevicesList extends Activity {
                 mAdapter.notifyDataSetChanged();
             }
         });
-    }
-
-    private void stopScan() {
-        Log.d("Stop scanning");
-        if (mService!= null) {
-            mService.stopScan();
-        } else {
-            Log.e("No Gatt instance");
-        }
     }
 
     private void appendBondDevices() {
@@ -250,7 +235,6 @@ public class ActivityDevicesList extends Activity {
                 appendDevice(device, "bonded");
             }
         }
-
     }
 
     private void appendDevices(Iterable<BluetoothDevice> bonded, String type) {
@@ -272,7 +256,12 @@ public class ActivityDevicesList extends Activity {
         });
     }
 
-    /* There is just only one UI thread so it guarantee single thread. */
+    /**
+     * Append Device to List in UI thread.
+     *
+     * There is just only one UI thread(main thread) so it guarantee single
+     * thread. Only the UI thread could modify List.
+     */
     private void uiAppendDevice(BluetoothDevice device, String type) {
         if (uiIsInList(device)) {
             return;
@@ -287,6 +276,12 @@ public class ActivityDevicesList extends Activity {
         mAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * To check whether a device is already in List.
+     *
+     * This method should be called in UI thread(main thread) so it does not
+     * worry about the List will be modify form another thread.
+     */
     private boolean uiIsInList(BluetoothDevice device) {
         Iterator<Map<String, Object>> it = mRecords.iterator();
         while(it.hasNext()) {

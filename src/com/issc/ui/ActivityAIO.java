@@ -70,16 +70,6 @@ public class ActivityAIO extends Activity
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
 
-    private final int[] INDEX = {
-        5, // LED 1
-        3, // LED 2
-        2, // LED 3
-        6, // LED 4
-        1, // LED 5
-        0, // LED 6
-        4  // LED 7
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,49 +116,6 @@ public class ActivityAIO extends Activity
         unbindService(mConn);
     }
 
-    private void setToggles() {
-        mToggles = new ToggleButton[NUM];
-        mToggles[0] = (ToggleButton) findViewById(R.id.aio_ctrl_1);
-        mToggles[1] = (ToggleButton) findViewById(R.id.aio_ctrl_2);
-        mToggles[2] = (ToggleButton) findViewById(R.id.aio_ctrl_3);
-        mToggles[3] = (ToggleButton) findViewById(R.id.aio_ctrl_4);
-        mToggles[4] = (ToggleButton) findViewById(R.id.aio_ctrl_5);
-        mToggles[5] = (ToggleButton) findViewById(R.id.aio_ctrl_6);
-        mToggles[6] = (ToggleButton) findViewById(R.id.aio_ctrl_7);
-    }
-
-    @Override
-    protected void onActivityResult(int request, int result, Intent data) {
-    }
-
-    class SrvConnection implements ServiceConnection {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mService = ((LeService.LocalBinder)service).getService();
-            mService.addListener(mListener);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            Log.e("Gatt Service disconnected");
-        }
-    }
-
-    public void onClickAutoPattern1(View v) {
-        showDialog(AUTOMATION_DIALOG);
-        AlgorithmAIO.startAutoPattern1(this);
-    }
-
-    public void onClickAutoPattern2(View v) {
-        showDialog(AUTOMATION_DIALOG);
-        AlgorithmAIO.startAutoPattern2(this);
-    }
-
-    public void onClickAutoPattern3(View v) {
-        showDialog(AUTOMATION_DIALOG);
-        AlgorithmAIO.startAutoPattern3(this);
-    }
-
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
         /*FIXME: this function is deprecated. */
@@ -188,124 +135,6 @@ public class ActivityAIO extends Activity
             return mAutomationDialog;
         }
         return null;
-    }
-
-    private void onSetAnalogValue() {
-        AlgorithmAIO.ctrlPWM(mRedVal, mGreenVal, mBlueVal, this);
-    }
-
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)  {
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        if (seekBar == mRed) {
-            mRedVal = seekBar.getProgress();
-        } else if (seekBar == mGreen) {
-            mGreenVal = seekBar.getProgress();
-        } else if (seekBar == mBlue) {
-            mBlueVal = seekBar.getProgress();
-        }
-
-        onSetAnalogValue();
-    }
-
-    public void onToggleClicked(View v) {
-        onSetDigitalValue();
-    }
-
-    @Override
-    public void onTransact(GattTransaction t) {
-        t.chr.setValue(t.value);
-        if (t.isWrite) {
-            mService.writeCharacteristic(t.chr);
-        }
-    }
-
-    private void onSetDigitalValue() {
-        boolean[] leds = new boolean[mToggles.length];
-        for (int i = 0; i < mToggles.length; i++) {
-            leds[i] = mToggles[i].isChecked();
-        }
-
-        AlgorithmAIO.ctrlDigital(leds, this);
-    }
-
-    @Override
-    public void onControllDigital(byte[] ctrl) {
-        GattService srv = mService.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
-        GattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
-
-        GattTransaction t = new GattTransaction(chr, ctrl);
-        mQueue.add(t);
-    }
-
-    @Override
-    public void onControllPWM(int r, int g, int b, byte[][] ctrl) {
-        Log.d(String.format("To set: R=%d, G=%d, B=%d", r, g, b));
-        GattTransaction t = new GattTransaction(mChrCustomAOut1, ctrl[0], 200);
-        Log.d(String.format("desc:0x%02x 0x%02x 0x%02x 0x%02x", ctrl[0][0], ctrl[0][1], ctrl[0][2], ctrl[0][3]));
-        mQueue.add(t);
-        for (int i = 1; i < ctrl.length; i++) {
-            if (r != 0) {
-                GattTransaction c = new GattTransaction(mChrAOut1, ctrl[i], 200);
-                mQueue.add(c);
-                Log.d(String.format("[%d(R)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
-                r = 0;
-            } else if (g != 0) {
-                GattTransaction c = new GattTransaction(mChrAOut2, ctrl[i], 200);
-                mQueue.add(c);
-                Log.d(String.format("[%d(G)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
-                g = 0;
-            } else if (b != 0) {
-                GattTransaction c = new GattTransaction(mChrAOut3, ctrl[i], 200);
-                mQueue.add(c);
-                Log.d(String.format("[%d(B)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
-                b = 0;
-            }
-        }
-    }
-
-    @Override
-    public void onStopControll() {
-        Log.d("Stopped automation");
-        onSetDigitalValue();
-        onSetAnalogValue();
-    }
-
-    public void updateView(int tag, Bundle info) {
-        if (info == null) {
-            info = new Bundle();
-        }
-        mViewHandler.removeMessages(tag);
-        Message msg = mViewHandler.obtainMessage(tag);
-        msg.what = tag;
-        msg.setData(info);
-        mViewHandler.sendMessage(msg);
-    }
-
-    class ViewHandler extends Handler {
-        public void handleMessage(Message msg) {
-            Bundle bundle = msg.getData();
-            if (bundle == null) {
-                Log.d("ViewHandler handled a message without information");
-                return;
-            }
-
-            int tag = msg.what;
-            if (tag == SHOW_CONNECTION_DIALOG) {
-                showDialog(CONNECTION_DIALOG);
-            } else if (tag == DISMISS_CONNECTION_DIALOG) {
-                if (mConnectionDialog != null && mConnectionDialog.isShowing()) {
-                    dismissDialog(CONNECTION_DIALOG);
-                }
-            }
-        }
     }
 
     private void onConnected() {
@@ -371,6 +200,169 @@ public class ActivityAIO extends Activity
                 mChrAOut2 != null,
                 mChrAOut3 != null));
         onSetDigitalValue();
+    }
+
+    private void setToggles() {
+        mToggles = new ToggleButton[NUM];
+        mToggles[0] = (ToggleButton) findViewById(R.id.aio_ctrl_1);
+        mToggles[1] = (ToggleButton) findViewById(R.id.aio_ctrl_2);
+        mToggles[2] = (ToggleButton) findViewById(R.id.aio_ctrl_3);
+        mToggles[3] = (ToggleButton) findViewById(R.id.aio_ctrl_4);
+        mToggles[4] = (ToggleButton) findViewById(R.id.aio_ctrl_5);
+        mToggles[5] = (ToggleButton) findViewById(R.id.aio_ctrl_6);
+        mToggles[6] = (ToggleButton) findViewById(R.id.aio_ctrl_7);
+    }
+
+    public void onToggleClicked(View v) {
+        onSetDigitalValue();
+    }
+
+    public void onClickAutoPattern1(View v) {
+        showDialog(AUTOMATION_DIALOG);
+        AlgorithmAIO.startAutoPattern1(this);
+    }
+
+    public void onClickAutoPattern2(View v) {
+        showDialog(AUTOMATION_DIALOG);
+        AlgorithmAIO.startAutoPattern2(this);
+    }
+
+    public void onClickAutoPattern3(View v) {
+        showDialog(AUTOMATION_DIALOG);
+        AlgorithmAIO.startAutoPattern3(this);
+    }
+
+    private void onSetAnalogValue() {
+        AlgorithmAIO.ctrlPWM(mRedVal, mGreenVal, mBlueVal, this);
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)  {
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        if (seekBar == mRed) {
+            mRedVal = seekBar.getProgress();
+        } else if (seekBar == mGreen) {
+            mGreenVal = seekBar.getProgress();
+        } else if (seekBar == mBlue) {
+            mBlueVal = seekBar.getProgress();
+        }
+
+        onSetAnalogValue();
+    }
+
+    /**
+     * Change LEDs state according to UI.
+     */
+    private void onSetDigitalValue() {
+        boolean[] leds = new boolean[mToggles.length];
+        for (int i = 0; i < mToggles.length; i++) {
+            leds[i] = mToggles[i].isChecked();
+        }
+
+        AlgorithmAIO.ctrlDigital(leds, this);
+    }
+
+    @Override
+    public void onControllDigital(byte[] ctrl) {
+        GattService srv = mService.getService(mDevice, Bluebit.SERVICE_AUTOMATION_IO);
+        GattCharacteristic chr = srv.getCharacteristic(Bluebit.CHR_DIGITAL_OUT);
+
+        GattTransaction t = new GattTransaction(chr, ctrl);
+        mQueue.add(t);
+    }
+
+    @Override
+    public void onControllPWM(int r, int g, int b, byte[][] ctrl) {
+        Log.d(String.format("To set: R=%d, G=%d, B=%d", r, g, b));
+        GattTransaction t = new GattTransaction(mChrCustomAOut1, ctrl[0], 200);
+        Log.d(String.format("desc:0x%02x 0x%02x 0x%02x 0x%02x", ctrl[0][0], ctrl[0][1], ctrl[0][2], ctrl[0][3]));
+        mQueue.add(t);
+        for (int i = 1; i < ctrl.length; i++) {
+            if (r != 0) {
+                GattTransaction c = new GattTransaction(mChrAOut1, ctrl[i], 200);
+                mQueue.add(c);
+                Log.d(String.format("[%d(R)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
+                r = 0;
+            } else if (g != 0) {
+                GattTransaction c = new GattTransaction(mChrAOut2, ctrl[i], 200);
+                mQueue.add(c);
+                Log.d(String.format("[%d(G)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
+                g = 0;
+            } else if (b != 0) {
+                GattTransaction c = new GattTransaction(mChrAOut3, ctrl[i], 200);
+                mQueue.add(c);
+                Log.d(String.format("[%d(B)]:0x%02x 0x%02x", i, ctrl[i][0], ctrl[i][1]));
+                b = 0;
+            }
+        }
+    }
+
+    @Override
+    public void onStopControll() {
+        Log.d("Stopped automation");
+        onSetDigitalValue();
+        onSetAnalogValue();
+    }
+
+    /**
+     * Send message to handler of UI thread.
+     */
+    public void updateView(int tag, Bundle info) {
+        if (info == null) {
+            info = new Bundle();
+        }
+        mViewHandler.removeMessages(tag);
+        Message msg = mViewHandler.obtainMessage(tag);
+        msg.what = tag;
+        msg.setData(info);
+        mViewHandler.sendMessage(msg);
+    }
+
+    class ViewHandler extends Handler {
+        public void handleMessage(Message msg) {
+            Bundle bundle = msg.getData();
+            if (bundle == null) {
+                Log.d("ViewHandler handled a message without information");
+                return;
+            }
+
+            int tag = msg.what;
+            if (tag == SHOW_CONNECTION_DIALOG) {
+                showDialog(CONNECTION_DIALOG);
+            } else if (tag == DISMISS_CONNECTION_DIALOG) {
+                if (mConnectionDialog != null && mConnectionDialog.isShowing()) {
+                    dismissDialog(CONNECTION_DIALOG);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onTransact(GattTransaction t) {
+        t.chr.setValue(t.value);
+        if (t.isWrite) {
+            mService.writeCharacteristic(t.chr);
+        }
+    }
+
+    class SrvConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = ((LeService.LocalBinder)service).getService();
+            mService.addListener(mListener);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("Gatt Service disconnected");
+        }
     }
 
     class GattListener extends Gatt.ListenerHelper {

@@ -186,6 +186,17 @@ public class ActivityTransparent extends Activity implements
         spinner.setAdapter(adapter);
     }
 
+    private void addTab(TabHost host, String tag, CharSequence text, int viewResource) {
+        View indicator = getLayoutInflater().inflate(R.layout.tab_indicator, null);
+        TextView tv = (TextView)indicator.findViewById(R.id.indicator_text);
+        tv.setText(text);
+
+        TabHost.TabSpec spec = host.newTabSpec(tag);
+        spec.setIndicator(indicator);
+        spec.setContent(viewResource);
+        host.addTab(spec);
+    }
+
     @Override
     public void onCreateContextMenu(ContextMenu menu,
                                         View v,
@@ -206,17 +217,6 @@ public class ActivityTransparent extends Activity implements
             mMsg.scrollTo(0, 0);
         }
         return true;
-    }
-
-    private void addTab(TabHost host, String tag, CharSequence text, int viewResource) {
-        View indicator = getLayoutInflater().inflate(R.layout.tab_indicator, null);
-        TextView tv = (TextView)indicator.findViewById(R.id.indicator_text);
-        tv.setText(text);
-
-        TabHost.TabSpec spec = host.newTabSpec(tag);
-        spec.setIndicator(indicator);
-        spec.setContent(viewResource);
-        host.addTab(spec);
     }
 
     public void onClickSend(View v) {
@@ -257,21 +257,6 @@ public class ActivityTransparent extends Activity implements
         }
     }
 
-    private void onEcho(byte[] data) {
-        StringBuffer sb = new StringBuffer();
-        if (data == null) {
-            sb.append("Received empty data");
-        } else {
-            String recv = new String(data);
-            msgShow("recv:", recv);
-            write(data);
-            msgShow("echo:", recv);
-        }
-        Bundle msg = new Bundle();
-        msg.putCharSequence(INFO_CONTENT, sb);
-        updateView(APPEND_MESSAGE, msg);
-    }
-
     private void enableNotification() {
         boolean set = mService.setCharacteristicNotification(mTransTx, true);
         Log.d("set notification:" + set);
@@ -288,6 +273,26 @@ public class ActivityTransparent extends Activity implements
         dsc.setValue(GattDescriptor.DISABLE_NOTIFICATION_VALUE );
         boolean success = mService.writeDescriptor(dsc);
         Log.d("writing disable descriptor:" + success);
+    }
+
+    /**
+     * Received data from remote when enabling Echo.
+     *
+     * Display the data and transfer back to device.
+     */
+    private void onEcho(byte[] data) {
+        StringBuffer sb = new StringBuffer();
+        if (data == null) {
+            sb.append("Received empty data");
+        } else {
+            String recv = new String(data);
+            msgShow("recv:", recv);
+            write(data);
+            msgShow("echo:", recv);
+        }
+        Bundle msg = new Bundle();
+        msg.putCharSequence(INFO_CONTENT, sb);
+        updateView(APPEND_MESSAGE, msg);
     }
 
     @Override
@@ -312,21 +317,23 @@ public class ActivityTransparent extends Activity implements
         StringBuffer sb = new StringBuffer();
         sb.append(prefix);
         sb.append(cs);
-        msgShow(sb);
-    }
-
-    private void msgShow(CharSequence cs) {
         Log.d(cs.toString());
         Bundle msg = new Bundle();
         msg.putCharSequence(INFO_CONTENT, cs);
         updateView(APPEND_MESSAGE, msg);
     }
 
+    /**
+     * Write string to remote device.
+     */
     private void write(CharSequence cs) {
         byte[] bytes = cs.toString().getBytes();
         write(bytes);
     }
 
+    /**
+     * Write data to remote device.
+     */
     private void write(byte[] bytes) {
         ByteBuffer buf = ByteBuffer.allocate(bytes.length);
         buf.put(bytes);
@@ -337,20 +344,6 @@ public class ActivityTransparent extends Activity implements
             buf.get(dst, 0, size);
             GattTransaction t = new GattTransaction(mTransRx, dst);
             mQueue.add(t);
-        }
-    }
-
-    @Override
-    public void onTransact(GattTransaction t) {
-        t.chr.setValue(t.value);
-        if (t.isWrite) {
-            int type = mToggleResponse.isChecked() ?
-                GattCharacteristic.WRITE_TYPE_DEFAULT:
-                GattCharacteristic.WRITE_TYPE_NO_RESPONSE;
-            t.chr.setWriteType(type);
-            mService.writeCharacteristic(t.chr);
-        } else {
-            mService.readCharacteristic(t.chr);
         }
     }
 
@@ -421,6 +414,67 @@ public class ActivityTransparent extends Activity implements
         mRunning = false;
     }
 
+    /**
+     * Add message to UI.
+     */
+    private void appendMsg(CharSequence msg) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(msg);
+        sb.append("\n");
+        mLogBuf.add(sb);
+        // we don't want to display too many lines
+        if (mLogBuf.size() > MAX_LINES) {
+            mLogBuf.remove(0);
+        }
+
+        StringBuffer text = new StringBuffer();
+        for (int i = 0; i < mLogBuf.size(); i++) {
+            text.append(mLogBuf.get(i));
+        }
+        mMsg.setText(text);
+    }
+
+    private void onConnected() {
+        List<GattService> list = mService.getServices(mDevice);
+        if ((list == null) || (list.size() == 0)) {
+            Log.d("no services, do discovery");
+            mService.discoverServices(mDevice);
+        } else {
+            onDiscovered();
+        }
+    }
+
+    private void onDisconnected() {
+        Log.d("disconnected, connecting to device");
+        updateView(SHOW_CONNECTION_DIALOG, null);
+        mQueue.clear();
+        mService.connect(mDevice, false);
+    }
+
+    private void onDiscovered() {
+        updateView(DISMISS_CONNECTION_DIALOG, null);
+
+        GattService proprietary = mService.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
+        mTransTx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_TX);
+        mTransRx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_RX);
+        Log.d(String.format("found Tx:%b, Rx:%b", mTransTx != null, mTransRx != null));
+        onSetEcho(mToggleEcho.isChecked());
+    }
+
+    @Override
+    public void onTransact(GattTransaction t) {
+        t.chr.setValue(t.value);
+        if (t.isWrite) {
+            int type = mToggleResponse.isChecked() ?
+                GattCharacteristic.WRITE_TYPE_DEFAULT:
+                GattCharacteristic.WRITE_TYPE_NO_RESPONSE;
+            t.chr.setWriteType(type);
+            mService.writeCharacteristic(t.chr);
+        } else {
+            mService.readCharacteristic(t.chr);
+        }
+    }
+
     public void updateView(int tag, Bundle info) {
         if (info == null) {
             info = new Bundle();
@@ -474,49 +528,6 @@ public class ActivityTransparent extends Activity implements
                 mEchoIndicator.setChecked(bundle.getBoolean(ECHO_ENABLED, false));
             }
         }
-    }
-
-    private void appendMsg(CharSequence msg) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(msg);
-        sb.append("\n");
-        mLogBuf.add(sb);
-        if (mLogBuf.size() > MAX_LINES) {
-            mLogBuf.remove(0);
-        }
-
-        StringBuffer text = new StringBuffer();
-        for (int i = 0; i < mLogBuf.size(); i++) {
-            text.append(mLogBuf.get(i));
-        }
-        mMsg.setText(text);
-    }
-
-    private void onConnected() {
-        List<GattService> list = mService.getServices(mDevice);
-        if ((list == null) || (list.size() == 0)) {
-            Log.d("no services, do discovery");
-            mService.discoverServices(mDevice);
-        } else {
-            onDiscovered();
-        }
-    }
-
-    private void onDiscovered() {
-        updateView(DISMISS_CONNECTION_DIALOG, null);
-
-        GattService proprietary = mService.getService(mDevice, Bluebit.SERVICE_ISSC_PROPRIETARY);
-        mTransTx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_TX);
-        mTransRx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_RX);
-        Log.d(String.format("found Tx:%b, Rx:%b", mTransTx != null, mTransRx != null));
-        onSetEcho(mToggleEcho.isChecked());
-    }
-
-    private void onDisconnected() {
-        Log.d("disconnected, connecting to device");
-        updateView(SHOW_CONNECTION_DIALOG, null);
-        mQueue.clear();
-        mService.connect(mDevice, false);
     }
 
     class GattListener extends Gatt.ListenerHelper {

@@ -13,6 +13,8 @@ import com.issc.util.Log;
 import com.issc.util.Util;
 import com.issc.util.TransactionQueue;
 
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -66,6 +68,7 @@ public class ActivityTransparent extends Activity implements
     private ProgressDialog mTimerDialog;
     protected ViewHandler  mViewHandler;
 
+    private OutputStream mStream;
     private TransactionQueue mQueue;
 
     private final static int PAYLOAD_MAX = 20; // 90 bytes might be max
@@ -153,6 +156,7 @@ public class ActivityTransparent extends Activity implements
     public void onDestroy() {
         super.onDestroy();
         mQueue.clear();
+        closeStream();
         mViewHandler.removeCallbacksAndMessages(null);
 
         /* Transparent is not a leaf activity. disconnect/unregister-listener in onDestroy*/
@@ -254,8 +258,10 @@ public class ActivityTransparent extends Activity implements
     private void onSetEcho(boolean enable) {
         if (enable) {
             enableNotification();
+            openStream(Bluebit.DEFAULT_LOG);
         } else {
             disableNotification();
+            closeStream();
         }
     }
 
@@ -277,6 +283,41 @@ public class ActivityTransparent extends Activity implements
         Log.d("writing disable descriptor:" + success);
     }
 
+    private void openStream(String path) {
+        try {
+            mStream = new FileOutputStream(path);
+        } catch (IOException e) {
+            msgShow("open stream fail:", e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    private void closeStream() {
+        try {
+            if (mStream != null) {
+                mStream.flush();
+                mStream.close();
+            }
+        } catch (IOException e) {
+            msgShow("close stream fail:", e.toString());
+            e.printStackTrace();
+        }
+
+        mStream = null;
+    }
+
+    private void writeToStream(byte[] data) {
+        if (mStream != null) {
+            try {
+                mStream.write(data, 0, data.length);
+                mStream.flush();
+            } catch (IOException e) {
+                msgShow("write fail:", e.toString());
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Received data from remote when enabling Echo.
      *
@@ -290,6 +331,7 @@ public class ActivityTransparent extends Activity implements
             String recv = new String(data);
             msgShow("recv:", recv);
             write(data);
+            writeToStream(data);
             msgShow("echo:", recv);
         }
         Bundle msg = new Bundle();

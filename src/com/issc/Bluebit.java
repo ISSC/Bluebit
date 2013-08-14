@@ -24,6 +24,7 @@ public final class Bluebit {
 
     public final static String EXTERNAL = Environment.getExternalStorageDirectory().getPath();
     public final static String DATA_DIR = EXTERNAL + "/issc/";
+    public final static String DEFAULT_LOG = DATA_DIR + "received_data";
 
     // Request-Code for Activities-communication
     private final static int _REQ_START = 0x9527; // just random number

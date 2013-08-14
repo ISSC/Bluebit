@@ -222,7 +222,7 @@ public class ActivityWeight extends Activity implements
         // enable notification to get update from Weight Scale
         mService.setCharacteristicNotification(mFFF4, true);
         GattTransaction t = new GattTransaction(mCCC,
-                GattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                mCCC.getConstantBytes(GattDescriptor.ENABLE_NOTIFICATION_VALUE));
         mQueue.add(t);
 
         enableAirPatch();

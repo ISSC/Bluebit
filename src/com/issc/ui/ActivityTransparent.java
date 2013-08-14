@@ -261,7 +261,7 @@ public class ActivityTransparent extends Activity implements
         boolean set = mService.setCharacteristicNotification(mTransTx, true);
         Log.d("set notification:" + set);
         GattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
-        dsc.setValue(GattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        dsc.setValue(dsc.getConstantBytes(GattDescriptor.ENABLE_NOTIFICATION_VALUE));
         boolean success = mService.writeDescriptor(dsc);
         Log.d("writing enable descriptor:" + success);
     }
@@ -270,7 +270,7 @@ public class ActivityTransparent extends Activity implements
         boolean set = mService.setCharacteristicNotification(mTransTx, false);
         Log.d("set notification:" + set);
         GattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
-        dsc.setValue(GattDescriptor.DISABLE_NOTIFICATION_VALUE );
+        dsc.setValue(dsc.getConstantBytes(GattDescriptor.DISABLE_NOTIFICATION_VALUE));
         boolean success = mService.writeDescriptor(dsc);
         Log.d("writing disable descriptor:" + success);
     }
@@ -609,11 +609,11 @@ public class ActivityTransparent extends Activity implements
         public void onDescriptorWrite(GattDescriptor dsc, int status) {
             if (status == Gatt.GATT_SUCCESS) {
                 byte[] value = dsc.getValue();
-                if (Arrays.equals(value, GattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
+                if (Arrays.equals(value, dsc.getConstantBytes(GattDescriptor.ENABLE_NOTIFICATION_VALUE))) {
                     Bundle state = new Bundle();
                     state.putBoolean(ECHO_ENABLED, true);
                     updateView(ECHO_STATE, state);
-                } else if (Arrays.equals(value, GattDescriptor.DISABLE_NOTIFICATION_VALUE)) {
+                } else if (Arrays.equals(value, dsc.getConstantBytes(GattDescriptor.DISABLE_NOTIFICATION_VALUE))) {
                     Bundle state = new Bundle();
                     state.putBoolean(ECHO_ENABLED, false);
                     updateView(ECHO_STATE, state);

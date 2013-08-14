@@ -143,6 +143,7 @@ public class ActivityTransparent extends Activity implements
         mLogBuf = new ArrayList<CharSequence>();
 
         /* Transparent is not a leaf activity. connect service in onCreate*/
+        mConn = new SrvConnection();
         bindService(new Intent(this, LeService.class), mConn, 0);
     }
 

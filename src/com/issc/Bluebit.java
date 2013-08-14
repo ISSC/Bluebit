@@ -2,6 +2,7 @@
 package com.issc;
 
 import com.issc.util.Util;
+import android.os.Environment;
 import java.util.UUID;
 
 /**
@@ -18,6 +19,11 @@ public final class Bluebit {
     // Keys that be used by Intent, Bundle...etc.
     /** The device has been choosen from another activity. */
     public final static String CHOSEN_DEVICE = "the_device_been_choosen";
+    /** The path to choose a file for use. */
+    public final static String CHOOSE_PATH = "the_path_to_choose_file";
+
+    public final static String EXTERNAL = Environment.getExternalStorageDirectory().getPath();
+    public final static String DATA_DIR = EXTERNAL + "/issc/";
 
     // Request-Code for Activities-communication
     private final static int _REQ_START = 0x9527; // just random number

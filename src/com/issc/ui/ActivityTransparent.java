@@ -234,10 +234,9 @@ public class ActivityTransparent extends Activity implements
     }
 
     public void onClickChoose(View v) {
-        /* you should install a file chooser beforehand. */
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("text/plain");
-        startActivityForResult(intent, CHOOSE_FILE);
+        Intent i = new Intent(this, ActivityFileChooser.class);
+        i.putExtra(Bluebit.CHOOSE_PATH, Bluebit.DATA_DIR);
+        startActivityForResult(i, CHOOSE_FILE);
     }
 
     public void onClickType(View v) {

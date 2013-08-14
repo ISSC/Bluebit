@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	>
+	<ListView
+		android:id="@android:id/list"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		>
+	</ListView>
+	<LinearLayout
+		android:id="@android:id/empty"
+		android:orientation="vertical"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_weight="1"
+		android:gravity="center"
+		>
+		<TextView
+			android:id="@+id/empty_msg"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			/>
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		style="@android:style/ButtonBar"
+		>
+		<TextView
+			android:id="@+id/filename"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:layout_marginLeft="@dimen/large_gutter"
+			/>
+		<Button
+			android:id="@+id/btn_choose"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Pick"
+			android:onClick="onClickChoose"
+			android:clickable="false"
+			/>
+	</LinearLayout>
+
+</LinearLayout>
+

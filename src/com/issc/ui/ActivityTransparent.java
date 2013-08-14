@@ -228,7 +228,7 @@ public class ActivityTransparent extends Activity implements
 
     public void onClickSend(View v) {
         CharSequence cs = mInput.getText();
-        msgShow("send:", cs);
+        msgShow("send", cs);
         write(cs);
     }
 
@@ -287,7 +287,7 @@ public class ActivityTransparent extends Activity implements
         try {
             mStream = new FileOutputStream(path);
         } catch (IOException e) {
-            msgShow("open stream fail:", e.toString());
+            msgShow("open stream fail", e.toString());
             e.printStackTrace();
         }
     }
@@ -299,7 +299,7 @@ public class ActivityTransparent extends Activity implements
                 mStream.close();
             }
         } catch (IOException e) {
-            msgShow("close stream fail:", e.toString());
+            msgShow("close stream fail", e.toString());
             e.printStackTrace();
         }
 
@@ -312,7 +312,7 @@ public class ActivityTransparent extends Activity implements
                 mStream.write(data, 0, data.length);
                 mStream.flush();
             } catch (IOException e) {
-                msgShow("write fail:", e.toString());
+                msgShow("write fail", e.toString());
                 e.printStackTrace();
             }
         }
@@ -329,10 +329,10 @@ public class ActivityTransparent extends Activity implements
             sb.append("Received empty data");
         } else {
             String recv = new String(data);
-            msgShow("recv:", recv);
+            msgShow("recv", recv);
             write(data);
             writeToStream(data);
-            msgShow("echo:", recv);
+            msgShow("echo", recv);
         }
         Bundle msg = new Bundle();
         msg.putCharSequence(INFO_CONTENT, sb);
@@ -349,7 +349,7 @@ public class ActivityTransparent extends Activity implements
                 try {
                     mStartTime = Calendar.getInstance();
                     write(Util.readBytesFromFile(filePath));
-                    msgShow("send:", filePath);
+                    msgShow("send", filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.d("IO Exception");
@@ -361,10 +361,11 @@ public class ActivityTransparent extends Activity implements
     private void msgShow(CharSequence prefix, CharSequence cs) {
         StringBuffer sb = new StringBuffer();
         sb.append(prefix);
+        sb.append(": ");
         sb.append(cs);
-        Log.d(cs.toString());
+        Log.d(sb.toString());
         Bundle msg = new Bundle();
-        msg.putCharSequence(INFO_CONTENT, cs);
+        msg.putCharSequence(INFO_CONTENT, sb.toString());
         updateView(APPEND_MESSAGE, msg);
     }
 
@@ -421,7 +422,7 @@ public class ActivityTransparent extends Activity implements
             // if too long
             out = out.substring(out.length() - size);
         }
-        msgShow("send:", out);
+        msgShow("send", out);
         write(out);
     }
 
@@ -642,12 +643,12 @@ public class ActivityTransparent extends Activity implements
                     mSuccess,
                     mFail,
                     mQueue.size());
-            msgShow("wrote:", s);
+            msgShow("wrote", s);
             mQueue.onConsumed();
             if (mQueue.size() == 0 && mStartTime != null) {
                 long elapse =  Calendar.getInstance().getTimeInMillis()
                     - mStartTime.getTimeInMillis();
-                msgShow("time:", "spent " + (elapse / 1000) + " seconds");
+                msgShow("time", "spent " + (elapse / 1000) + " seconds");
                 mStartTime = null;
             }
             updateView(CONSUME_TRANSACTION, null);

@@ -31,7 +31,7 @@ public class SamsungGattService implements GattService {
 
     @Override
     public GattCharacteristic getCharacteristic(UUID uuid) {
-        return new GattCharacteristic(mSrv.getCharacteristic(uuid));
+        return new SamsungGattCharacteristic(mSrv.getCharacteristic(uuid));
     }
 
     @Override
@@ -39,7 +39,7 @@ public class SamsungGattService implements GattService {
         List<BluetoothGattCharacteristic> chrs = mSrv.getCharacteristics();
         ArrayList<GattCharacteristic> list = new ArrayList<GattCharacteristic>();
         for (BluetoothGattCharacteristic chr: chrs) {
-            list.add(new GattCharacteristic(chr));
+            list.add(new SamsungGattCharacteristic(chr));
         }
 
         return list;

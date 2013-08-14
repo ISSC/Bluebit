@@ -97,7 +97,8 @@ public class SamsungGatt implements Gatt {
 
     @Override
     public boolean readCharacteristic(GattCharacteristic chr) {
-        return mGatt.readCharacteristic(chr.getCharacteristic());
+        return mGatt.readCharacteristic(
+                (BluetoothGattCharacteristic)chr.getImpl());
     }
 
     @Override
@@ -112,7 +113,8 @@ public class SamsungGatt implements Gatt {
 
     @Override
     public boolean setCharacteristicNotification(GattCharacteristic chr, boolean enable) {
-        return mGatt.setCharacteristicNotification(chr.getCharacteristic(), enable);
+        return mGatt.setCharacteristicNotification(
+                (BluetoothGattCharacteristic)chr.getImpl(), enable);
     }
 
     @Override
@@ -127,7 +129,8 @@ public class SamsungGatt implements Gatt {
 
     @Override
     public boolean writeCharacteristic(GattCharacteristic chr) {
-        return mGatt.writeCharacteristic(chr.getCharacteristic());
+        return mGatt.writeCharacteristic(
+                (BluetoothGattCharacteristic)chr.getImpl());
     }
 
     @Override
@@ -150,13 +153,13 @@ public class SamsungGatt implements Gatt {
 
         @Override
         public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
-            GattCharacteristic c = new GattCharacteristic(chrc);
+            GattCharacteristic c = new SamsungGattCharacteristic(chrc);
             mListener.onCharacteristicChanged(c);
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status) {
-            GattCharacteristic c = new GattCharacteristic(chrc);
+            GattCharacteristic c = new SamsungGattCharacteristic(chrc);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 mListener.onCharacteristicRead(c, Gatt.GATT_SUCCESS);
             } else {
@@ -166,7 +169,7 @@ public class SamsungGatt implements Gatt {
 
         @Override
         public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status) {
-            GattCharacteristic c = new GattCharacteristic(chrc);
+            GattCharacteristic c = new SamsungGattCharacteristic(chrc);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 mListener.onCharacteristicWrite(c, Gatt.GATT_SUCCESS);
             } else {

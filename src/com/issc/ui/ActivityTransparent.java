@@ -485,10 +485,6 @@ public class ActivityTransparent extends Activity implements
             info = new Bundle();
         }
 
-        // remove previous log since the latest log
-        // already contains needed information.
-        mViewHandler.removeMessages(tag);
-
         Message msg = mViewHandler.obtainMessage(tag);
         msg.what = tag;
         msg.setData(info);

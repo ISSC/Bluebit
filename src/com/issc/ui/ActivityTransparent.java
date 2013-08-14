@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.List;
@@ -106,6 +107,7 @@ public class ActivityTransparent extends Activity implements
 
     private int mSuccess = 0;
     private int mFail    = 0;
+    private Calendar mStartTime;
 
     private final static int MAX_LINES = 50;
     private ArrayList<CharSequence> mLogBuf;
@@ -304,6 +306,7 @@ public class ActivityTransparent extends Activity implements
                 String filePath = uri.getPath();
                 Log.d("chosen file:" + filePath);
                 try {
+                    mStartTime = Calendar.getInstance();
                     write(Util.readBytesFromFile(filePath));
                     msgShow("send:", filePath);
                 } catch (IOException e) {
@@ -448,6 +451,7 @@ public class ActivityTransparent extends Activity implements
     private void onDisconnected() {
         Log.d("disconnected, connecting to device");
         updateView(SHOW_CONNECTION_DIALOG, null);
+        mStartTime = null;
         mQueue.clear();
         mService.connect(mDevice, false);
     }
@@ -603,6 +607,12 @@ public class ActivityTransparent extends Activity implements
                     mQueue.size());
             msgShow("wrote:", s);
             mQueue.onConsumed();
+            if (mQueue.size() == 0 && mStartTime != null) {
+                long elapse =  Calendar.getInstance().getTimeInMillis()
+                    - mStartTime.getTimeInMillis();
+                msgShow("time:", "spent " + (elapse / 1000) + " seconds");
+                mStartTime = null;
+            }
             updateView(CONSUME_TRANSACTION, null);
         }
 

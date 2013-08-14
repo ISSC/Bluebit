@@ -76,7 +76,7 @@ public class SamsungGatt implements Gatt {
 
     @Override
     public GattService getService(BluetoothDevice device, UUID uuid) {
-        return new GattService(mGatt.getService(device, uuid));
+        return new SamsungGattService(mGatt.getService(device, uuid));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class SamsungGatt implements Gatt {
         List<BluetoothGattService> srvs = mGatt.getServices(device);
         ArrayList<GattService> list = new ArrayList<GattService>();
         for (BluetoothGattService srv: srvs) {
-            list.add(new GattService(srv));
+            list.add(new SamsungGattService(srv));
         }
 
         return list;

@@ -51,7 +51,7 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:onClick="onClickSend"
-						android:text="Send"
+						android:text="@string/send"
 						/>
 				</LinearLayout>
 				<Button
@@ -59,7 +59,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:onClick="onClickChoose"
-					android:text="Choose File"
+					android:text="@string/choose_file"
 					/>
 			</LinearLayout>
 
@@ -74,14 +74,13 @@
 					<TextView
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:text="Delta time(ms)"
+						android:text="timer_delta"
 						/>
 					<Spinner
 						android:id="@+id/timer_delta"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:maxLines="1"
-						android:text="1000"
 						android:inputType="number"
 						/>
 				</TableRow>
@@ -90,7 +89,7 @@
 					<TextView
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:text="Pattern Size(less than 20)"
+						android:text="@string/timer_size"
 						/>
 					<Spinner
 						android:id="@+id/timer_size"
@@ -103,14 +102,13 @@
 					<TextView
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:text="Times(0: unlimited)"
+						android:text="@string/timer_repeat"
 						/>
 					<Spinner
 						android:id="@+id/timer_repeat"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:maxLines="1"
-						android:text="0"
 						android:inputType="number"
 						/>
 				</TableRow>
@@ -120,7 +118,7 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:onClick="onClickStartTimer"
-						android:text="Start"
+						android:text="@string/start"
 						/>
 				</TableRow>
 			</TableLayout>
@@ -134,14 +132,39 @@
 				<TableRow
 					android:layout_marginTop="@dimen/large_gutter"
 					>
-					<TextView
+					<LinearLayout
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:layout_weight="1"
-						android:text="Set Echo"
-						android:layout_marginLeft="@dimen/large_gutter"
-						style="@style/row_text"
-						/>
+						android:minHeight="?android:attr/listPreferredItemHeight"
+						android:gravity="center_vertical"
+						android:orientation="vertical" >
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="@dimen/large_gutter"
+							android:text="@string/echo_title"
+							style="@style/row_text"
+							>
+						</TextView>
+						<TextView
+							android:id="@id/row_description"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="@dimen/large_gutter"
+							android:text="@string/echo_desc"
+							style="@style/row_text_small"
+							>
+						</TextView>
+						<CheckBox
+							android:id="@+id/echo_indicator"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="@string/echo_state"
+							android:layout_marginLeft="@dimen/large_gutter"
+							android:enabled="false"
+							/>
+					</LinearLayout>
 					<ToggleButton
 						android:id="@+id/echo_toggle"
 						android:layout_width="wrap_content"
@@ -151,30 +174,6 @@
 						android:layout_marginLeft="@dimen/large_gutter"
 						android:onClick="onClickEcho"
 						android:checked="false"
-						/>
-				</TableRow>
-				<TableRow
-					>
-					<TextView
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_weight="1"
-						android:text="To transfer data back automatically"
-						android:layout_marginLeft="@dimen/large_gutter"
-						android:layout_marginTop="@dimen/large_gutter"
-						android:layout_marginBottom="@dimen/large_gutter"
-						/>
-				</TableRow>
-				<TableRow
-					>
-					<CheckBox
-						android:id="@+id/echo_indicator"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_weight="1"
-						android:text="Enabled"
-						android:layout_margin="@dimen/large_gutter"
-						android:enabled="false"
 						/>
 				</TableRow>
 			</TableLayout>
@@ -191,7 +190,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
-				android:text="Write with Response"
+				android:text="@string/with_response"
 				android:layout_marginLeft="@dimen/large_gutter"
 				style="@style/row_text"
 				/>

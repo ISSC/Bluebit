@@ -5,8 +5,11 @@
 	<string name="target">Target</string>
 	<string name="on">On</string>
 	<string name="off">Off</string>
+	<string name="send">Send</string>
 	<string name="scan">Scan</string>
+	<string name="start">Start</string>
 	<string name="more">More</string>
+	<string name="choose_file">Choose File</string>
 	<string name="stop_scan">Stop Scan</string>
 	<string name="scanning">Scanning</string>
 	<string name="discovering">Discovering</string>
@@ -60,4 +63,12 @@
 	<string name="title_srv">Service</string>
 	<string name="title_chr">Characteristic</string>
 	<string name="title_dsc">Descriptor</string>
+
+	<string name="timer_delta">Delta time(ms)</string>
+	<string name="timer_size">Pattern Size(less than 20)</string>
+	<string name="timer_repeat">Repeat(0: unlimited)</string>
+	<string name="echo_title">Set Echo</string>
+	<string name="echo_desc">To transfer data back automatically</string>
+	<string name="echo_state">Enabled</string>
+	<string name="with_response">Write with Response</string>
 </resources>

@@ -34,7 +34,7 @@ public class SamsungGattCharacteristic implements GattCharacteristic {
 
     @Override
     public GattDescriptor getDescriptor(UUID uuid) {
-        return new GattDescriptor(mChr.getDescriptor(uuid));
+        return new SamsungGattDescriptor(mChr.getDescriptor(uuid));
     }
 
     @Override
@@ -42,7 +42,7 @@ public class SamsungGattCharacteristic implements GattCharacteristic {
         List<BluetoothGattDescriptor> dscs = mChr.getDescriptors();
         ArrayList<GattDescriptor> list = new ArrayList<GattDescriptor>();
         for (BluetoothGattDescriptor dsc: dscs) {
-            list.add(new GattDescriptor(dsc));
+            list.add(new SamsungGattDescriptor(dsc));
         }
 
         return list;

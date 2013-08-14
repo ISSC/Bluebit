@@ -9,47 +9,26 @@ import java.util.UUID;
 
 import android.bluetooth.BluetoothDevice;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCallback;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
-
 /**
  * This is a wrapper.
  *
  * It will be an interface to help us to avoid depending on any specific
  * platform.
  **/
-public class GattDescriptor {
+public interface GattDescriptor {
 
-    public final static byte[] ENABLE_NOTIFICATION_VALUE = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;
-    public final static byte[] DISABLE_NOTIFICATION_VALUE = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
+    public final static int ENABLE_NOTIFICATION_VALUE  = 0x5987; // just a type
+    public final static int DISABLE_NOTIFICATION_VALUE = ENABLE_NOTIFICATION_VALUE + 1;
 
-    private BluetoothGattDescriptor mDsc;
+    public Object getImpl();
 
-    public GattDescriptor(BluetoothGattDescriptor dsc) {
-        mDsc = dsc;
-    }
+    /* we cannot provide byte[] data directly since the implementation might be different
+     * from various platform.*/
+    public byte[] getConstantBytes(int type);
 
-    public BluetoothGattDescriptor getDescriptor() {
-        return mDsc;
-    }
-
-    public int getPermissions() {
-        return mDsc.getPermissions();
-    }
-
-    public UUID getUuid() {
-        return mDsc.getUuid();
-    }
-
-    public byte[] getValue() {
-        return mDsc.getValue();
-    }
-
-    public boolean setValue(byte[] value) {
-        return mDsc.setValue(value);
-    }
+    public int getPermissions();
+    public UUID getUuid();
+    public byte[] getValue();
+    public boolean setValue(byte[] value);
 }
 

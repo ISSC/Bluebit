@@ -103,7 +103,7 @@ public class SamsungGatt implements Gatt {
 
     @Override
     public boolean readDescriptor(GattDescriptor dsc) {
-        return mGatt.readDescriptor(dsc.getDescriptor());
+        return mGatt.readDescriptor((BluetoothGattDescriptor)dsc.getImpl());
     }
 
     @Override
@@ -135,7 +135,7 @@ public class SamsungGatt implements Gatt {
 
     @Override
     public boolean writeDescriptor(GattDescriptor dsc) {
-        return mGatt.writeDescriptor(dsc.getDescriptor());
+        return mGatt.writeDescriptor((BluetoothGattDescriptor)dsc.getImpl());
     }
 
     /* This is the only one callback that register to GATT Profile. It dispatch each
@@ -188,7 +188,7 @@ public class SamsungGatt implements Gatt {
 
         @Override
         public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
-            GattDescriptor dsc = new GattDescriptor(descriptor);
+            GattDescriptor dsc = new SamsungGattDescriptor(descriptor);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 mListener.onDescriptorRead(dsc, Gatt.GATT_SUCCESS);
             } else {
@@ -198,7 +198,7 @@ public class SamsungGatt implements Gatt {
 
         @Override
         public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
-            GattDescriptor dsc = new GattDescriptor(descriptor);
+            GattDescriptor dsc = new SamsungGattDescriptor(descriptor);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 mListener.onDescriptorWrite(dsc, Gatt.GATT_SUCCESS);
             } else {

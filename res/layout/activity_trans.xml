@@ -135,6 +135,7 @@
 					<LinearLayout
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
+						android:layout_weight="1"
 						android:minHeight="?android:attr/listPreferredItemHeight"
 						android:gravity="center_vertical"
 						android:orientation="vertical" >
@@ -169,6 +170,7 @@
 						android:id="@+id/echo_toggle"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
+						android:layout_weight="2"
 						android:textOn="@string/on"
 						android:textOff="@string/off"
 						android:layout_marginLeft="@dimen/large_gutter"
@@ -176,9 +178,27 @@
 						android:checked="false"
 						/>
 				</TableRow>
+				<TableRow>
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="@dimen/large_gutter"
+						android:layout_weight="1"
+						android:text="Choose a file to compare"
+						style="@style/row_text"
+						>
+					</TextView>
+					<Button
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="@dimen/large_gutter"
+						android:layout_weight="2"
+						android:onClick="onClickCompare"
+						android:text="@string/choose_file"
+						/>
+				</TableRow>
 			</TableLayout>
 		</FrameLayout>
-
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -205,6 +225,5 @@
 				android:checked="true"
 				/>
 		</LinearLayout>
-
 	</LinearLayout>
 </TabHost>

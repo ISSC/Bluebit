@@ -64,6 +64,7 @@
 	<string name="title_chr">Characteristic</string>
 	<string name="title_dsc">Descriptor</string>
 
+	<string name="compare_file">Choose a file to compare</string>
 	<string name="timer_delta">Delta time(ms)</string>
 	<string name="timer_size">Pattern Size(less than 20)</string>
 	<string name="timer_repeat">Repeat(0: unlimited)</string>

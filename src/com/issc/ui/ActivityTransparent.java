@@ -76,6 +76,7 @@ public class ActivityTransparent extends Activity implements
     private final static int CONNECTION_DIALOG = 1;
     private final static int TIMER_DIALOG      = 2;
     private final static int CHOOSE_FILE = 0x101;
+    private final static int COMPARE_FILE = 0x102;
     private final static int MENU_CLEAR  = 0x501;
 
     private final static String INFO_CONTENT = "the_information_body";
@@ -237,6 +238,12 @@ public class ActivityTransparent extends Activity implements
         startTimer();
     }
 
+    public void onClickCompare(View v) {
+        Intent i = new Intent(this, ActivityFileChooser.class);
+        i.putExtra(Bluebit.CHOOSE_PATH, Bluebit.DATA_DIR);
+        startActivityForResult(i, COMPARE_FILE);
+    }
+
     public void onClickChoose(View v) {
         Intent i = new Intent(this, ActivityFileChooser.class);
         i.putExtra(Bluebit.CHOOSE_PATH, Bluebit.DATA_DIR);
@@ -318,6 +325,23 @@ public class ActivityTransparent extends Activity implements
         }
     }
 
+    private void compareFile(String pathA, String pathB) {
+        try {
+            String md5A = Util.getMD5FromBytes(Util.readBytesFromFile(pathA));
+            String md5B = Util.getMD5FromBytes(Util.readBytesFromFile(pathB));
+            msgShow(pathA, md5A);
+            msgShow(pathB, md5B);
+            if (md5A.equals(md5B)) {
+                msgShow("compare", "Match");
+            } else {
+                msgShow("compare", "Not Match");
+            }
+        } catch (IOException e) {
+            msgShow("comapre fail", e.toString());
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Received data from remote when enabling Echo.
      *
@@ -354,6 +378,12 @@ public class ActivityTransparent extends Activity implements
                     e.printStackTrace();
                     Log.d("IO Exception");
                 }
+            }
+        } else if (request == COMPARE_FILE) {
+            if (data != null) {
+                Uri uri = data.getData();
+                String filePath = uri.getPath();
+                compareFile(filePath, Bluebit.DEFAULT_LOG);
             }
         }
     }

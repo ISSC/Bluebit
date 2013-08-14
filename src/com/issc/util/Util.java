@@ -22,6 +22,8 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -167,6 +169,23 @@ public final class Util {
         writer.write(data.toString(), 0, data.length());
         writer.close();
         return;
+    }
+
+    public static String getMD5FromBytes(byte[] data) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] hash = digest.digest(data);
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < hash.length; i++) {
+                sb.append(String.format("%02x", hash[i]));
+            }
+
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public static void dumpServices(List<BluetoothGattService> list) {

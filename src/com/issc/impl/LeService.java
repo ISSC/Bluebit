@@ -41,7 +41,6 @@ public class LeService extends Service {
     private Gatt.Listener mCallback;
 
     private List<Listener> mListeners;
-    private List<Listener> mPending;
     private Object mLock;
 
     @Override
@@ -50,11 +49,9 @@ public class LeService extends Service {
         mLock = new Object();
         mCallback   = new TheCallback();
         mListeners  = new ArrayList<Listener>();
-        mPending    = new ArrayList<Listener>();
 
         mBinder = new LocalBinder();
-        SamsungGattAdapter adapter = new SamsungGattAdapter(this, mCallback);
-        mGattAdapter = adapter;
+        mGattAdapter = new SamsungGattAdapter(this, mCallback);
     }
 
     @Override
@@ -71,30 +68,12 @@ public class LeService extends Service {
     public void addListener(Listener l) {
         synchronized(mLock) {
             mListeners.add(l);
-            if (mGattReady) {
-                l.onGattReady(mGatt);
-            } else {
-                mPending.add(l);
-            }
         }
     }
 
     public boolean rmListener(Listener l) {
         synchronized(mLock) {
             return mListeners.remove(l);
-        }
-    }
-
-    private void onGattReadyInternal() {
-        synchronized(mLock) {
-            mGattReady = true;
-            if (mPending.size() != 0) {
-                Iterator<Listener> it = mPending.iterator();
-                while(it.hasNext()) {
-                    it.next().onGattReady(mGatt);
-                }
-                mPending.clear();
-            }
         }
     }
 
@@ -174,12 +153,6 @@ public class LeService extends Service {
     /* This is the only one callback that register to GATT. It dispatch each
      * of returen value to listeners. */
     class TheCallback implements Gatt.Listener {
-        @Override
-        public void onGattReady(Gatt gatt) {
-            mGatt = gatt;
-            onGattReadyInternal();
-        }
-
         @Override
         public void onCharacteristicChanged(GattCharacteristic chrc) {
             synchronized(mListeners) {

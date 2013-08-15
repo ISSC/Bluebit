@@ -2,6 +2,7 @@
 package com.issc.gatt;
 
 import com.issc.Bluebit;
+import com.issc.gatt.Gatt;
 import com.issc.gatt.Gatt.Listener;
 import com.issc.util.Log;
 
@@ -23,7 +24,7 @@ public interface GattAdapter {
      * instance directly although that is AOSP way. Instead of that, we return
      * Gatt instance in {@link #onGattReady}.
      */
-    public void connectGatt(Context ctx, boolean autoConnect, Listener listener, BluetoothDevice dev);
+    public Gatt connectGatt(Context ctx, boolean autoConnect, Listener listener, BluetoothDevice dev);
 
     public boolean startLeScan();
     public void stopLeScan();

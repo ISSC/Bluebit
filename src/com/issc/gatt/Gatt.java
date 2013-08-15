@@ -56,8 +56,6 @@ public interface Gatt {
     public boolean writeDescriptor(GattDescriptor dsc);
 
     public interface Listener {
-        /* This function will be called if ready to use Gatt functions */
-        public void onGattReady(Gatt gatt);
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord);
         public void onCharacteristicChanged(GattCharacteristic chrc);
         public void onCharacteristicRead(GattCharacteristic chrc, int status);
@@ -73,10 +71,6 @@ public interface Gatt {
         String iTag;
         public ListenerHelper(String tag) {
             iTag = tag;
-        }
-
-        public void onGattReady(Gatt gatt) {
-            Log.d(String.format("%s, onGattReady", iTag));
         }
 
         public void onCharacteristicChanged(GattCharacteristic chrc) {

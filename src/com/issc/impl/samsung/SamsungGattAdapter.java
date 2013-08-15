@@ -34,6 +34,7 @@ public class SamsungGattAdapter implements GattAdapter {
     private Listener mListener;
 
     private Object mLock;
+    private boolean mScanning = false;
 
     public SamsungGattAdapter(Context ctx, Listener listener) {
         mLock = new Object();
@@ -46,25 +47,36 @@ public class SamsungGattAdapter implements GattAdapter {
     }
 
     @Override
-    public void connectGatt(Context ctx, boolean autoConnect, Listener listener, BluetoothDevice dev) {
-        synchronized(mLock) {
-            mListener = listener;
-
-            if (mGattInterface != null) {
-                mListener.onGattReady(mGattInterface);
-            }
-        }
+    public Gatt connectGatt(Context ctx, boolean autoConnect, Listener listener, BluetoothDevice dev) {
+        /* we can return Gatt directly because of that if user want to connect to a Gatt Device,
+         * he should perform scan before. In Samsung SDK, we already got Gatt instance so we can perform
+         * scanning.*/
+        mListener = listener;
+        return mGattInterface;
     }
 
 
     @Override
     public boolean startLeScan() {
-        return mGatt.startScan();
+        synchronized(mLock) {
+            if (mGatt == null) {
+                // User asks to perform scanning but the gatt instance is not ready yet.
+                mScanning = true;
+                return true;
+            } else {
+                return mGatt.startScan();
+            }
+        }
     }
 
     @Override
     public void stopLeScan() {
-        mGatt.stopScan();
+        synchronized(mLock) {
+            mScanning = false;
+            if (mGatt != null) {
+                mGatt.stopScan();
+            }
+        }
     }
 
     @Override
@@ -86,8 +98,8 @@ public class SamsungGattAdapter implements GattAdapter {
                 synchronized(mLock) {
                     Log.d("GattProxy Regitered its callback to BluetoothGATT Profile");
                     mGattInterface = new SamsungGatt(mGatt);
-                    if (mListener != null) {
-                        mListener.onGattReady(mGattInterface);
+                    if (mScanning) {
+                        mGatt.startScan();
                     }
                 }
             } else {

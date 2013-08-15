@@ -27,21 +27,10 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 public class SamsungGatt implements Gatt {
 
     private BluetoothGatt mGatt;
-    private BluetoothGattCallback mCallback;
-    private SystemProfileServiceListener mSystemListener;
     private Listener mListener;
 
-    public SamsungGatt() {
-        mCallback = new TheCallback();
-        mSystemListener = new SystemProfileServiceListener();
-    }
-
-    @Override
-    public void connectGatt(Context ctx, boolean autoConnect, Listener listener) {
-        mListener = listener;
-        /* for samsung, try to init Gatt when this Service created*/
-        BluetoothGattAdapter.getProfileProxy(ctx,
-                mSystemListener, BluetoothGattAdapter.GATT);
+    public SamsungGatt(BluetoothGatt gatt) {
+        mGatt = gatt;
     }
 
     @Override
@@ -118,16 +107,6 @@ public class SamsungGatt implements Gatt {
     }
 
     @Override
-    public boolean startScan() {
-        return mGatt.startScan();
-    }
-
-    @Override
-    public void stopScan() {
-        mGatt.stopScan();
-    }
-
-    @Override
     public boolean writeCharacteristic(GattCharacteristic chr) {
         return mGatt.writeCharacteristic(
                 (BluetoothGattCharacteristic)chr.getImpl());
@@ -136,122 +115,6 @@ public class SamsungGatt implements Gatt {
     @Override
     public boolean writeDescriptor(GattDescriptor dsc) {
         return mGatt.writeDescriptor((BluetoothGattDescriptor)dsc.getImpl());
-    }
-
-    /* This is the only one callback that register to GATT Profile. It dispatch each
-     * of returen value to listeners. */
-    class TheCallback extends BluetoothGattCallback {
-        @Override
-        public void onAppRegistered(int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("GattProxy Regitered its callback to BluetoothGATT Profile");
-                mListener.onGattReady();
-            } else {
-                Log.e("Register callback to GATT failed!!");
-            }
-        }
-
-        @Override
-        public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
-            GattCharacteristic c = new SamsungGattCharacteristic(chrc);
-            mListener.onCharacteristicChanged(c);
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status) {
-            GattCharacteristic c = new SamsungGattCharacteristic(chrc);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onCharacteristicRead(c, Gatt.GATT_SUCCESS);
-            } else {
-                mListener.onCharacteristicRead(c, status);
-            }
-        }
-
-        @Override
-        public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status) {
-            GattCharacteristic c = new SamsungGattCharacteristic(chrc);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onCharacteristicWrite(c, Gatt.GATT_SUCCESS);
-            } else {
-                mListener.onCharacteristicWrite(c, status);
-            }
-        }
-
-        @Override
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onConnectionStateChange(device, Gatt.GATT_SUCCESS, newState);
-            } else {
-                mListener.onConnectionStateChange(device, status, newState);
-            }
-        }
-
-        @Override
-        public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
-            GattDescriptor dsc = new SamsungGattDescriptor(descriptor);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onDescriptorRead(dsc, Gatt.GATT_SUCCESS);
-            } else {
-                mListener.onDescriptorRead(dsc, status);
-            }
-        }
-
-        @Override
-        public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
-            GattDescriptor dsc = new SamsungGattDescriptor(descriptor);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onDescriptorWrite(dsc, Gatt.GATT_SUCCESS);
-            } else {
-                mListener.onDescriptorWrite(dsc, status);
-            }
-        }
-
-        @Override
-        public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onReadRemoteRssi(device, rssi, Gatt.GATT_SUCCESS);
-            } else {
-                mListener.onReadRemoteRssi(device, rssi, status);
-            }
-        }
-
-        @Override
-        public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            mListener.onLeScan(device, rssi, scanRecord);
-        }
-
-        @Override
-        public void onServicesDiscovered(BluetoothDevice device, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onServicesDiscovered(device, Gatt.GATT_SUCCESS);
-            } else {
-                mListener.onServicesDiscovered(device, status);
-            }
-        }
-    }
-
-    class SystemProfileServiceListener implements BluetoothProfile.ServiceListener {
-
-        @Override
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d("connection to service of System Profile created");
-            Log.d("registering callback to system service.");
-            if (profile == BluetoothGattAdapter.GATT) {
-                /* Gatt is not completely ready */
-                mGatt = (BluetoothGatt) proxy;
-                mGatt.registerApp(mCallback);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(int profile) {
-            // Unfortunately, this callback seems never been called
-            // from SDK for unknown reason.
-            Log.d("connection to service of System Profile removed");
-            Log.d("you cannot use Gatt anymore in this application");
-            if (profile == BluetoothGattAdapter.GATT) {
-            }
-        }
     }
 }
 

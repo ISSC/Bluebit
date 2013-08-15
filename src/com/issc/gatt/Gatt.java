@@ -19,14 +19,6 @@ public interface Gatt {
 
     public final static int GATT_SUCCESS = 0;
 
-    /**
-     * Connect to a device and retrieve Gatt profile from the device.
-     *
-     * For the reason to be compatible with Samsung, we cannot return Gatt
-     * instance directly although that is AOSP way. Instead of that, we return
-     * Gatt instance in {@link #onGattReady}.
-     */
-    public void connectGatt(Context ctx, boolean autoConnect, Listener listener);
 
     /**
      * Close this Bluetooth Gatt client.
@@ -60,8 +52,6 @@ public interface Gatt {
     public boolean readCharacteristic(GattCharacteristic chr);
     public boolean readDescriptor(GattDescriptor dsc);
     public boolean removeBond(BluetoothDevice device);
-    public boolean startScan();
-    public void stopScan();
 
     public boolean setCharacteristicNotification(GattCharacteristic chr, boolean enable);
     public boolean writeCharacteristic(GattCharacteristic chr);
@@ -69,7 +59,7 @@ public interface Gatt {
 
     public interface Listener {
         /* This function will be called if ready to use Gatt functions */
-        public void onGattReady();
+        public void onGattReady(Gatt gatt);
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord);
         public void onCharacteristicChanged(GattCharacteristic chrc);
         public void onCharacteristicRead(GattCharacteristic chrc, int status);
@@ -87,7 +77,7 @@ public interface Gatt {
             iTag = tag;
         }
 
-        public void onGattReady() {
+        public void onGattReady(Gatt gatt) {
             Log.d(String.format("%s, onGattReady", iTag));
         }
 

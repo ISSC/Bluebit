@@ -610,7 +610,7 @@ public class ActivityTransparent extends Activity implements
         }
 
         @Override
-        public void onGattReady() {
+        public void onGattReady(Gatt gatt) {
             Log.d(String.format("onRetrievedGatt"));
 
             int conn = mService.getConnectionState(mDevice);

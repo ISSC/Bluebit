@@ -200,7 +200,7 @@ public class ActivityFunctionPicker extends ListActivity {
         }
 
         @Override
-        public void onGattReady() {
+        public void onGattReady(Gatt gatt) {
             // If Adapter is empty, means we never do discovering
             if (mAdapter.getCount() == 0) {
                 connectToDevice();

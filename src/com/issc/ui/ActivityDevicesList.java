@@ -313,7 +313,7 @@ public class ActivityDevicesList extends Activity {
         }
 
         @Override
-        public void onGattReady() {
+        public void onGattReady(Gatt gatt) {
             resetList();
         }
 

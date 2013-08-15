@@ -372,7 +372,7 @@ public class ActivityAIO extends Activity
         }
 
         @Override
-        public void onGattReady() {
+        public void onGattReady(Gatt gatt) {
             Log.d(String.format("onGattReady"));
 
             int conn = mService.getConnectionState(mDevice);

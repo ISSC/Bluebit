@@ -3,11 +3,12 @@ package com.issc.impl;
 
 import com.issc.Bluebit;
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattAdapter;
 import com.issc.gatt.Gatt.Listener;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
-import com.issc.impl.samsung.SamsungGatt;
+import com.issc.impl.samsung.SamsungGattAdapter;
 import com.issc.util.Log;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class LeService extends Service {
     private IBinder mBinder;
 
     private boolean mGattReady = false;
+    private GattAdapter mGattAdapter = null;
     private Gatt mGatt = null;
     private Gatt.Listener mCallback;
 
@@ -51,8 +53,11 @@ public class LeService extends Service {
         mPending    = new ArrayList<Listener>();
 
         mBinder = new LocalBinder();
-        mGatt = new SamsungGatt();
-        mGatt.connectGatt(this, false, mCallback);
+        SamsungGattAdapter adapter = new SamsungGattAdapter(this);
+        mGattAdapter = adapter;
+
+        // temp workaround
+        adapter.connectGatt(this, false, mCallback, null);
     }
 
     @Override
@@ -70,7 +75,7 @@ public class LeService extends Service {
         synchronized(mLock) {
             mListeners.add(l);
             if (mGattReady) {
-                l.onGattReady();
+                l.onGattReady(mGatt);
             } else {
                 mPending.add(l);
             }
@@ -89,7 +94,7 @@ public class LeService extends Service {
             if (mPending.size() != 0) {
                 Iterator<Listener> it = mPending.iterator();
                 while(it.hasNext()) {
-                    it.next().onGattReady();
+                    it.next().onGattReady(mGatt);
                 }
                 mPending.clear();
             }
@@ -105,11 +110,11 @@ public class LeService extends Service {
     }
 
     public boolean startScan() {
-        return mGatt.startScan();
+        return mGattAdapter.startLeScan();
     }
 
     public void stopScan() {
-        mGatt.stopScan();
+        mGattAdapter.stopLeScan();
     }
 
     public boolean connect(BluetoothDevice device, boolean auto) {
@@ -173,7 +178,8 @@ public class LeService extends Service {
      * of returen value to listeners. */
     class TheCallback implements Gatt.Listener {
         @Override
-        public void onGattReady() {
+        public void onGattReady(Gatt gatt) {
+            mGatt = gatt;
             onGattReadyInternal();
         }
 

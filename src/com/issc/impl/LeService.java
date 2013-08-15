@@ -117,7 +117,7 @@ public class LeService extends Service {
     }
 
     public void disconnect(BluetoothDevice device) {
-        mGatt.cancelConnection(device);
+        mGatt.disconnect(device);
     }
 
     public List<BluetoothDevice> getConnectedDevices() {

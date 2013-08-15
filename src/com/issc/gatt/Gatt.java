@@ -15,21 +15,41 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
-/**
- * This is a wrapper.
- *
- * It will be an interface to help us to avoid depending on any specific
- * platform.
- **/
 public interface Gatt {
 
     public final static int GATT_SUCCESS = 0;
 
+    /**
+     * Connect to a device and retrieve Gatt profile from the device.
+     *
+     * For the reason to be compatible with Samsung, we cannot return Gatt
+     * instance directly although that is AOSP way. Instead of that, we return
+     * Gatt instance in {@link #onGattReady}.
+     */
     public void connectGatt(Context ctx, boolean autoConnect, Listener listener);
+
+    /**
+     * Close this Bluetooth Gatt client.
+     */
     public void close();
 
+    /**
+     * Connect to a remote device.
+     *
+     * In AOSP, it just invoke *connect* without any parameter since the Gatt instance is already bind
+     * to the remote device. However, in Samsung SDK the Gatt profile binds to several remote devices.
+     * Since we want to be compatible with Samsung SDK, we should specify the BluetoothDevice.
+     */
     public boolean connect(BluetoothDevice device, boolean auto);
-    public void cancelConnection(BluetoothDevice device);
+
+    /**
+     * Disconnects an established connection, or cancels a connection attempt currently in progress.
+     *
+     * In AOSP, it just invoke *disconnect* without any parameter since the Gatt instance is already bind
+     * to the remote device. However, in Samsung SDK the Gatt profile binds to several remote devices.
+     * Since we want to be compatible with Samsung SDK, we should specify the BluetoothDevice.
+     */
+    public void disconnect(BluetoothDevice device);
 
     public List<BluetoothDevice> getConnectedDevices();
     public boolean discoverServices(BluetoothDevice device);

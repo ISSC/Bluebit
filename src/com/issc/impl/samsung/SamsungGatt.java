@@ -55,7 +55,7 @@ public class SamsungGatt implements Gatt {
     }
 
     @Override
-    public void cancelConnection(BluetoothDevice device) {
+    public void disconnect(BluetoothDevice device) {
         mGatt.cancelConnection(device);
     }
 

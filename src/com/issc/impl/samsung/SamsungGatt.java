@@ -49,18 +49,8 @@ public class SamsungGatt implements Gatt {
     }
 
     @Override
-    public List<BluetoothDevice> getConnectedDevices() {
-        return mGatt.getConnectedDevices();
-    }
-
-    @Override
     public boolean discoverServices(BluetoothDevice device) {
         return mGatt.discoverServices(device);
-    }
-
-    @Override
-    public int getConnectionState(BluetoothDevice device) {
-        return mGatt.getConnectionState(device);
     }
 
     @Override

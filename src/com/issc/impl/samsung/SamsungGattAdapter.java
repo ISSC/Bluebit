@@ -35,10 +35,11 @@ public class SamsungGattAdapter implements GattAdapter {
 
     private Object mLock;
 
-    public SamsungGattAdapter(Context ctx) {
+    public SamsungGattAdapter(Context ctx, Listener listener) {
         mLock = new Object();
         mCallback = new TheCallback();
         mSystemListener = new SystemProfileServiceListener();
+        mListener = listener;
 
         BluetoothGattAdapter.getProfileProxy(ctx,
                 mSystemListener, BluetoothGattAdapter.GATT);
@@ -64,6 +65,16 @@ public class SamsungGattAdapter implements GattAdapter {
     @Override
     public void stopLeScan() {
         mGatt.stopScan();
+    }
+
+    @Override
+    public int getConnectionState(BluetoothDevice device) {
+        return mGatt.getConnectionState(device);
+    }
+
+    @Override
+    public List<BluetoothDevice> getConnectedDevices() {
+        return mGatt.getConnectedDevices();
     }
 
     /* This is the only one callback that register to GATT Profile. It dispatch each

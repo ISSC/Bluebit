@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
+import java.util.List;
+
 /**
  * Encapsulate Gatt initial procedures.
  */
@@ -25,5 +27,8 @@ public interface GattAdapter {
 
     public boolean startLeScan();
     public void stopLeScan();
+
+    public List<BluetoothDevice> getConnectedDevices();
+    public int getConnectionState(BluetoothDevice device);
 }
 

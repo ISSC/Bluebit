@@ -53,11 +53,8 @@ public class LeService extends Service {
         mPending    = new ArrayList<Listener>();
 
         mBinder = new LocalBinder();
-        SamsungGattAdapter adapter = new SamsungGattAdapter(this);
+        SamsungGattAdapter adapter = new SamsungGattAdapter(this, mCallback);
         mGattAdapter = adapter;
-
-        // temp workaround
-        adapter.connectGatt(this, false, mCallback, null);
     }
 
     @Override
@@ -126,7 +123,7 @@ public class LeService extends Service {
     }
 
     public List<BluetoothDevice> getConnectedDevices() {
-        return mGatt.getConnectedDevices();
+        return mGattAdapter.getConnectedDevices();
     }
 
     public boolean discoverServices(BluetoothDevice device) {
@@ -134,7 +131,7 @@ public class LeService extends Service {
     }
 
     public int getConnectionState(BluetoothDevice device) {
-        return mGatt.getConnectionState(device);
+        return mGattAdapter.getConnectionState(device);
     }
 
     public GattService getService(BluetoothDevice device, UUID uuid) {

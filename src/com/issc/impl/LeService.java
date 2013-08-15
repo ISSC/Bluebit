@@ -85,6 +85,16 @@ public class LeService extends Service {
         }
     }
 
+    /**
+     * Invoke this method to initialize Gatt before using Gatt.
+     *
+     * FIXME: right now we support connect to just 1 device.
+     */
+    public Gatt connectGatt(Context ctx, boolean auto, BluetoothDevice dev) {
+        mGatt = mGattAdapter.connectGatt(ctx, auto, mCallback, dev);
+        return mGatt;
+    }
+
     public boolean startScan() {
         return mGattAdapter.startLeScan();
     }

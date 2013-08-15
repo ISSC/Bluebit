@@ -151,6 +151,7 @@ public class ActivityAIO extends Activity
         Log.d("disconnected, connecting to device");
         mQueue.clear();
         updateView(SHOW_CONNECTION_DIALOG, null);
+        mService.connectGatt(this, false, mDevice);
         mService.connect(mDevice, false);
     }
 
@@ -355,8 +356,17 @@ public class ActivityAIO extends Activity
     class SrvConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
+            /* bind to LeService, retrieve Gatt Profile of the device */
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
+
+            int conn = mService.getConnectionState(mDevice);
+            if (conn == BluetoothProfile.STATE_DISCONNECTED) {
+                onDisconnected();
+            } else {
+                Log.d("already connected");
+                onConnected();
+            }
         }
 
         @Override
@@ -369,19 +379,6 @@ public class ActivityAIO extends Activity
 
         GattListener() {
             super("ActivityAIO");
-        }
-
-        @Override
-        public void onGattReady(Gatt gatt) {
-            Log.d(String.format("onGattReady"));
-
-            int conn = mService.getConnectionState(mDevice);
-            if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                onDisconnected();
-            } else {
-                Log.d("already connected");
-                onConnected();
-            }
         }
 
         @Override

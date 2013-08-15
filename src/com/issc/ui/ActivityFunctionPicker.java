@@ -127,6 +127,7 @@ public class ActivityFunctionPicker extends ListActivity {
                 showDialog(DISCOVERY_DIALOG);
             }
         });
+        mService.connectGatt(this, false, mDevice);
         if (mService.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
             Log.d("already connected to device");
             List<GattService> list = mService.getServices(mDevice);
@@ -200,14 +201,6 @@ public class ActivityFunctionPicker extends ListActivity {
         }
 
         @Override
-        public void onGattReady(Gatt gatt) {
-            // If Adapter is empty, means we never do discovering
-            if (mAdapter.getCount() == 0) {
-                connectToDevice();
-            }
-        }
-
-        @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {
             onDiscovered(device);
         }
@@ -235,6 +228,10 @@ public class ActivityFunctionPicker extends ListActivity {
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
+            // If Adapter is empty, means we never do discovering
+            if (mAdapter.getCount() == 0) {
+                connectToDevice();
+            }
         }
 
         @Override

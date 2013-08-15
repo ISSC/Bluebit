@@ -313,11 +313,6 @@ public class ActivityDevicesList extends Activity {
         }
 
         @Override
-        public void onGattReady(Gatt gatt) {
-            resetList();
-        }
-
-        @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             appendDevice(device, "");
         }
@@ -328,6 +323,7 @@ public class ActivityDevicesList extends Activity {
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
+            resetList();
         }
 
         @Override

@@ -431,12 +431,6 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onGattReady(Gatt gatt) {
-            Log.d(String.format("onRetrievedGatt"));
-            scanTarget();
-        }
-
-        @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             Log.d("Scanned:" + device.getAddress());
             if (isTheTarget(device, scanRecord)) {
@@ -520,6 +514,7 @@ public class ActivityWeight extends Activity implements
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
+            scanTarget();
         }
 
         @Override

@@ -525,6 +525,7 @@ public class ActivityTransparent extends Activity implements
         updateView(SHOW_CONNECTION_DIALOG, null);
         mStartTime = null;
         mQueue.clear();
+        mService.connectGatt(this, false, mDevice);
         mService.connect(mDevice, false);
     }
 
@@ -607,19 +608,6 @@ public class ActivityTransparent extends Activity implements
 
         GattListener() {
             super("ActivityTransparent");
-        }
-
-        @Override
-        public void onGattReady(Gatt gatt) {
-            Log.d(String.format("onRetrievedGatt"));
-
-            int conn = mService.getConnectionState(mDevice);
-            if (conn == BluetoothProfile.STATE_DISCONNECTED) {
-                onDisconnected();
-            } else {
-                Log.d("already connected");
-                onConnected();
-            }
         }
 
         @Override
@@ -706,6 +694,14 @@ public class ActivityTransparent extends Activity implements
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
             mService.addListener(mListener);
+
+            int conn = mService.getConnectionState(mDevice);
+            if (conn == BluetoothProfile.STATE_DISCONNECTED) {
+                onDisconnected();
+            } else {
+                Log.d("already connected");
+                onConnected();
+            }
         }
 
         @Override

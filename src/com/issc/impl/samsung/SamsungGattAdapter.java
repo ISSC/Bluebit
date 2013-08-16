@@ -27,6 +27,8 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class SamsungGattAdapter implements GattAdapter {
 
+    private GattAdapter.LeScanCallback mScanCallback;
+
     private SamsungGatt mGattInterface;
     private BluetoothGatt mGatt;
     private BluetoothGattCallback mCallback;
@@ -60,8 +62,9 @@ public class SamsungGattAdapter implements GattAdapter {
 
 
     @Override
-    public boolean startLeScan() {
+    public boolean startLeScan(GattAdapter.LeScanCallback callback) {
         synchronized(mLock) {
+            mScanCallback = callback;
             if (mGatt == null) {
                 // User asks to perform scanning but the gatt instance is not ready yet.
                 mScanning = true;
@@ -73,8 +76,9 @@ public class SamsungGattAdapter implements GattAdapter {
     }
 
     @Override
-    public void stopLeScan() {
+    public void stopLeScan(GattAdapter.LeScanCallback callback) {
         synchronized(mLock) {
+            mScanCallback = null;
             mScanning = false;
             if (mGatt != null) {
                 mGatt.stopScan();
@@ -176,7 +180,9 @@ public class SamsungGattAdapter implements GattAdapter {
 
         @Override
         public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            mListener.onLeScan(device, rssi, scanRecord);
+            if (mScanCallback != null) {
+                mScanCallback.onLeScan(device, rssi, scanRecord);
+            }
         }
 
         @Override

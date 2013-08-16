@@ -95,12 +95,12 @@ public class LeService extends Service {
         return mGatt;
     }
 
-    public boolean startScan() {
-        return mGattAdapter.startLeScan();
+    public boolean startScan(GattAdapter.LeScanCallback clbk) {
+        return mGattAdapter.startLeScan(clbk);
     }
 
-    public void stopScan() {
-        mGattAdapter.stopLeScan();
+    public void stopScan(GattAdapter.LeScanCallback clbk) {
+        mGattAdapter.stopLeScan(clbk);
     }
 
     public boolean connect(BluetoothDevice device, boolean auto) {
@@ -158,7 +158,6 @@ public class LeService extends Service {
     public boolean setCharacteristicNotification(GattCharacteristic chr, boolean enable) {
         return mGatt.setCharacteristicNotification(chr, enable);
     }
-
 
     /* This is the only one callback that register to GATT. It dispatch each
      * of returen value to listeners. */
@@ -229,16 +228,6 @@ public class LeService extends Service {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
                     it.next().onReadRemoteRssi(device, rssi, status);
-                }
-            }
-        }
-
-        @Override
-        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            synchronized(mListeners) {
-                Iterator<Listener> it = mListeners.iterator();
-                while(it.hasNext()) {
-                    it.next().onLeScan(device, rssi, scanRecord);
                 }
             }
         }

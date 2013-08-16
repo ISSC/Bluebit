@@ -64,6 +64,11 @@ public class SamsungGatt implements Gatt {
     }
 
     @Override
+    public BluetoothDevice getDevice() {
+        return mDevice;
+    }
+
+    @Override
     public GattService getService(UUID uuid) {
         return new SamsungGattService(mGatt.getService(mDevice, uuid));
     }

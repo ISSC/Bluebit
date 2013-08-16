@@ -36,6 +36,7 @@ public interface Gatt {
     public void disconnect();
 
     public boolean discoverServices();
+    public BluetoothDevice getDevice();
     public GattService getService(UUID uuid);
     public List<GattService> getServices();
     public boolean isBLEDevice(BluetoothDevice device);

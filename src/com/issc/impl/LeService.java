@@ -131,10 +131,6 @@ public class LeService extends Service {
         return mGatt.getServices();
     }
 
-    public boolean isBLEDevice(BluetoothDevice device) {
-        return mGatt.isBLEDevice(device);
-    }
-
     public boolean readCharacteristic(GattCharacteristic chr) {
         return mGatt.readCharacteristic(chr);
     }

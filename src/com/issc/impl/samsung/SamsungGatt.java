@@ -85,11 +85,6 @@ public class SamsungGatt implements Gatt {
     }
 
     @Override
-    public boolean isBLEDevice(BluetoothDevice device) {
-        return mGatt.isBLEDevice(device);
-    }
-
-    @Override
     public boolean readCharacteristic(GattCharacteristic chr) {
         return mGatt.readCharacteristic(
                 (BluetoothGattCharacteristic)chr.getImpl());

@@ -39,7 +39,6 @@ public interface Gatt {
     public BluetoothDevice getDevice();
     public GattService getService(UUID uuid);
     public List<GattService> getServices();
-    public boolean isBLEDevice(BluetoothDevice device);
     public boolean readCharacteristic(GattCharacteristic chr);
     public boolean readDescriptor(GattDescriptor dsc);
     public boolean removeBond(BluetoothDevice device);

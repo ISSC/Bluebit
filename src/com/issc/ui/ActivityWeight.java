@@ -444,8 +444,9 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onConnectionStateChange(BluetoothDevice device,
+        public void onConnectionStateChange(Gatt gatt,
                 int status, int newState) {
+            BluetoothDevice device = gatt.getDevice();
             if (!mDevice.getAddress().equals(device.getAddress())) {
                 // not the device I care about
                 return;
@@ -459,7 +460,7 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onCharacteristicChanged(GattCharacteristic chrc) {
+        public void onCharacteristicChanged(Gatt gatt, GattCharacteristic chrc) {
             Log.d("on chr changed");
             if (chrc.getUuid().equals(mFFF4.getUuid())) {
                 Log.d("Got Weight value, update view");
@@ -484,32 +485,32 @@ public class ActivityWeight extends Activity implements
         }
 
         @Override
-        public void onCharacteristicRead(GattCharacteristic charac, int status) {
+        public void onCharacteristicRead(Gatt gatt, GattCharacteristic charac, int status) {
             Log.d("on chr read:" + status);
             byte[] value = charac.getValue();
             mQueue.onConsumed();
         }
 
         @Override
-        public void onCharacteristicWrite(GattCharacteristic charac, int status) {
+        public void onCharacteristicWrite(Gatt gatt, GattCharacteristic charac, int status) {
             Log.d("on chr write:" + status);
             mQueue.onConsumed();
         }
 
         @Override
-        public void onDescriptorRead(GattDescriptor desc, int status) {
+        public void onDescriptorRead(Gatt gatt, GattDescriptor desc, int status) {
             Log.d("on desc read:" + status);
             mQueue.onConsumed();
         }
 
         @Override
-        public void onDescriptorWrite(GattDescriptor desc, int status) {
+        public void onDescriptorWrite(Gatt gatt, GattDescriptor desc, int status) {
             Log.d("on desc write:" + status);
             mQueue.onConsumed();
         }
 
         @Override
-        public void onServicesDiscovered(BluetoothDevice device, int status) {
+        public void onServicesDiscovered(Gatt gatt, int status) {
             onDiscovered();
         }
     }

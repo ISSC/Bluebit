@@ -201,12 +201,12 @@ public class ActivityFunctionPicker extends ListActivity {
         }
 
         @Override
-        public void onServicesDiscovered(BluetoothDevice device, int status) {
-            onDiscovered(device);
+        public void onServicesDiscovered(Gatt gatt, int status) {
+            onDiscovered(gatt.getDevice());
         }
 
         @Override
-        public void onConnectionStateChange(BluetoothDevice device,
+        public void onConnectionStateChange(Gatt gatt,
                 int status, int newState) {
 
             if (mService == null) {

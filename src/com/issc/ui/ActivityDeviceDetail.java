@@ -268,13 +268,13 @@ public class ActivityDeviceDetail extends ListActivity {
         }
 
         @Override
-        public void onServicesDiscovered(BluetoothDevice device, int status) {
+        public void onServicesDiscovered(Gatt gatt, int status) {
             stopDiscovery();
-            onDiscovered(device);
+            onDiscovered(mDevice);
         }
 
         @Override
-        public void onConnectionStateChange(BluetoothDevice device,
+        public void onConnectionStateChange(Gatt gatt,
                 int status, int newState) {
 
             if (mService == null) {

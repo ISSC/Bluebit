@@ -382,9 +382,9 @@ public class ActivityAIO extends Activity
         }
 
         @Override
-        public void onConnectionStateChange(BluetoothDevice device,
+        public void onConnectionStateChange(Gatt gatt,
                 int status, int newState) {
-            if (!mDevice.getAddress().equals(device.getAddress())) {
+            if (!mDevice.getAddress().equals(gatt.getDevice().getAddress())) {
                 // not the device I care about
                 return;
             }
@@ -397,12 +397,12 @@ public class ActivityAIO extends Activity
         }
 
         @Override
-        public void onServicesDiscovered(BluetoothDevice device, int status) {
+        public void onServicesDiscovered(Gatt gatt, int status) {
             onDiscovered();
         }
 
         @Override
-        public void onCharacteristicRead(GattCharacteristic charac, int status) {
+        public void onCharacteristicRead(Gatt gatt, GattCharacteristic charac, int status) {
             Log.d("read char, uuid=" + charac.getUuid().toString());
             byte[] value = charac.getValue();
             Log.d("get value, byte length:" + value.length);
@@ -412,7 +412,7 @@ public class ActivityAIO extends Activity
         }
 
         @Override
-        public void onCharacteristicWrite(GattCharacteristic charac, int status) {
+        public void onCharacteristicWrite(Gatt gatt, GattCharacteristic charac, int status) {
             Log.d("on consumed!!");
             mQueue.onConsumed();
         }

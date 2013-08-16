@@ -27,10 +27,20 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 public class SamsungGatt implements Gatt {
 
     private BluetoothGatt mGatt;
+    private BluetoothDevice mDevice;
     private Listener mListener;
 
     public SamsungGatt(BluetoothGatt gatt) {
         mGatt = gatt;
+    }
+
+    /**
+     * Specify the LE device we are going to communicate.
+     *
+     * In previous implementation, we only connect to a LE device one at a time.
+     */
+    public void setDevice(BluetoothDevice dev) {
+        mDevice = dev;
     }
 
     @Override

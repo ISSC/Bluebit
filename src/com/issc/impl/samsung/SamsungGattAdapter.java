@@ -27,9 +27,10 @@ import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public class SamsungGattAdapter implements GattAdapter {
 
-    private Gatt mGattInterface;
+    private SamsungGatt mGattInterface;
     private BluetoothGatt mGatt;
     private BluetoothGattCallback mCallback;
+    private BluetoothDevice mDevice;
     private SystemProfileServiceListener mSystemListener;
     private Listener mListener;
 
@@ -52,6 +53,8 @@ public class SamsungGattAdapter implements GattAdapter {
          * he should perform scan before. In Samsung SDK, we already got Gatt instance so we can perform
          * scanning.*/
         mListener = listener;
+        mDevice = dev;
+        mGattInterface.setDevice(mDevice);
         return mGattInterface;
     }
 

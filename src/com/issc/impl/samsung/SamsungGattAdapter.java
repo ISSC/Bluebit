@@ -117,16 +117,16 @@ public class SamsungGattAdapter implements GattAdapter {
         @Override
         public void onCharacteristicChanged(BluetoothGattCharacteristic chrc) {
             GattCharacteristic c = new SamsungGattCharacteristic(chrc);
-            mListener.onCharacteristicChanged(c);
+            mListener.onCharacteristicChanged(mGattInterface, c);
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGattCharacteristic chrc, int status) {
             GattCharacteristic c = new SamsungGattCharacteristic(chrc);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onCharacteristicRead(c, Gatt.GATT_SUCCESS);
+                mListener.onCharacteristicRead(mGattInterface, c, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onCharacteristicRead(c, status);
+                mListener.onCharacteristicRead(mGattInterface, c, status);
             }
         }
 
@@ -134,18 +134,18 @@ public class SamsungGattAdapter implements GattAdapter {
         public void onCharacteristicWrite(BluetoothGattCharacteristic chrc, int status) {
             GattCharacteristic c = new SamsungGattCharacteristic(chrc);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onCharacteristicWrite(c, Gatt.GATT_SUCCESS);
+                mListener.onCharacteristicWrite(mGattInterface, c, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onCharacteristicWrite(c, status);
+                mListener.onCharacteristicWrite(mGattInterface, c, status);
             }
         }
 
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onConnectionStateChange(device, Gatt.GATT_SUCCESS, newState);
+                mListener.onConnectionStateChange(mGattInterface, Gatt.GATT_SUCCESS, newState);
             } else {
-                mListener.onConnectionStateChange(device, status, newState);
+                mListener.onConnectionStateChange(mGattInterface, status, newState);
             }
         }
 
@@ -153,9 +153,9 @@ public class SamsungGattAdapter implements GattAdapter {
         public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
             GattDescriptor dsc = new SamsungGattDescriptor(descriptor);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onDescriptorRead(dsc, Gatt.GATT_SUCCESS);
+                mListener.onDescriptorRead(mGattInterface, dsc, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onDescriptorRead(dsc, status);
+                mListener.onDescriptorRead(mGattInterface, dsc, status);
             }
         }
 
@@ -163,18 +163,18 @@ public class SamsungGattAdapter implements GattAdapter {
         public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
             GattDescriptor dsc = new SamsungGattDescriptor(descriptor);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onDescriptorWrite(dsc, Gatt.GATT_SUCCESS);
+                mListener.onDescriptorWrite(mGattInterface, dsc, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onDescriptorWrite(dsc, status);
+                mListener.onDescriptorWrite(mGattInterface, dsc, status);
             }
         }
 
         @Override
         public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onReadRemoteRssi(device, rssi, Gatt.GATT_SUCCESS);
+                mListener.onReadRemoteRssi(mGattInterface, rssi, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onReadRemoteRssi(device, rssi, status);
+                mListener.onReadRemoteRssi(mGattInterface, rssi, status);
             }
         }
 
@@ -188,9 +188,9 @@ public class SamsungGattAdapter implements GattAdapter {
         @Override
         public void onServicesDiscovered(BluetoothDevice device, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onServicesDiscovered(device, Gatt.GATT_SUCCESS);
+                mListener.onServicesDiscovered(mGattInterface, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onServicesDiscovered(device, status);
+                mListener.onServicesDiscovered(mGattInterface, status);
             }
         }
     }

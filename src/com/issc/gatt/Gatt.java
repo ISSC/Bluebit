@@ -49,14 +49,14 @@ public interface Gatt {
     public boolean writeDescriptor(GattDescriptor dsc);
 
     public interface Listener {
-        public void onCharacteristicChanged(GattCharacteristic chrc);
-        public void onCharacteristicRead(GattCharacteristic chrc, int status);
-        public void onCharacteristicWrite(GattCharacteristic chrc, int status);
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState);
-        public void onDescriptorRead(GattDescriptor descriptor, int status);
-        public void onDescriptorWrite(GattDescriptor descriptor, int status);
-        public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status);
-        public void onServicesDiscovered(BluetoothDevice device, int status);
+        public void onCharacteristicChanged(Gatt gatt, GattCharacteristic chrc);
+        public void onCharacteristicRead(Gatt gatt, GattCharacteristic chrc, int status);
+        public void onCharacteristicWrite(Gatt gatt, GattCharacteristic chrc, int status);
+        public void onConnectionStateChange(Gatt gatt, int status, int newState);
+        public void onDescriptorRead(Gatt gatt, GattDescriptor descriptor, int status);
+        public void onDescriptorWrite(Gatt gatt, GattDescriptor descriptor, int status);
+        public void onReadRemoteRssi(Gatt gatt, int rssi, int status);
+        public void onServicesDiscovered(Gatt gatt, int status);
     }
 
     public static class ListenerHelper implements Listener {
@@ -65,35 +65,35 @@ public interface Gatt {
             iTag = tag;
         }
 
-        public void onCharacteristicChanged(GattCharacteristic chrc) {
+        public void onCharacteristicChanged(Gatt gatt, GattCharacteristic chrc) {
             Log.d(String.format("%s, onCharChanged", iTag));
         }
 
-        public void onCharacteristicRead(GattCharacteristic chrc, int status) {
+        public void onCharacteristicRead(Gatt gatt, GattCharacteristic chrc, int status) {
             Log.d(String.format("%s, onCharacteristicRead, status:%d", iTag, status));
         }
 
-        public void onCharacteristicWrite(GattCharacteristic chrc, int status) {
+        public void onCharacteristicWrite(Gatt gatt, GattCharacteristic chrc, int status) {
             Log.d(String.format("%s, onCharacteristicWrite, status:%d", iTag, status));
         }
 
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+        public void onConnectionStateChange(Gatt gatt, int status, int newState) {
             Log.d(String.format("%s, onConnectionStateChange, status:%d, newState:%d", iTag, status, newState));
         }
 
-        public void onDescriptorRead(GattDescriptor descriptor, int status) {
+        public void onDescriptorRead(Gatt gatt, GattDescriptor descriptor, int status) {
             Log.d(String.format("%s, onDescriptorRead, status:%d", iTag, status));
         }
 
-        public void onDescriptorWrite(GattDescriptor descriptor, int status) {
+        public void onDescriptorWrite(Gatt gatt, GattDescriptor descriptor, int status) {
             Log.d(String.format("%s, onDescriptorWrite, status:%d", iTag, status));
         }
 
-        public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status) {
+        public void onReadRemoteRssi(Gatt gatt, int rssi, int status) {
             Log.d(String.format("%s, onReadRemoteRssi, rssi:%d", iTag, rssi));
         }
 
-        public void onServicesDiscovered(BluetoothDevice device, int status) {
+        public void onServicesDiscovered(Gatt gatt, int status) {
             Log.d(String.format("%s, onServicesDiscovered", iTag));
         }
     }

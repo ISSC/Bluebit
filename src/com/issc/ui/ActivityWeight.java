@@ -4,6 +4,7 @@ package com.issc.ui;
 
 import com.issc.Bluebit;
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattAdapter;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
@@ -58,6 +59,7 @@ public class ActivityWeight extends Activity implements
     private LeService mService;
     private Gatt.Listener mListener;
     private SrvConnection mConn;
+    private ScanCallback mScanCallback;
 
     private final static double LB_BASE = 2.2046; // 1 kg is about 2.2046 lb
     private final static double ST_BASE = 0.1574; // 1 kg is about 0.1574 st
@@ -110,6 +112,7 @@ public class ActivityWeight extends Activity implements
 
         mViewHandler = new ViewHandler();
         mListener = new GattListener();
+        mScanCallback = new ScanCallback();
         mConn = new SrvConnection();
     }
 
@@ -186,14 +189,14 @@ public class ActivityWeight extends Activity implements
     private void scanTarget() {
         mDevice = null;
         Log.d("Scanning Target");
-        mService.startScan();
+        mService.startScan(mScanCallback);
         updateView(SHOW_LOADER, null);
     }
 
     private void stopScanningTarget() {
         Log.d("Stop scanning");
         updateView(HIDE_LOADER, null);
-        mService.stopScan();
+        mService.stopScan(mScanCallback);
     }
 
     private void onConnected() {
@@ -425,17 +428,19 @@ public class ActivityWeight extends Activity implements
         }
     }
 
-    class GattListener extends Gatt.ListenerHelper {
-        GattListener() {
-            super("ActivityWeight");
-        }
-
+    class ScanCallback implements GattAdapter.LeScanCallback {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             Log.d("Scanned:" + device.getAddress());
             if (isTheTarget(device, scanRecord)) {
                 onFoundTarget(device, scanRecord);
             }
+        }
+    }
+
+    class GattListener extends Gatt.ListenerHelper {
+        GattListener() {
+            super("ActivityWeight");
         }
 
         @Override

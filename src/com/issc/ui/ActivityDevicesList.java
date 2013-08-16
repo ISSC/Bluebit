@@ -4,6 +4,7 @@ package com.issc.ui;
 
 import com.issc.Bluebit;
 import com.issc.gatt.Gatt;
+import com.issc.gatt.GattAdapter;
 import com.issc.impl.LeService;
 import com.issc.R;
 import com.issc.util.Log;
@@ -68,6 +69,7 @@ public class ActivityDevicesList extends Activity {
     private final static int MENU_RMBOND = 2;
 
     private LeService mService;
+    private ScanCallback mScanCallback;
     private Gatt.Listener mListener;
     private SrvConnection mConn;
 
@@ -83,6 +85,7 @@ public class ActivityDevicesList extends Activity {
         registerForContextMenu(mListView);
 
         mListener = new GattListener();
+        mScanCallback = new ScanCallback();
         initAdapter();
         mConn = new SrvConnection();
     }
@@ -192,12 +195,12 @@ public class ActivityDevicesList extends Activity {
         // connected device will be ingored when scanning.
         resetList();
         appendConnectedDevices();
-        mService.startScan();
+        mService.startScan(mScanCallback);
     }
 
     private void stopScan() {
         Log.d("Stop scanning");
-        mService.stopScan();
+        mService.stopScan(mScanCallback);
     }
 
     private void appendConnectedDevices() {
@@ -307,14 +310,16 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
-    class GattListener extends Gatt.ListenerHelper {
-        GattListener() {
-            super("ActivityDevicesList");
-        }
-
+    class ScanCallback implements GattAdapter.LeScanCallback {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             appendDevice(device, "");
+        }
+    }
+
+    class GattListener extends Gatt.ListenerHelper {
+        GattListener() {
+            super("ActivityDevicesList");
         }
     }
 

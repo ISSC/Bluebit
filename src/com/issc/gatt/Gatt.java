@@ -48,7 +48,6 @@ public interface Gatt {
     public boolean writeDescriptor(GattDescriptor dsc);
 
     public interface Listener {
-        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord);
         public void onCharacteristicChanged(GattCharacteristic chrc);
         public void onCharacteristicRead(GattCharacteristic chrc, int status);
         public void onCharacteristicWrite(GattCharacteristic chrc, int status);
@@ -91,10 +90,6 @@ public interface Gatt {
 
         public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status) {
             Log.d(String.format("%s, onReadRemoteRssi, rssi:%d", iTag, rssi));
-        }
-
-        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            Log.d(String.format("%s, onScanResult, rssi:%d", iTag, rssi));
         }
 
         public void onServicesDiscovered(BluetoothDevice device, int status) {

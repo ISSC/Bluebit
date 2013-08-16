@@ -6,6 +6,7 @@ import com.issc.gatt.Gatt;
 import com.issc.gatt.Gatt.Listener;
 import com.issc.util.Log;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -26,10 +27,14 @@ public interface GattAdapter {
      */
     public Gatt connectGatt(Context ctx, boolean autoConnect, Listener listener, BluetoothDevice dev);
 
-    public boolean startLeScan();
-    public void stopLeScan();
+    public boolean startLeScan(LeScanCallback clbk);
+    public void stopLeScan(LeScanCallback clbk);
 
     public List<BluetoothDevice> getConnectedDevices();
     public int getConnectionState(BluetoothDevice device);
+
+    public interface LeScanCallback {
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord);
+    }
 }
 

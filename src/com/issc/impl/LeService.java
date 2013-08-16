@@ -163,81 +163,81 @@ public class LeService extends Service {
      * of returen value to listeners. */
     class TheCallback implements Gatt.Listener {
         @Override
-        public void onCharacteristicChanged(GattCharacteristic chrc) {
+        public void onCharacteristicChanged(Gatt gatt, GattCharacteristic chrc) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicChanged(chrc);
+                    it.next().onCharacteristicChanged(gatt, chrc);
                 }
             }
         }
 
         @Override
-        public void onCharacteristicRead(GattCharacteristic chrc, int status) {
+        public void onCharacteristicRead(Gatt gatt, GattCharacteristic chrc, int status) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicRead(chrc, status);
+                    it.next().onCharacteristicRead(gatt, chrc, status);
                 }
             }
         }
 
         @Override
-        public void onCharacteristicWrite(GattCharacteristic chrc, int status) {
+        public void onCharacteristicWrite(Gatt gatt, GattCharacteristic chrc, int status) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onCharacteristicWrite(chrc, status);
+                    it.next().onCharacteristicWrite(gatt, chrc, status);
                 }
             }
         }
 
         @Override
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+        public void onConnectionStateChange(Gatt gatt, int status, int newState) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onConnectionStateChange(device, status, newState);
+                    it.next().onConnectionStateChange(gatt, status, newState);
                 }
             }
         }
 
         @Override
-        public void onDescriptorRead(GattDescriptor descriptor, int status) {
+        public void onDescriptorRead(Gatt gatt, GattDescriptor descriptor, int status) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onDescriptorRead(descriptor, status);
+                    it.next().onDescriptorRead(gatt, descriptor, status);
                 }
             }
         }
 
         @Override
-        public void onDescriptorWrite(GattDescriptor descriptor, int status) {
+        public void onDescriptorWrite(Gatt gatt, GattDescriptor descriptor, int status) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onDescriptorWrite(descriptor, status);
+                    it.next().onDescriptorWrite(gatt, descriptor, status);
                 }
             }
         }
 
         @Override
-        public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status) {
+        public void onReadRemoteRssi(Gatt gatt,  int rssi, int status) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onReadRemoteRssi(device, rssi, status);
+                    it.next().onReadRemoteRssi(gatt, rssi, status);
                 }
             }
         }
 
         @Override
-        public void onServicesDiscovered(BluetoothDevice device, int status) {
+        public void onServicesDiscovered(Gatt gatt,  int status) {
             synchronized(mListeners) {
                 Iterator<Listener> it = mListeners.iterator();
                 while(it.hasNext()) {
-                    it.next().onServicesDiscovered(device, status);
+                    it.next().onServicesDiscovered(gatt, status);
                 }
             }
         }

@@ -27,25 +27,17 @@ public interface Gatt {
 
     /**
      * Connect to a remote device.
-     *
-     * In AOSP, it just invoke *connect* without any parameter since the Gatt instance is already bind
-     * to the remote device. However, in Samsung SDK the Gatt profile binds to several remote devices.
-     * Since we want to be compatible with Samsung SDK, we should specify the BluetoothDevice.
      */
-    public boolean connect(BluetoothDevice device, boolean auto);
+    public boolean connect();
 
     /**
      * Disconnects an established connection, or cancels a connection attempt currently in progress.
-     *
-     * In AOSP, it just invoke *disconnect* without any parameter since the Gatt instance is already bind
-     * to the remote device. However, in Samsung SDK the Gatt profile binds to several remote devices.
-     * Since we want to be compatible with Samsung SDK, we should specify the BluetoothDevice.
      */
-    public void disconnect(BluetoothDevice device);
+    public void disconnect();
 
-    public boolean discoverServices(BluetoothDevice device);
-    public GattService getService(BluetoothDevice device, UUID uuid);
-    public List<GattService> getServices(BluetoothDevice device);
+    public boolean discoverServices();
+    public GattService getService(UUID uuid);
+    public List<GattService> getServices();
     public boolean isBLEDevice(BluetoothDevice device);
     public boolean readCharacteristic(GattCharacteristic chr);
     public boolean readDescriptor(GattDescriptor dsc);

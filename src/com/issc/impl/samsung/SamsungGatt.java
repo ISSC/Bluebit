@@ -49,28 +49,28 @@ public class SamsungGatt implements Gatt {
     }
 
     @Override
-    public boolean connect(BluetoothDevice device, boolean auto) {
-        return mGatt.connect(device, auto);
+    public boolean connect() {
+        return mGatt.connect(mDevice, false);
     }
 
     @Override
-    public void disconnect(BluetoothDevice device) {
-        mGatt.cancelConnection(device);
+    public void disconnect() {
+        mGatt.cancelConnection(mDevice);
     }
 
     @Override
-    public boolean discoverServices(BluetoothDevice device) {
-        return mGatt.discoverServices(device);
+    public boolean discoverServices() {
+        return mGatt.discoverServices(mDevice);
     }
 
     @Override
-    public GattService getService(BluetoothDevice device, UUID uuid) {
-        return new SamsungGattService(mGatt.getService(device, uuid));
+    public GattService getService(UUID uuid) {
+        return new SamsungGattService(mGatt.getService(mDevice, uuid));
     }
 
     @Override
-    public List<GattService> getServices(BluetoothDevice device) {
-        List<BluetoothGattService> srvs = mGatt.getServices(device);
+    public List<GattService> getServices() {
+        List<BluetoothGattService> srvs = mGatt.getServices(mDevice);
         ArrayList<GattService> list = new ArrayList<GattService>();
         for (BluetoothGattService srv: srvs) {
             list.add(new SamsungGattService(srv));

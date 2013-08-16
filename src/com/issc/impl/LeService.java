@@ -104,11 +104,11 @@ public class LeService extends Service {
     }
 
     public boolean connect(BluetoothDevice device, boolean auto) {
-        return mGatt.connect(device, auto);
+        return mGatt.connect();
     }
 
     public void disconnect(BluetoothDevice device) {
-        mGatt.disconnect(device);
+        mGatt.disconnect();
     }
 
     public List<BluetoothDevice> getConnectedDevices() {
@@ -116,7 +116,7 @@ public class LeService extends Service {
     }
 
     public boolean discoverServices(BluetoothDevice device) {
-        return mGatt.discoverServices(device);
+        return mGatt.discoverServices();
     }
 
     public int getConnectionState(BluetoothDevice device) {
@@ -124,11 +124,11 @@ public class LeService extends Service {
     }
 
     public GattService getService(BluetoothDevice device, UUID uuid) {
-        return mGatt.getService(device, uuid);
+        return mGatt.getService(uuid);
     }
 
     public List<GattService> getServices(BluetoothDevice device) {
-        return mGatt.getServices(device);
+        return mGatt.getServices();
     }
 
     public boolean isBLEDevice(BluetoothDevice device) {

@@ -27,9 +27,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 /**
- * This class is a wrapper and singleton to solve Samsung BLE conneciton problem.
+ * This class is a wrapper that handles Gatt related operations.
  *
- * This singleton will try to keep the Gatt instance to be used via each Activity.
+ * Upper layer just use this service so that they do not have to
+ * deal with Gatt by themself.
  */
 public class LeService extends Service {
 

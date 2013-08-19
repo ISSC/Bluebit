@@ -148,7 +148,7 @@ public class LeService extends Service {
     }
 
     public boolean removeBond(BluetoothDevice device) {
-        return mGatt.removeBond(device);
+        return mGattAdapter.removeBond(device);
     }
 
     public boolean setCharacteristicNotification(GattCharacteristic chr, boolean enable) {

@@ -96,6 +96,11 @@ public class SamsungGattAdapter implements GattAdapter {
         return mGatt.getConnectedDevices();
     }
 
+    @Override
+    public boolean removeBond(BluetoothDevice dev) {
+        return mGatt.removeBond(dev);
+    }
+
     /* This is the only one callback that register to GATT Profile. It dispatch each
      * of returen value to listeners. */
     class TheCallback extends BluetoothGattCallback {

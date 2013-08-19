@@ -33,6 +33,8 @@ public interface GattAdapter {
     public List<BluetoothDevice> getConnectedDevices();
     public int getConnectionState(BluetoothDevice device);
 
+    public boolean removeBond(BluetoothDevice dev);
+
     public interface LeScanCallback {
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord);
     }

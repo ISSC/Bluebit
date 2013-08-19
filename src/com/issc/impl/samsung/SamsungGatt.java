@@ -96,11 +96,6 @@ public class SamsungGatt implements Gatt {
     }
 
     @Override
-    public boolean removeBond(BluetoothDevice device) {
-        return mGatt.removeBond(device);
-    }
-
-    @Override
     public boolean setCharacteristicNotification(GattCharacteristic chr, boolean enable) {
         return mGatt.setCharacteristicNotification(
                 (BluetoothGattCharacteristic)chr.getImpl(), enable);

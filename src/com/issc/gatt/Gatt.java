@@ -41,7 +41,6 @@ public interface Gatt {
     public List<GattService> getServices();
     public boolean readCharacteristic(GattCharacteristic chr);
     public boolean readDescriptor(GattDescriptor dsc);
-    public boolean removeBond(BluetoothDevice device);
 
     public boolean setCharacteristicNotification(GattCharacteristic chr, boolean enable);
     public boolean writeCharacteristic(GattCharacteristic chr);

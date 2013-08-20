@@ -9,8 +9,6 @@ import com.issc.util.TransactionQueue.Transaction;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 
-import com.samsung.android.sdk.bt.gatt.BluetoothGatt;
-
 public class GattTransaction implements Transaction {
 
     public GattCharacteristic chr;

@@ -2,6 +2,9 @@
 package com.issc.util;
 
 import com.issc.Bluebit;
+import com.issc.gatt.GattCharacteristic;
+import com.issc.gatt.GattDescriptor;
+import com.issc.gatt.GattService;
 import com.issc.R;
 
 import android.app.Activity;
@@ -30,10 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import com.samsung.android.sdk.bt.gatt.BluetoothGattCharacteristic;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattDescriptor;
-import com.samsung.android.sdk.bt.gatt.BluetoothGattService;
 
 public final class Util {
 
@@ -188,40 +187,40 @@ public final class Util {
         return null;
     }
 
-    public static void dumpServices(List<BluetoothGattService> list) {
-        Iterator<BluetoothGattService> it = list.iterator();
+    public static void dumpServices(List<GattService> list) {
+        Iterator<GattService> it = list.iterator();
         while (it.hasNext()) {
             dumpService(it.next());
         }
     }
 
-    public static void dumpService(BluetoothGattService srv) {
+    public static void dumpService(GattService srv) {
         Log.d(String.format("  Service uuid: %s,", srv.getUuid().toString()));
-        List<BluetoothGattCharacteristic> list = srv.getCharacteristics();
+        List<GattCharacteristic> list = srv.getCharacteristics();
         if (list == null || list.size() <= 0) {
             Log.d("    ...without characteristic");
         }
 
-        Iterator<BluetoothGattCharacteristic> it = list.iterator();
+        Iterator<GattCharacteristic> it = list.iterator();
         while (it.hasNext()) {
             dumpChr(it.next());
         }
     }
 
-    public static void dumpChr(BluetoothGattCharacteristic chr) {
+    public static void dumpChr(GattCharacteristic chr) {
         Log.d(String.format("    chr uuid: %s,", chr.getUuid().toString()));
-        List<BluetoothGattDescriptor> list = chr.getDescriptors();
+        List<GattDescriptor> list = chr.getDescriptors();
         if (list == null || list.size() <= 0) {
             Log.d("    ...without descriptor");
         }
 
-        Iterator<BluetoothGattDescriptor> it = list.iterator();
+        Iterator<GattDescriptor> it = list.iterator();
         while (it.hasNext()) {
             dumpDesc(it.next());
         }
     }
 
-    public static void dumpDesc(BluetoothGattDescriptor desc) {
+    public static void dumpDesc(GattDescriptor desc) {
         Log.d(String.format("        desc uuid: %s, permission:0x%x",
                     desc.getUuid().toString(),
                     desc.getPermissions()));

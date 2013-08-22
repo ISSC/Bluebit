@@ -8,7 +8,7 @@ import com.issc.gatt.Gatt.Listener;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
-import com.issc.impl.samsung.SamsungGattAdapter;
+import com.issc.impl.aosp.AospGattAdapter;
 import com.issc.util.Log;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class LeService extends Service {
         mListeners  = new ArrayList<Listener>();
 
         mBinder = new LocalBinder();
-        mGattAdapter = new SamsungGattAdapter(this, mCallback);
+        mGattAdapter = new AospGattAdapter(this, mCallback);
     }
 
     @Override

@@ -81,7 +81,9 @@ public class LeService extends Service {
     private void releaseGatt() {
         synchronized(mLock) {
             mGattReady = false;
-            mGatt.close();
+            if (mGatt != null) {
+                mGatt.close();
+            }
             mGatt = null;
         }
     }

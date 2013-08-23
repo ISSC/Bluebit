@@ -125,7 +125,11 @@ public class ActivityDeviceDetail extends ListActivity {
     }
 
     private void init(BluetoothDevice device) {
-        append(getString(R.string.detail_name), device.getName());
+        if (device.getName() == null) {
+            append(getString(R.string.detail_name), "");
+        } else {
+            append(getString(R.string.detail_name), device.getName());
+        }
         append(getString(R.string.detail_addr), device.getAddress());
     }
 
@@ -139,6 +143,7 @@ public class ActivityDeviceDetail extends ListActivity {
         if (mService!= null) {
             showDialog(DISCOVERY_DIALOG);
             if (mService.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
+                mService.connectGatt(this, false, mDevice);
                 List<GattService> list = mService.getServices(mDevice);
                 if ((list == null) || (list.size() == 0)) {
                     Log.d("start discovery");

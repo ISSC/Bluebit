@@ -66,7 +66,6 @@ public class ActivityDevicesList extends Activity {
 
     private final static int MENU_DETAIL = 0;
     private final static int MENU_CHOOSE = 1;
-    private final static int MENU_RMBOND = 2;
 
     private LeService mService;
     private ScanCallback mScanCallback;
@@ -157,7 +156,6 @@ public class ActivityDevicesList extends Activity {
             menu.setHeaderTitle(R.string.device_menu_title);
             menu.add(0, MENU_DETAIL, Menu.NONE, R.string.device_menu_detail);
             menu.add(0, MENU_CHOOSE, Menu.NONE, R.string.device_menu_choose);
-            menu.add(0, MENU_RMBOND, Menu.NONE, R.string.device_menu_rm_bond);
         }
     }
 
@@ -177,13 +175,6 @@ public class ActivityDevicesList extends Activity {
             i.putExtra(Bluebit.CHOSEN_DEVICE,
                     (BluetoothDevice)mRecords.get(pos).get(sDevice));
             startActivity(i);
-        } else if (id == MENU_RMBOND) {
-            BluetoothDevice target =
-                (BluetoothDevice)mRecords.get(pos).get(sDevice);
-
-            boolean r = mService.removeBond(target);
-            Log.d("Remove bond:" + r);
-            resetList();
         }
         return true;
     }

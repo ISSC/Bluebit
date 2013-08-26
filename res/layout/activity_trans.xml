@@ -14,7 +14,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:background="#F4F4F4"
-			android:layout_weight="2"
+			android:layout_weight="1"
 			/>
 		<TabWidget
 			android:id="@android:id/tabs"
@@ -31,6 +31,7 @@
 				android:id="@+id/tab_raw"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:layout_marginTop="@dimen/large_gutter"
 				android:orientation="vertical"
 				>
 				<LinearLayout
@@ -67,6 +68,8 @@
 				android:id="@+id/tab_timer"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:layout_marginTop="@dimen/large_gutter"
+				android:layout_marginLeft="@dimen/small_gutter"
 				android:orientation="vertical"
 				>
 				<TableRow
@@ -127,10 +130,10 @@
 				android:id="@+id/tab_echo"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:layout_marginTop="@dimen/large_gutter"
 				android:orientation="vertical"
 				>
 				<TableRow
-					android:layout_marginTop="@dimen/large_gutter"
 					>
 					<LinearLayout
 						android:layout_width="match_parent"

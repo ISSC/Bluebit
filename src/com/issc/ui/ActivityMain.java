@@ -33,7 +33,12 @@ public class ActivityMain extends Activity {
         mListener = new GattListener();
         mConn = new SrvConnection();
 
-        startService(new Intent(this, LeService.class));
+        Intent intent = getIntent();
+        boolean fake = intent.getBooleanExtra(Bluebit.USE_FAKE, false);
+
+        Intent launch = new Intent(this, LeService.class);
+        launch.putExtra(Bluebit.USE_FAKE, fake);
+        startService(launch);
     }
 
     @Override

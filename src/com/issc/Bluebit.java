@@ -16,6 +16,9 @@ public final class Bluebit {
     /** Tag for Logcat output */
     public final static String TAG = "Bluebit";
 
+    /** Use Fake implementation for testing */
+    public final static String USE_FAKE = "USE_FAKE";
+
     // Keys that be used by Intent, Bundle...etc.
     /** The device has been choosen from another activity. */
     public final static String CHOSEN_DEVICE = "the_device_been_choosen";

@@ -15,5 +15,14 @@
 		<arg line="-n ${run.package}/${run.activity} ${run.parameters}" />
 	</exec>
 </target>
+<target name="run-activity-fake">
+	<exec executable="${adb}" failonerror="true">
+		<arg line="${adb.device.arg}" />
+		<arg line="shell am start" />
+		<arg line="--ez USE_FAKE true" />
+		<arg line="-c android.intent.category.LAUNCHER -a android.intent.action.MAIN" />
+		<arg line="-n ${run.package}/${run.activity} ${run.parameters}" />
+	</exec>
+</target>
 </project>
 

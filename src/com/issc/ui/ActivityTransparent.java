@@ -14,6 +14,7 @@ import com.issc.util.Util;
 import com.issc.util.TransactionQueue;
 
 import java.io.FileOutputStream;
+import java.io.File;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -292,7 +293,16 @@ public class ActivityTransparent extends Activity implements
 
     private void openStream(String path) {
         try {
-            mStream = new FileOutputStream(path);
+            File file = new File(path);
+            if (!file.exists()) {
+                Log.w("Target file does not exist, create: " + path);
+                File parent = file.getParentFile();
+                Log.w("make dirs:" + parent.getPath());
+                parent.mkdirs();
+                file.createNewFile();
+            }
+
+            mStream = new FileOutputStream(file, false);
         } catch (IOException e) {
             msgShow("open stream fail", e.toString());
             e.printStackTrace();

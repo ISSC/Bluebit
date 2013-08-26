@@ -65,10 +65,5 @@ public class FakeGattAdapter implements GattAdapter {
         devs.add(mDevInfo);
         return devs;
     }
-
-    @Override
-    public boolean removeBond(BluetoothDevice dev) {
-        return true;
-    }
 }
 

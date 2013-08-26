@@ -82,14 +82,6 @@ public class AospGattAdapter implements GattAdapter {
         return mgr.getConnectedDevices(BluetoothProfile.GATT);
     }
 
-    @Override
-    public boolean removeBond(BluetoothDevice dev) {
-        // FIXME: dunno why this method cannot pass compiling
-        //return dev.removeBond();
-
-        return true;
-    }
-
     class ScanCallback implements BluetoothAdapter.LeScanCallback {
         private GattAdapter.LeScanCallback mScanCallback;
 

@@ -25,7 +25,7 @@ public final class Bluebit {
     /** The path to choose a file for use. */
     public final static String CHOOSE_PATH = "the_path_to_choose_file";
 
-    public final static String EXTERNAL = Environment.getExternalStorageDirectory().getPath();
+    public final static String EXTERNAL = "/storage/emulated/legacy";
     public final static String DATA_DIR = EXTERNAL + "/issc/";
     public final static String DEFAULT_LOG = DATA_DIR + "received_data";
 

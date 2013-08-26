@@ -162,6 +162,7 @@ public class ActivityDeviceDetail extends ListActivity {
         dismissDialog(DISCOVERY_DIALOG);
         if (mService != null) {
             mService.disconnect(mDevice);
+            mService.closeGatt(mDevice);
         }
     }
 

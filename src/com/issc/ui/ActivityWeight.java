@@ -134,6 +134,7 @@ public class ActivityWeight extends Activity implements
         stopScanningTarget();
         mService.rmListener(mListener);
         mService.disconnect(mDevice);
+        mService.closeGatt(mDevice);
         mQueue.clear();
         unbindService(mConn);
     }
@@ -183,6 +184,7 @@ public class ActivityWeight extends Activity implements
     }
 
     private void connectDevice() {
+        mService.connectGatt(this, false, mDevice);
         mService.connect(mDevice, false);
     }
 

@@ -108,8 +108,16 @@ public class LeService extends Service {
      * FIXME: right now we support connect to just 1 device.
      */
     public Gatt connectGatt(Context ctx, boolean auto, BluetoothDevice dev) {
+        if (mGatt != null) {
+            closeGatt(dev);
+        }
         mGatt = mGattAdapter.connectGatt(ctx, auto, mCallback, dev);
         return mGatt;
+    }
+
+    public void closeGatt(BluetoothDevice device) {
+        mGatt.close();
+        mGatt = null;
     }
 
     public boolean startScan(GattAdapter.LeScanCallback clbk) {

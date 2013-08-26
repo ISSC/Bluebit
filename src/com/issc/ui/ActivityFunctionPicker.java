@@ -75,6 +75,7 @@ public class ActivityFunctionPicker extends ListActivity {
         super.onDestroy();
         if (mService != null) {
             mService.disconnect(mDevice);
+            mService.closeGatt(mDevice);
         }
         mService = null;
     }

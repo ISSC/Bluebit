@@ -96,6 +96,7 @@ public class LeService extends Service {
         synchronized(mLock) {
             mGattReady = false;
             if (mGatt != null) {
+                mGatt.disconnect();
                 mGatt.close();
             }
             mGatt = null;
@@ -116,8 +117,14 @@ public class LeService extends Service {
     }
 
     public void closeGatt(BluetoothDevice device) {
-        mGatt.close();
-        mGatt = null;
+        /* In general, there should be an activity that close an Gatt when
+         * onDestroy. However, if user press-back-key too fast, this Service will
+         * release Gatt before destroying the activity, therefore Gatt might be null
+         * when activity do closing Gatt.*/
+        if (mGatt != null) {
+            mGatt.close();
+            mGatt = null;
+        }
     }
 
     public boolean startScan(GattAdapter.LeScanCallback clbk) {
@@ -133,7 +140,13 @@ public class LeService extends Service {
     }
 
     public void disconnect(BluetoothDevice device) {
-        mGatt.disconnect();
+        /* In general, there should be an activity that disconnect from an Gatt when
+         * onDestroy. However, if user press-back-key too fast, this Service will
+         * release Gatt before destroying the activity, therefore Gatt might be null
+         * when activity do disconnecting.*/
+        if (mGatt != null) {
+            mGatt.disconnect();
+        }
     }
 
     public List<BluetoothDevice> getConnectedDevices() {

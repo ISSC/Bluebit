@@ -199,6 +199,7 @@ public class ActivityDevicesList extends Activity {
         // connected device will be ingored when scanning.
         resetList();
         appendConnectedDevices();
+        appendBondDevices();
         mService.startScan(mScanCallback);
     }
 
@@ -226,7 +227,6 @@ public class ActivityDevicesList extends Activity {
         this.runOnUiThread(new Runnable() {
             public void run() {
                 mRecords.clear();
-                appendBondDevices();
                 mAdapter.notifyDataSetChanged();
             }
         });

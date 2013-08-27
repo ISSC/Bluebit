@@ -48,7 +48,9 @@ public class ActivityFunctionPicker extends ListActivity {
     private final static int LAUNCH_FUNCTION = 0x101;
 
     private final static int DISCOVERY_DIALOG = 1;
+    private final static int CONNECT_DIALOG   = 2;
     private ProgressDialog mDiscoveringDialog;
+    private ProgressDialog mConnectDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,10 +115,20 @@ public class ActivityFunctionPicker extends ListActivity {
             mDiscoveringDialog.setMessage(this.getString(R.string.discovering));
             mDiscoveringDialog.setOnCancelListener(new Dialog.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
-                    stopDiscovery();
+                    dismissDiscovery();
                 }
             });
             return mDiscoveringDialog;
+        } else if (id == CONNECT_DIALOG) {
+            mConnectDialog = new ProgressDialog(this);
+            mConnectDialog.setMessage(this.getString(R.string.connecting));
+            mConnectDialog.setOnCancelListener(new Dialog.OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    stopConnect();
+                    dismissConnect();
+                }
+            });
+            return mConnectDialog;
         }
         return null;
     }
@@ -145,22 +157,19 @@ public class ActivityFunctionPicker extends ListActivity {
     }
 
     private void connectToDevice() {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                showDialog(DISCOVERY_DIALOG);
-            }
-        });
         mService.connectGatt(this, false, mDevice);
         if (mService.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
             Log.d("already connected to device");
             List<GattService> list = mService.getServices(mDevice);
             if ((list == null) || (list.size() == 0)) {
+                displayDiscovering();
                 Log.d("start discovering services");
                 mService.discoverServices(mDevice);
             } else {
                 onDiscovered(mDevice);
             }
         } else {
+            displayConnecting();
             boolean init = mService.connect(mDevice, false);
             Log.d("Try to connec to device, successfully? " + init);
         }
@@ -168,7 +177,6 @@ public class ActivityFunctionPicker extends ListActivity {
 
     private void onDiscovered(BluetoothDevice device) {
         Log.d("on discovered:");
-        stopDiscovery();
         if (mService != null) {
             List<GattService> srvs = mService.getServices(device);
             Log.d("discovered result:" + srvs.size());
@@ -180,7 +188,38 @@ public class ActivityFunctionPicker extends ListActivity {
         }
     }
 
-    private void stopDiscovery() {
+    private void stopConnect() {
+        if (mService != null) {
+            mService.disconnect(mDevice);
+            mService.closeGatt(mDevice);
+        }
+    }
+
+    private void displayConnecting() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                showDialog(CONNECT_DIALOG);
+            }
+        });
+    }
+
+    private void displayDiscovering() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                showDialog(DISCOVERY_DIALOG);
+            }
+        });
+    }
+
+    private void dismissConnect() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                dismissDialog(CONNECT_DIALOG);
+            }
+        });
+    }
+
+    private void dismissDiscovery() {
         runOnUiThread(new Runnable() {
             public void run() {
                 dismissDialog(DISCOVERY_DIALOG);
@@ -225,6 +264,7 @@ public class ActivityFunctionPicker extends ListActivity {
 
         @Override
         public void onServicesDiscovered(Gatt gatt, int status) {
+            dismissDiscovery();
             onDiscovered(gatt.getDevice());
         }
 
@@ -238,7 +278,9 @@ public class ActivityFunctionPicker extends ListActivity {
             }
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
+                dismissConnect();
                 Log.d("connected to device, start discovery");
+                displayDiscovering();
                 mService.discoverServices(mDevice);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d("connection state changed to disconnected in function picker");

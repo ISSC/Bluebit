@@ -531,12 +531,12 @@ public class ActivityTransparent extends Activity implements
     }
 
     private void onDisconnected() {
-        Log.d("disconnected, connecting to device");
-        updateView(SHOW_CONNECTION_DIALOG, null);
+        Log.d("transparent activity disconnected, closing");
+        stopTimer();
         mStartTime = null;
         mQueue.clear();
-        mService.connectGatt(this, false, mDevice);
-        mService.connect(mDevice, false);
+        this.setResult(Bluebit.RESULT_REMOTE_DISCONNECT);
+        this.finish();
     }
 
     private void onDiscovered() {

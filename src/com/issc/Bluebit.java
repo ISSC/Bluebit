@@ -2,6 +2,7 @@
 package com.issc;
 
 import com.issc.util.Util;
+import android.app.Activity;
 import android.os.Environment;
 import java.util.UUID;
 
@@ -18,6 +19,10 @@ public final class Bluebit {
 
     /** Use Fake implementation for testing */
     public final static String USE_FAKE = "USE_FAKE";
+
+    /** Activity Result code */
+    // if remote disconnect, the activity should be closed
+    public final static int RESULT_REMOTE_DISCONNECT = Activity.RESULT_FIRST_USER + 1;
 
     // Keys that be used by Intent, Bundle...etc.
     /** The device has been choosen from another activity. */

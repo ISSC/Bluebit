@@ -45,6 +45,8 @@ public class ActivityFunctionPicker extends ListActivity {
     private Gatt.Listener mListener;
     private SrvConnection mConn;
 
+    private final static int LAUNCH_FUNCTION = 0x101;
+
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
 
@@ -74,6 +76,7 @@ public class ActivityFunctionPicker extends ListActivity {
     public void onDestroy() {
         super.onDestroy();
         if (mService != null) {
+            Log.d("function picker tries to drop Gatt");
             mService.disconnect(mDevice);
             mService.closeGatt(mDevice);
         }
@@ -91,6 +94,16 @@ public class ActivityFunctionPicker extends ListActivity {
         super.onPause();
         mService.rmListener(mListener);
         unbindService(mConn);
+    }
+
+    @Override
+    protected void onActivityResult(int request, int result, Intent data) {
+        if (request == LAUNCH_FUNCTION) {
+            if (result == Bluebit.RESULT_REMOTE_DISCONNECT) {
+                Log.d("function picker found remote disconnect, closing");
+                onDisconnected();
+            }
+        }
     }
 
     @Override
@@ -114,7 +127,16 @@ public class ActivityFunctionPicker extends ListActivity {
         // so retrieve intent from Adapter.
         Intent i = mAdapter.createIntent(pos);
         i.putExtra(Bluebit.CHOSEN_DEVICE, mDevice);
-        startActivity(i);
+        startActivityForResult(i, LAUNCH_FUNCTION);
+    }
+
+    private void onDisconnected() {
+        if (mService != null) {
+            mService.disconnect(mDevice);
+            mService.closeGatt(mDevice);
+        }
+
+        finish();
     }
 
     private void initAdapter() {
@@ -219,7 +241,8 @@ public class ActivityFunctionPicker extends ListActivity {
                 Log.d("connected to device, start discovery");
                 mService.discoverServices(mDevice);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d("disconnected!!!");
+                Log.d("connection state changed to disconnected in function picker");
+                onDisconnected();
             }
         }
     }

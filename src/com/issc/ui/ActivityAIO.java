@@ -148,11 +148,10 @@ public class ActivityAIO extends Activity
     }
 
     private void onDisconnected() {
-        Log.d("disconnected, connecting to device");
+        Log.d("automation io activity disconnected, closing");
         mQueue.clear();
-        updateView(SHOW_CONNECTION_DIALOG, null);
-        mService.connectGatt(this, false, mDevice);
-        mService.connect(mDevice, false);
+        this.setResult(Bluebit.RESULT_REMOTE_DISCONNECT);
+        this.finish();
     }
 
     private void onDiscovered() {

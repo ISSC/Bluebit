@@ -148,6 +148,7 @@ public class ActivityFunctionPicker extends ListActivity {
             mService.closeGatt(mDevice);
         }
 
+        setResult(Bluebit.RESULT_REMOTE_DISCONNECT);
         finish();
     }
 

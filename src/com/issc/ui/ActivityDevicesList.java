@@ -40,6 +40,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 /**
  * To scan BLE devices around user.
@@ -63,6 +64,9 @@ public class ActivityDevicesList extends Activity {
     private final static String sDevice = "_bluetooth_device";
 
     private final static int SCAN_DIALOG = 1;
+
+    /* request code to ask a activity to connect to a device */
+    private final static int REQUEST_CONNECT_DEVICE = 0x201;
 
     private final static int MENU_DETAIL = 0;
     private final static int MENU_CHOOSE = 1;
@@ -174,9 +178,18 @@ public class ActivityDevicesList extends Activity {
             Intent i = new Intent(this, ActivityFunctionPicker.class);
             i.putExtra(Bluebit.CHOSEN_DEVICE,
                     (BluetoothDevice)mRecords.get(pos).get(sDevice));
-            startActivity(i);
+            startActivityForResult(i, REQUEST_CONNECT_DEVICE);
         }
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int request, int result, Intent data) {
+        if (request == REQUEST_CONNECT_DEVICE) {
+            if (result == Bluebit.RESULT_REMOTE_DISCONNECT) {
+                Toast.makeText(this, R.string.disconnected, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void startScan() {
@@ -296,7 +309,7 @@ public class ActivityDevicesList extends Activity {
                                     long id) {
             Intent i = new Intent(ActivityDevicesList.this, ActivityFunctionPicker.class);
             i.putExtra(Bluebit.CHOSEN_DEVICE, (BluetoothDevice)mRecords.get(position).get(sDevice));
-            startActivity(i);
+            startActivityForResult(i, REQUEST_CONNECT_DEVICE);
 
         }
     }

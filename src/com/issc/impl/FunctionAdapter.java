@@ -115,6 +115,7 @@ public class FunctionAdapter extends BaseAdapter {
     private void initOptions(ArrayList<UuidMatcher> options) {
         addLighting(options);
         addTransparent(options);
+        addKeyboard(options);
     }
 
     private void addLighting(ArrayList<UuidMatcher> options) {
@@ -137,6 +138,17 @@ public class FunctionAdapter extends BaseAdapter {
         }
 
         matcher.setInfo("Transparent", "Transfer data to device");
+        options.add(matcher);
+    }
+
+    private void addKeyboard(ArrayList<UuidMatcher> options) {
+        UuidMatcher matcher = new UuidMatcher();
+        matcher.setTarget("com.issc", "com.issc.ui.ActivityKeyboard");
+        for (int i = 0; i < Bluebit.UUIDS_OF_TRANSPARENT.length; i++) {
+            matcher.addRule(Bluebit.UUIDS_OF_TRANSPARENT[i]);
+        }
+
+        matcher.setInfo("Keyboard", "Send Key event to device");
         options.add(matcher);
     }
 }

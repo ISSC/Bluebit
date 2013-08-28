@@ -4,6 +4,7 @@
 	<color name="transparent_red">#33FF1111</color>
 	<color name="transparent_green">#3311FF11</color>
 	<color name="transparent_blue">#331111FF</color>
+	<color name="transparent_white">#33FFFFFF</color>
 
 	<color name="black">#000000</color>
 	<color name="white">#FFFFFF</color>

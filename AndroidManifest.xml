@@ -44,6 +44,9 @@
 		<activity android:name=".ui.ActivityWeight"
 			android:screenOrientation="portrait"
 			/>
+		<activity android:name=".ui.ActivityKeyboard"
+			android:screenOrientation="portrait"
+			/>
 
 		<activity android:name=".ui.ActivityFileChooser"
 			android:screenOrientation="portrait"

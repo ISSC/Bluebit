@@ -18,9 +18,11 @@ import android.bluetooth.BluetoothGattService;
 public class AospGattService implements GattService {
 
     private BluetoothGattService mSrv;
+    private List<GattCharacteristic> mList;
 
     public AospGattService(BluetoothGattService srv) {
         mSrv = srv;
+        mList = new ArrayList<GattCharacteristic>();
     }
 
     @Override
@@ -35,13 +37,15 @@ public class AospGattService implements GattService {
 
     @Override
     public List<GattCharacteristic> getCharacteristics() {
+        mList.clear();
+
+        /* Always return current charactesristic, we do not hold any cache. */
         List<BluetoothGattCharacteristic> chrs = mSrv.getCharacteristics();
-        ArrayList<GattCharacteristic> list = new ArrayList<GattCharacteristic>();
         for (BluetoothGattCharacteristic chr: chrs) {
-            list.add(new AospGattCharacteristic(chr));
+            mList.add(new AospGattCharacteristic(chr));
         }
 
-        return list;
+        return mList;
     }
 
     @Override

@@ -25,6 +25,7 @@ public class FakeGattAdapter implements GattAdapter {
 
     private BluetoothAdapter mAdapter;
     private BluetoothDevice mDevInfo;
+    private BluetoothDevice mDevTransparent;
     private Gatt mGattInterface;
 
     public FakeGattAdapter(Context ctx, Listener listener) {
@@ -35,11 +36,16 @@ public class FakeGattAdapter implements GattAdapter {
 
     private void initDevices() {
         mDevInfo = mAdapter.getRemoteDevice("00:11:DE:AD:BE:EF");
+        mDevTransparent = mAdapter.getRemoteDevice("00:11:00:FF:FF:00");
     }
 
     @Override
     public Gatt connectGatt(Context ctx, boolean autoConnect, Listener listener, BluetoothDevice dev) {
-        mGattInterface = new FakeGattDeviceInfo(mDevInfo, listener);
+        if (dev.getAddress().equals(mDevTransparent.getAddress())) {
+            mGattInterface = new FakeGattDeviceTransparent(mDevTransparent, listener);
+        } else {
+            mGattInterface = new FakeGattDeviceInfo(mDevInfo, listener);
+        }
         return mGattInterface;
     }
 
@@ -47,6 +53,7 @@ public class FakeGattAdapter implements GattAdapter {
     @Override
     public boolean startLeScan(GattAdapter.LeScanCallback callback) {
         callback.onLeScan(mDevInfo, 0, new byte[1]);
+        callback.onLeScan(mDevTransparent, 0, new byte[1]);
         return true;
     }
 
@@ -62,7 +69,6 @@ public class FakeGattAdapter implements GattAdapter {
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
         List<BluetoothDevice> devs = new ArrayList<BluetoothDevice>();
-        devs.add(mDevInfo);
         return devs;
     }
 }

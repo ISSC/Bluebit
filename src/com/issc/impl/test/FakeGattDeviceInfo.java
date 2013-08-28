@@ -35,27 +35,27 @@ public class FakeGattDeviceInfo implements Gatt {
         mService = new FakeGattService(Bluebit.SERVICE_DEVICE_INFO);
         FakeGattCharacteristic chr;
 
-        chr = new FakeGattCharacteristic(Bluebit.CHR_MANUFACTURE_NAME);
+        chr = new FakeGattCharacteristic(mService, Bluebit.CHR_MANUFACTURE_NAME);
         chr.setValue(new String("ISSC").getBytes());
         mService.addCharacteristic(chr);
 
-        chr = new FakeGattCharacteristic(Bluebit.CHR_MODEL_NUMBER);
+        chr = new FakeGattCharacteristic(mService, Bluebit.CHR_MODEL_NUMBER);
         chr.setValue(new String("FAKE").getBytes());
         mService.addCharacteristic(chr);
 
-        chr = new FakeGattCharacteristic(Bluebit.CHR_SERIAL_NUMBER);
+        chr = new FakeGattCharacteristic(mService, Bluebit.CHR_SERIAL_NUMBER);
         chr.setValue(new String("9527").getBytes());
         mService.addCharacteristic(chr);
 
-        chr = new FakeGattCharacteristic(Bluebit.CHR_HARDWARE_REVISION);
+        chr = new FakeGattCharacteristic(mService, Bluebit.CHR_HARDWARE_REVISION);
         chr.setValue(new String("1984").getBytes());
         mService.addCharacteristic(chr);
 
-        chr = new FakeGattCharacteristic(Bluebit.CHR_FIRMWARE_REVISION);
+        chr = new FakeGattCharacteristic(mService, Bluebit.CHR_FIRMWARE_REVISION);
         chr.setValue(new String("2001").getBytes());
         mService.addCharacteristic(chr);
 
-        chr = new FakeGattCharacteristic(Bluebit.CHR_SOFTWARE_REVISION);
+        chr = new FakeGattCharacteristic(mService, Bluebit.CHR_SOFTWARE_REVISION);
         chr.setValue(new String("42").getBytes());
         mService.addCharacteristic(chr);
 

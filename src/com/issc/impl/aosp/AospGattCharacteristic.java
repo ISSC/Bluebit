@@ -18,14 +18,21 @@ import android.bluetooth.BluetoothGattDescriptor;
 public class AospGattCharacteristic implements GattCharacteristic {
 
     private BluetoothGattCharacteristic mChr;
+    private List<GattDescriptor> mDscIfs;      // interfaces
 
     public AospGattCharacteristic(BluetoothGattCharacteristic chr) {
         mChr = chr;
+        mDscIfs = new ArrayList<GattDescriptor>();
     }
 
     @Override
     public Object getImpl() {
         return mChr;
+    }
+
+    @Override
+    public GattService getService() {
+        return new AospGattService(mChr.getService());
     }
 
     @Override
@@ -35,13 +42,16 @@ public class AospGattCharacteristic implements GattCharacteristic {
 
     @Override
     public List<GattDescriptor> getDescriptors() {
-        List<BluetoothGattDescriptor> dscs = mChr.getDescriptors();
-        ArrayList<GattDescriptor> list = new ArrayList<GattDescriptor>();
-        for (BluetoothGattDescriptor dsc: dscs) {
-            list.add(new AospGattDescriptor(dsc));
-        }
+        mDscIfs.clear();
 
-        return list;
+        /* Always reflect to the real implementation, we should not hold any cache.
+         * So the returned GattDescriptors always hold the BluetoothGattDescriptor
+         * from this GattCharacteristic. */
+        List<BluetoothGattDescriptor> dscs = mChr.getDescriptors();
+        for (BluetoothGattDescriptor dsc: dscs) {
+            mDscIfs.add(new AospGattDescriptor(dsc));
+        }
+        return mDscIfs;
     }
 
     @Override

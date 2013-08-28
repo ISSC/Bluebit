@@ -19,6 +19,7 @@ public interface GattCharacteristic {
 
     public Object getImpl();
 
+    public GattService getService();
     public GattDescriptor getDescriptor(UUID uuid);
     public List<GattDescriptor> getDescriptors();
     public Integer getIntValue(int type, int offset);

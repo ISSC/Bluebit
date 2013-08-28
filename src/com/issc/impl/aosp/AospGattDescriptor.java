@@ -2,6 +2,7 @@
 package com.issc.impl.aosp;
 
 import com.issc.Bluebit;
+import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.util.Log;
 
@@ -17,6 +18,11 @@ public class AospGattDescriptor implements GattDescriptor {
 
     public AospGattDescriptor(BluetoothGattDescriptor dsc) {
         mDsc = dsc;
+    }
+
+    @Override
+    public GattCharacteristic getCharacteristic() {
+        return new AospGattCharacteristic(mDsc.getCharacteristic());
     }
 
     @Override

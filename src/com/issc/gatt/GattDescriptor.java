@@ -22,6 +22,8 @@ public interface GattDescriptor {
 
     public Object getImpl();
 
+    public GattCharacteristic getCharacteristic();
+
     /* we cannot provide byte[] data directly since the implementation might be different
      * from various platform.*/
     public byte[] getConstantBytes(int type);

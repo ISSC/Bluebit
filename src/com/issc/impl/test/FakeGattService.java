@@ -36,7 +36,7 @@ public class FakeGattService implements GattService {
     }
 
     public void addCharacteristic(UUID uuid, List<UUID> descs) {
-        mChrcs.add(new FakeGattCharacteristic(uuid, descs));
+        mChrcs.add(new FakeGattCharacteristic(this, uuid, descs));
     }
 
     @Override

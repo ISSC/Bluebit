@@ -17,6 +17,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 public class FakeGattCharacteristic implements GattCharacteristic {
 
     private UUID mUuid;
+    private GattService mSrv;
     private List<GattDescriptor> mDescs;
     private byte[] mValue;
 
@@ -24,30 +25,35 @@ public class FakeGattCharacteristic implements GattCharacteristic {
     private int mPermissions;
     private int mProperties;
 
-    public FakeGattCharacteristic(UUID uuid) {
-        this(uuid, null);
+    public FakeGattCharacteristic(GattService srv, UUID uuid) {
+        this(srv, uuid, null);
     }
 
-    public FakeGattCharacteristic(UUID uuid, List<UUID> descs) {
+    public FakeGattCharacteristic(GattService srv, UUID uuid, List<UUID> descs) {
+        mSrv = srv;
         mUuid = uuid;
         mDescs = new ArrayList<GattDescriptor>();
-        createDescriptors(mDescs, descs);
+        if (descs != null) {
+            createDescriptors(mDescs, descs);
+        }
     }
 
     private void createDescriptors(List<GattDescriptor> container, List<UUID> uuids) {
-        if (uuids == null) {
-            return;
-        }
         Iterator<UUID> it = uuids.iterator();
         while(it.hasNext()) {
             UUID uuid = it.next();
-            container.add(new FakeGattDescriptor(uuid));
+            container.add(new FakeGattDescriptor(this, uuid));
         }
     }
 
     @Override
     public Object getImpl() {
         return this;
+    }
+
+    @Override
+    public GattService getService() {
+        return mSrv;
     }
 
     @Override

@@ -2,6 +2,7 @@
 package com.issc.impl.test;
 
 import com.issc.Bluebit;
+import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.util.Log;
 
@@ -13,15 +14,17 @@ import android.bluetooth.BluetoothGattDescriptor;
 
 public class FakeGattDescriptor implements GattDescriptor {
 
+    private GattCharacteristic mChrIf;  // interface
     private UUID mUuid;
     private int mPermissions;
     private byte[] mValue;
 
-    public FakeGattDescriptor(UUID uuid) {
-        this(uuid, BluetoothGattDescriptor.PERMISSION_READ);
+    public FakeGattDescriptor(GattCharacteristic chr, UUID uuid) {
+        this(chr, uuid, BluetoothGattDescriptor.PERMISSION_READ);
     }
 
-    public FakeGattDescriptor(UUID uuid, int permission) {
+    public FakeGattDescriptor(GattCharacteristic chr, UUID uuid, int permission) {
+        mChrIf = chr;
         mUuid = uuid;
         mPermissions = permission;
     }
@@ -29,6 +32,11 @@ public class FakeGattDescriptor implements GattDescriptor {
     @Override
     public Object getImpl() {
         return this;
+    }
+
+    @Override
+    public GattCharacteristic getCharacteristic() {
+        return mChrIf;
     }
 
     @Override

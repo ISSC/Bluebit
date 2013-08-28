@@ -173,7 +173,7 @@ public final class Util {
     public static String BytesToHex(byte[] data) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < data.length; i++) {
-            sb.append(String.format("%02x"));
+            sb.append(String.format("%02x", data[i]));
         }
 
         return sb.toString();

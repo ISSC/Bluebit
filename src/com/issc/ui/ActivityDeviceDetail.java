@@ -58,6 +58,7 @@ public class ActivityDeviceDetail extends ListActivity {
 
     private final static int DISCOVERY_DIALOG = 1;
     private ProgressDialog mDiscoveringDialog;
+    private boolean mDiscovered = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,7 +88,12 @@ public class ActivityDeviceDetail extends ListActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mService.rmListener(mListener);
+        if (mService != null) {
+            mService.rmListener(mListener);
+            mService.disconnect(mDevice);
+            mService.closeGatt(mDevice);
+        }
+
         mService = null;
         unbindService(mConn);
     }
@@ -134,7 +140,7 @@ public class ActivityDeviceDetail extends ListActivity {
     }
 
     public void onClickBtnMore(View v) {
-        if (mService != null) {
+        if (mService != null && !mDiscovered) {
             startDiscovery();
         }
     }
@@ -143,7 +149,6 @@ public class ActivityDeviceDetail extends ListActivity {
         if (mService!= null) {
             showDialog(DISCOVERY_DIALOG);
             if (mService.getConnectionState(mDevice) == BluetoothProfile.STATE_CONNECTED) {
-                mService.connectGatt(this, false, mDevice);
                 List<GattService> list = mService.getServices(mDevice);
                 if ((list == null) || (list.size() == 0)) {
                     Log.d("start discovery");
@@ -152,23 +157,20 @@ public class ActivityDeviceDetail extends ListActivity {
                     onDiscovered(mDevice);
                 }
             } else {
+                mService.connectGatt(this, false, mDevice);
                 mService.connect(mDevice, false);
             }
         }
-
     }
 
     private void stopDiscovery() {
         dismissDialog(DISCOVERY_DIALOG);
-        if (mService != null) {
-            mService.disconnect(mDevice);
-            mService.closeGatt(mDevice);
-        }
     }
 
     private void onDiscovered(BluetoothDevice device) {
-        Log.d("on discovered:");
-        if (mService!= null) {
+        mDiscovered = true;
+        Log.d("on discovered");
+        if (mService != null) {
             List<GattService> srvs = mService.getServices(device);
             Iterator<GattService> it = srvs.iterator();
             while (it.hasNext()) {

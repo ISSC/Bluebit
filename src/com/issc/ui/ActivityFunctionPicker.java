@@ -130,7 +130,8 @@ public class ActivityFunctionPicker extends ListActivity {
             mDiscoveringDialog.setMessage(this.getString(R.string.discovering));
             mDiscoveringDialog.setOnCancelListener(new Dialog.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
-                    dismissDiscovery();
+                    // this dialog should be closed, do not need to dismiss again
+                    //dismissDiscovery();
                 }
             });
             return mDiscoveringDialog;
@@ -140,7 +141,8 @@ public class ActivityFunctionPicker extends ListActivity {
             mConnectDialog.setOnCancelListener(new Dialog.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
                     stopConnect();
-                    dismissConnect();
+                    // this dialog should be closed, do not need to dismiss again
+                    // dismissConnect();
                 }
             });
             return mConnectDialog;
@@ -230,7 +232,9 @@ public class ActivityFunctionPicker extends ListActivity {
     private void dismissConnect() {
         runOnUiThread(new Runnable() {
             public void run() {
-                dismissDialog(CONNECT_DIALOG);
+                if (mConnectDialog != null && mConnectDialog.isShowing()) {
+                    dismissDialog(CONNECT_DIALOG);
+                }
             }
         });
     }
@@ -238,7 +242,9 @@ public class ActivityFunctionPicker extends ListActivity {
     private void dismissDiscovery() {
         runOnUiThread(new Runnable() {
             public void run() {
-                dismissDialog(DISCOVERY_DIALOG);
+                if (mDiscoveringDialog != null && mDiscoveringDialog .isShowing()) {
+                    dismissDialog(DISCOVERY_DIALOG);
+                }
             }
         });
     }

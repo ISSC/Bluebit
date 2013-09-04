@@ -120,7 +120,8 @@ public class ActivityDeviceDetail extends ListActivity {
             mDiscoveringDialog.setMessage(this.getString(R.string.scanning));
             mDiscoveringDialog.setOnCancelListener(new Dialog.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
-                    stopDiscovery();
+                    // this dialog should be closed, do not need to dismiss again
+                    // stopDiscovery();
                 }
             });
             return mDiscoveringDialog;

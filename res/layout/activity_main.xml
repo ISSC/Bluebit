@@ -42,6 +42,42 @@
 					/>
 			</LinearLayout>
 		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="@color/peter_river"
+			android:onClick="onClickServer"
+			>
+			<ImageView
+				android:layout_width="@dimen/navigation_icon_size"
+				android:layout_height="@dimen/navigation_icon_size"
+				android:src="@drawable/ic_light"
+				android:scaleType="fitXY"
+				/>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_weight="1"
+				android:orientation="vertical"
+				>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="@dimen/small_gutter"
+					android:text="@string/main_server_title"
+					style="@style/navigation_title"
+					/>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="@dimen/small_gutter"
+					android:text="@string/main_server_desc"
+					style="@style/navigation_description"
+					/>
+			</LinearLayout>
+		</LinearLayout>
+
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

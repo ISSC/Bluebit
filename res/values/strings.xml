@@ -26,6 +26,7 @@
 	<string name="device_menu_title">Bluetooth Device</string>
 	<string name="device_menu_choose">Choose this device</string>
 	<string name="device_menu_detail">Detail information</string>
+	<string name="device_menu_server">Connect as a server</string>
 	<string name="device_menu_rm_bond">Remove Bond</string>
 
 	<string name="detail_name">Name</string>
@@ -47,6 +48,8 @@
 
 	<string name="main_scan_title">Scan</string>
 	<string name="main_scan_desc">To scan devices around you</string>
+	<string name="main_server_title">Server</string>
+	<string name="main_server_desc">To be a GATT server and connect to a client device</string>
 	<string name="main_weight_title">Weight Scale</string>
 	<string name="main_weight_desc">Get data from your weight scale</string>
 

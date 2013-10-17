@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<item type="id" name="frag_gatt_server" />
 	<item type="id" name="row_title" />
 	<item type="id" name="row_description" />
 	<item type="id" name="row_extra" />

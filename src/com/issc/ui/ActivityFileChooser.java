@@ -114,6 +114,13 @@ public class ActivityFileChooser extends ListActivity {
     private void listFiles(String path) {
         File dir = new File(path);
 
+        if (!dir.exists()) {
+            if (!dir.mkdir()) {
+                fail("Cannot make: " + path);
+                return;
+            }
+        }
+
         if (!dir.canRead()) {
             fail("Cannot read: " + path);
             return;

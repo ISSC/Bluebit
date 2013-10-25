@@ -96,14 +96,14 @@ public class ActivityTransparent extends Activity implements
     private final static int MENU_CLEAR  = 0x501;
 
     private final static String INFO_CONTENT = "the_information_body";
-    private final static String ECHO_ENABLED = "echo_function_is_enabled";
+    private final static String RCV_ENABLED = "could_receive_data_if_enabled";
 
     private final static int SHOW_CONNECTION_DIALOG     = 0x1000;
     private final static int DISMISS_CONNECTION_DIALOG  = 0x1001;
     private final static int CONSUME_TRANSACTION        = 0x1002;
     private final static int DISMISS_TIMER_DIALOG       = 0x1003;
     private final static int APPEND_MESSAGE             = 0x1004;
-    private final static int ECHO_STATE                 = 0x1005;
+    private final static int RCV_STATE                  = 0x1005;
 
 
     private TabHost mTabHost;
@@ -112,7 +112,7 @@ public class ActivityTransparent extends Activity implements
     private Button   mBtnSend;
     private ToggleButton mToggleEcho;
     private ToggleButton mToggleResponse;
-    private CompoundButton mEchoIndicator;
+    private CompoundButton mRcvIndicator;
 
     private Spinner mSpinnerDelta;
     private Spinner mSpinnerSize;
@@ -144,7 +144,7 @@ public class ActivityTransparent extends Activity implements
         mBtnSend = (Button)findViewById(R.id.trans_btn_send);
         mToggleEcho     = (ToggleButton)findViewById(R.id.echo_toggle);
         mToggleResponse = (ToggleButton)findViewById(R.id.trans_type);
-        mEchoIndicator = (CompoundButton)findViewById(R.id.echo_indicator);
+        mRcvIndicator   = (CompoundButton)findViewById(R.id.rcv_indicator);
 
         mViewHandler = new ViewHandler();
 
@@ -152,7 +152,7 @@ public class ActivityTransparent extends Activity implements
         mTabHost.setup();
         addTab(mTabHost, "Tab1", "Raw", R.id.tab_raw);
         addTab(mTabHost, "Tab2", "Timer", R.id.tab_timer);
-        addTab(mTabHost, "Tab3", "Echo", R.id.tab_echo);
+        addTab(mTabHost, "Tab3", "Receive", R.id.tab_rcv);
 
         mMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
         registerForContextMenu(mMsg);
@@ -270,15 +270,11 @@ public class ActivityTransparent extends Activity implements
         onSetType(mToggleResponse.isChecked());
     }
 
-    public void onClickEcho(View v) {
-        onSetEcho(mToggleEcho.isChecked());
-    }
-
     private void onSetType(boolean withResponse) {
         Log.d("set write with response:" + withResponse);
     }
 
-    private void onSetEcho(boolean enable) {
+    private void enableReceive(boolean enable) {
         if (enable) {
             enableNotification();
             openStream(Bluebit.DEFAULT_LOG);
@@ -372,16 +368,19 @@ public class ActivityTransparent extends Activity implements
      *
      * Display the data and transfer back to device.
      */
-    private void onEcho(byte[] data) {
+    private void onReceived(byte[] data) {
         StringBuffer sb = new StringBuffer();
         if (data == null) {
             sb.append("Received empty data");
         } else {
             String recv = new String(data);
             msgShow("recv", recv);
-            write(data);
             writeToStream(data);
-            msgShow("echo", recv);
+
+            if (mToggleEcho.isChecked()) {
+                write(data);
+                msgShow("echo", recv);
+            }
         }
         Bundle msg = new Bundle();
         msg.putCharSequence(INFO_CONTENT, sb);
@@ -561,7 +560,6 @@ public class ActivityTransparent extends Activity implements
         mTransTx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_TX);
         mTransRx = proprietary.getCharacteristic(Bluebit.CHR_ISSC_TRANS_RX);
         Log.d(String.format("found Tx:%b, Rx:%b", mTransTx != null, mTransRx != null));
-        onSetEcho(mToggleEcho.isChecked());
     }
 
     @Override
@@ -627,8 +625,8 @@ public class ActivityTransparent extends Activity implements
                         mMsg.scrollTo(0, amount);
                     }
                 }
-            } else if (tag == ECHO_STATE) {
-                mEchoIndicator.setChecked(bundle.getBoolean(ECHO_ENABLED, false));
+            } else if (tag == RCV_STATE) {
+                mRcvIndicator.setChecked(bundle.getBoolean(RCV_ENABLED, false));
             }
         }
     }
@@ -673,7 +671,7 @@ public class ActivityTransparent extends Activity implements
         public void onCharacteristicChanged(Gatt gatt, GattCharacteristic chrc) {
             Log.d("on chr changed" );
             if (chrc.getUuid().equals(Bluebit.CHR_ISSC_TRANS_TX)) {
-                onEcho(chrc.getValue());
+                onReceived(chrc.getValue());
             }
         }
 
@@ -707,12 +705,12 @@ public class ActivityTransparent extends Activity implements
                 byte[] value = dsc.getValue();
                 if (Arrays.equals(value, dsc.getConstantBytes(GattDescriptor.ENABLE_NOTIFICATION_VALUE))) {
                     Bundle state = new Bundle();
-                    state.putBoolean(ECHO_ENABLED, true);
-                    updateView(ECHO_STATE, state);
+                    state.putBoolean(RCV_ENABLED, true);
+                    updateView(RCV_STATE, state);
                 } else if (Arrays.equals(value, dsc.getConstantBytes(GattDescriptor.DISABLE_NOTIFICATION_VALUE))) {
                     Bundle state = new Bundle();
-                    state.putBoolean(ECHO_ENABLED, false);
-                    updateView(ECHO_STATE, state);
+                    state.putBoolean(RCV_ENABLED, false);
+                    updateView(RCV_STATE, state);
                 }
             }
         }

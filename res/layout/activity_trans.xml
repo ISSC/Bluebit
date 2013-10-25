@@ -127,12 +127,30 @@
 			</TableLayout>
 
 			<TableLayout
-				android:id="@+id/tab_echo"
+				android:id="@+id/tab_rcv"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="@dimen/large_gutter"
 				android:orientation="vertical"
 				>
+				<TableRow>
+					<TextView
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="@dimen/large_gutter"
+						android:text="@string/rcv_desc"
+						style="@style/row_text_small"
+						/>
+					<CheckBox
+						android:id="@+id/rcv_indicator"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:text="@string/rcv_state"
+						android:layout_marginLeft="@dimen/large_gutter"
+						android:enabled="false"
+						/>
+				</TableRow>
 				<TableRow
 					>
 					<LinearLayout
@@ -159,15 +177,6 @@
 							style="@style/row_text_small"
 							>
 						</TextView>
-						<CheckBox
-							android:id="@+id/echo_indicator"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_weight="1"
-							android:text="@string/echo_state"
-							android:layout_marginLeft="@dimen/large_gutter"
-							android:enabled="false"
-							/>
 					</LinearLayout>
 					<ToggleButton
 						android:id="@+id/echo_toggle"
@@ -177,7 +186,6 @@
 						android:textOn="@string/on"
 						android:textOff="@string/off"
 						android:layout_marginLeft="@dimen/large_gutter"
-						android:onClick="onClickEcho"
 						android:checked="false"
 						/>
 				</TableRow>

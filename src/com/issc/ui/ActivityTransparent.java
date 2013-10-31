@@ -379,16 +379,19 @@ public class ActivityTransparent extends Activity implements
             sb.append("Received empty data");
         } else {
             String recv = new String(data);
-            msgShow("recv", recv);
+            sb.append("recv:");
+            sb.append(recv);
             writeToStream(data);
 
             if (mToggleEcho.isChecked()) {
                 write(data);
-                msgShow("echo", recv);
+                sb.append("echo:");
+                sb.append(recv);
             }
         }
         Bundle msg = new Bundle();
         msg.putCharSequence(INFO_CONTENT, sb);
+
         updateView(APPEND_MESSAGE, msg);
     }
 

@@ -23,8 +23,7 @@ import com.issc.gatt.Gatt.Listener;
 import com.issc.gatt.GattCharacteristic;
 import com.issc.gatt.GattDescriptor;
 import com.issc.gatt.GattService;
-import com.issc.impl.aosp.AospGattAdapter;
-import com.issc.impl.test.FakeGattAdapter;
+import com.issc.impl.samsung.SamsungGattAdapter;
 import com.issc.util.Log;
 
 import java.util.ArrayList;
@@ -79,13 +78,8 @@ public class LeService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         boolean fake = intent.getBooleanExtra(Bluebit.USE_FAKE, false);
-        if (fake) {
-            Log.d("Use FakeGattAdapter for testing");
-            mGattAdapter = new FakeGattAdapter(this, mCallback);
-        } else {
-            Log.d("Use AospGattAdapter");
-            mGattAdapter = new AospGattAdapter(this, mCallback);
-        }
+        Log.d("Use SamsungGattAdapter");
+        mGattAdapter = new SamsungGattAdapter(this, mCallback);
 
         return Service.START_STICKY;
     }

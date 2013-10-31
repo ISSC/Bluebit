@@ -270,17 +270,22 @@ public class ActivityTransparent extends Activity implements
         onSetType(mToggleResponse.isChecked());
     }
 
+    public void onClickRcv(View v) {
+        toggleReceive();
+    }
+
     private void onSetType(boolean withResponse) {
         Log.d("set write with response:" + withResponse);
     }
 
-    private void enableReceive(boolean enable) {
-        if (enable) {
-            enableNotification();
-            openStream(Bluebit.DEFAULT_LOG);
-        } else {
+    private void toggleReceive() {
+
+        if (mRcvIndicator.isChecked()) {
             disableNotification();
             closeStream();
+        } else {
+            enableNotification();
+            openStream(Bluebit.DEFAULT_LOG);
         }
     }
 

@@ -66,6 +66,7 @@
 	<string name="title_dsc">Descriptor</string>
 
 	<string name="rcv_desc">Receive file from remote if enabled</string>
+	<string name="rcv_btn">Toggle</string>
 	<string name="rcv_state">Enabled</string>
 	<string name="compare_file">Choose a file to compare</string>
 	<string name="timer_delta">Delta time(ms)</string>

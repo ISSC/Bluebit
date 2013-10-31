@@ -134,21 +134,37 @@
 				android:orientation="vertical"
 				>
 				<TableRow>
-					<TextView
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginLeft="@dimen/large_gutter"
-						android:text="@string/rcv_desc"
-						style="@style/row_text_small"
-						/>
-					<CheckBox
-						android:id="@+id/rcv_indicator"
+					<LinearLayout
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_weight="1"
-						android:text="@string/rcv_state"
+						android:minHeight="?android:attr/listPreferredItemHeight"
+						android:gravity="center_vertical"
+						android:orientation="vertical" >
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="@dimen/large_gutter"
+							android:text="@string/rcv_desc"
+							style="@style/row_text_small"
+							/>
+						<CheckBox
+							android:id="@+id/rcv_indicator"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="@string/rcv_state"
+							android:layout_marginLeft="@dimen/large_gutter"
+							android:enabled="false"
+							/>
+					</LinearLayout>
+					<Button
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
 						android:layout_marginLeft="@dimen/large_gutter"
-						android:enabled="false"
+						android:layout_weight="2"
+						android:onClick="onClickRcv"
+						android:text="@string/rcv_btn"
 						/>
 				</TableRow>
 				<TableRow

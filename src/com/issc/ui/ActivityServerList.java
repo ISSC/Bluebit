@@ -99,7 +99,7 @@ public class ActivityServerList extends ListActivity {
         handler.putExtra(Bluebit.EXTRA_ID, frag);
         handler.putExtra(Bluebit.EXTRA_LAYOUT, layout);
 
-        Intent picker = new Intent(this, ActivityDevicesList.class);
+        Intent picker = new Intent(this, ActivityDeviceChooser.class);
         picker.putExtra(Bluebit.EXTRA_TARGET, handler);
         startActivity(picker);
     }

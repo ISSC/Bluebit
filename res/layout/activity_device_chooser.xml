@@ -4,23 +4,21 @@
 	android:layout_height="match_parent"
 	android:orientation="vertical" >
 
-	<LinearLayout
+	<ListView
+		android:id="@android:id/list"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
 		>
-		<ListView
-			android:id="@+id/devices_list"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			/>
-		<ViewStub
-			android:id="@+id/empty"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout="@layout/empty_list_view"
-			/>
-	</LinearLayout>
+	</ListView>
+
+	<ViewStub
+		android:id="@android:id/empty"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout="@layout/empty_list_view"
+		android:layout_weight="1"
+		/>
 
 	<LinearLayout
 		android:layout_width="match_parent"

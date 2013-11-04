@@ -33,6 +33,7 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -49,7 +50,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -63,9 +63,8 @@ import android.widget.Toast;
  * We can select one of these devices to discover services of it.
  * Or to get more detail by long-pressing.
  */
-public class ActivityDevicesList extends Activity {
+public class ActivityDeviceChooser extends ListActivity {
 
-    private ListView mListView;
     private Button mBtnScan;
 
     private ProgressDialog mScanningDialog;
@@ -82,34 +81,30 @@ public class ActivityDevicesList extends Activity {
     /* request code to ask a activity to connect to a device */
     private final static int REQUEST_CONNECT_DEVICE = 0x201;
 
-    private Intent mTarget;
     private final static int MENU_DETAIL = 0;
     private final static int MENU_CHOOSE = 1;
 
+    private Intent mHandler;
     private LeService mService;
     private ScanCallback mScanCallback;
-    private Gatt.Listener mListener;
     private SrvConnection mConn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_devices_list);
+        setContentView(R.layout.activity_device_chooser);
 
         if (!getIntent().hasExtra(Bluebit.EXTRA_TARGET)) {
             finish();
             Log.d("Not specified target activity");
             return;
         }
-        mTarget = (Intent)getIntent().getExtras().getParcelable(Bluebit.EXTRA_TARGET);
+
+        mHandler = (Intent)getIntent().getExtras().getParcelable(Bluebit.EXTRA_TARGET);
 
         mBtnScan = (Button) findViewById(R.id.btn_scan);
-        mListView = (ListView) findViewById(R.id.devices_list);
+        registerForContextMenu(getListView());
 
-        mListView.setOnItemClickListener(new ItemClickListener());
-        registerForContextMenu(mListView);
-
-        mListener = new GattListener();
         mScanCallback = new ScanCallback();
         initAdapter();
         mConn = new SrvConnection();
@@ -130,8 +125,6 @@ public class ActivityDevicesList extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        // this activity is invisible, remove listener
-        mService.rmListener(mListener);
         mService = null;
         unbindService(mConn);
     }
@@ -149,8 +142,7 @@ public class ActivityDevicesList extends Activity {
                     to
                 );
 
-        mListView.setAdapter(mAdapter);
-        mListView.setEmptyView(findViewById(R.id.empty));
+        setListAdapter(mAdapter);
     }
 
     public void onClickBtnScan(View v) {
@@ -178,7 +170,7 @@ public class ActivityDevicesList extends Activity {
                                         View v,
                                         ContextMenuInfo info) {
         super.onCreateContextMenu(menu, v, info);
-        if (v == mListView) {
+        if (v == getListView()) {
             menu.setHeaderTitle(R.string.device_menu_title);
             menu.add(0, MENU_DETAIL, Menu.NONE, R.string.device_menu_detail);
             menu.add(0, MENU_CHOOSE, Menu.NONE, R.string.device_menu_choose);
@@ -197,9 +189,9 @@ public class ActivityDevicesList extends Activity {
                     (BluetoothDevice)mRecords.get(pos).get(sDevice));
             startActivity(i);
         } else if (id == MENU_CHOOSE) {
-            mTarget.putExtra(Bluebit.CHOSEN_DEVICE,
+            mHandler.putExtra(Bluebit.CHOSEN_DEVICE,
                     (BluetoothDevice)mRecords.get(pos).get(sDevice));
-            startActivityForResult(mTarget, REQUEST_CONNECT_DEVICE);
+            startActivityForResult(mHandler, REQUEST_CONNECT_DEVICE);
         }
         return true;
     }
@@ -322,17 +314,15 @@ public class ActivityDevicesList extends Activity {
         return false;
     }
 
-    class ItemClickListener implements OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent,
-                                    View view,
-                                    int position,
-                                    long id) {
-            mTarget.putExtra(Bluebit.CHOSEN_DEVICE,
-                    (BluetoothDevice)mRecords.get(position).get(sDevice));
-            startActivityForResult(mTarget, REQUEST_CONNECT_DEVICE);
+    @Override
+    public void onListItemClick(ListView parent,
+                                View view,
+                                int position,
+                                long id) {
 
-        }
+        mHandler.putExtra(Bluebit.CHOSEN_DEVICE,
+                (BluetoothDevice)mRecords.get(position).get(sDevice));
+        startActivityForResult(mHandler, REQUEST_CONNECT_DEVICE);
     }
 
     class ScanCallback implements GattAdapter.LeScanCallback {
@@ -342,17 +332,10 @@ public class ActivityDevicesList extends Activity {
         }
     }
 
-    class GattListener extends Gatt.ListenerHelper {
-        GattListener() {
-            super("ActivityDevicesList");
-        }
-    }
-
     class SrvConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = ((LeService.LocalBinder)service).getService();
-            mService.addListener(mListener);
             resetList();
         }
 

@@ -95,6 +95,8 @@ public class ActivityMain extends Activity {
     public void onClickScan(View v) {
         if (Util.isBluetoothEnabled()) {
             Intent i = new Intent(this, ActivityDevicesList.class);
+            Intent target = new Intent(this, ActivityFunctionPicker.class);
+            i.putExtra(Bluebit.EXTRA_TARGET, target);
             startActivity(i);
         } else {
             Log.d("Trying to enable Bluetooth");

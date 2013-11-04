@@ -82,6 +82,7 @@ public class ActivityDevicesList extends Activity {
     /* request code to ask a activity to connect to a device */
     private final static int REQUEST_CONNECT_DEVICE = 0x201;
 
+    private Intent mTarget;
     private final static int MENU_DETAIL = 0;
     private final static int MENU_CHOOSE = 1;
 
@@ -94,6 +95,13 @@ public class ActivityDevicesList extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_devices_list);
+
+        if (!getIntent().hasExtra(Bluebit.EXTRA_TARGET)) {
+            finish();
+            Log.d("Not specified target activity");
+            return;
+        }
+        mTarget = (Intent)getIntent().getExtras().getParcelable(Bluebit.EXTRA_TARGET);
 
         mBtnScan = (Button) findViewById(R.id.btn_scan);
         mListView = (ListView) findViewById(R.id.devices_list);
@@ -189,10 +197,9 @@ public class ActivityDevicesList extends Activity {
                     (BluetoothDevice)mRecords.get(pos).get(sDevice));
             startActivity(i);
         } else if (id == MENU_CHOOSE) {
-            Intent i = new Intent(this, ActivityFunctionPicker.class);
-            i.putExtra(Bluebit.CHOSEN_DEVICE,
+            mTarget.putExtra(Bluebit.CHOSEN_DEVICE,
                     (BluetoothDevice)mRecords.get(pos).get(sDevice));
-            startActivityForResult(i, REQUEST_CONNECT_DEVICE);
+            startActivityForResult(mTarget, REQUEST_CONNECT_DEVICE);
         }
         return true;
     }
@@ -321,9 +328,9 @@ public class ActivityDevicesList extends Activity {
                                     View view,
                                     int position,
                                     long id) {
-            Intent i = new Intent(ActivityDevicesList.this, ActivityFunctionPicker.class);
-            i.putExtra(Bluebit.CHOSEN_DEVICE, (BluetoothDevice)mRecords.get(position).get(sDevice));
-            startActivityForResult(i, REQUEST_CONNECT_DEVICE);
+            mTarget.putExtra(Bluebit.CHOSEN_DEVICE,
+                    (BluetoothDevice)mRecords.get(position).get(sDevice));
+            startActivityForResult(mTarget, REQUEST_CONNECT_DEVICE);
 
         }
     }

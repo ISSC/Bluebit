@@ -106,7 +106,7 @@ public class ActivityMain extends Activity {
 
     public void onClickServer(View v) {
         if (Util.isBluetoothEnabled()) {
-            Intent i = new Intent(this, ActivityGattServer.class);
+            Intent i = new Intent(this, ActivityServerList.class);
             startActivity(i);
         } else {
             Log.d("Trying to enable Bluetooth");

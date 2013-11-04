@@ -52,6 +52,10 @@
 			android:screenOrientation="portrait"
 			/>
 
+		<activity android:name=".ui.ActivityServerList"
+			android:screenOrientation="portrait"
+			/>
+
 		<activity android:name=".ui.ActivityGattServer"
 			android:screenOrientation="portrait"
 			/>

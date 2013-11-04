@@ -30,14 +30,14 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginLeft="@dimen/small_gutter"
-					android:text="@string/main_scan_title"
+					android:text="@string/main_client_title"
 					style="@style/navigation_title"
 					/>
 				<TextView
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginLeft="@dimen/small_gutter"
-					android:text="@string/main_scan_desc"
+					android:text="@string/main_client_desc"
 					style="@style/navigation_description"
 					/>
 			</LinearLayout>

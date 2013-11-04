@@ -46,8 +46,8 @@
 	<string name="device_class_uncategorized">Uncategorized</string>
 	<string name="device_class_wearable">Wearable</string>
 
-	<string name="main_scan_title">Scan</string>
-	<string name="main_scan_desc">To scan devices around you</string>
+	<string name="main_client_title">Client</string>
+	<string name="main_client_desc">To be a Gatt client and scan server devices around you</string>
 	<string name="main_server_title">Server</string>
 	<string name="main_server_desc">To be a GATT server and connect to a client device</string>
 	<string name="main_weight_title">Weight Scale</string>

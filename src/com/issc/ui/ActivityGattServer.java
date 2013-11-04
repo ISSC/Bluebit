@@ -16,6 +16,7 @@
 
 package com.issc.ui;
 
+import com.issc.Bluebit;
 import com.issc.R;
 import com.issc.util.Log;
 import com.issc.util.Util;
@@ -27,15 +28,31 @@ import android.os.Bundle;
 import android.view.View;
 
 public class ActivityGattServer extends Activity {
+
+    private int mId;
+    private int mLayout;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gatt_server);
+        Intent i = getIntent();
+        if (!i.hasExtra(Bluebit.EXTRA_ID)) {
+            Log.d("No extra id");
+            finish();
+        }
+        if (!i.hasExtra(Bluebit.EXTRA_LAYOUT)) {
+            Log.d("No extra layout");
+            finish();
+        }
+
+        mId = i.getExtras().getInt(Bluebit.EXTRA_ID);
+        mLayout = i.getExtras().getInt(Bluebit.EXTRA_LAYOUT);
+        setContentView(mLayout);
     }
 
     @Override
     public void onActivityResult(int req, int result, Intent data) {
-        Fragment gattsrv = getFragmentManager().findFragmentById(R.id.frag_gatt_server);
+        Fragment gattsrv = getFragmentManager().findFragmentById(mId);
         if (gattsrv != null) {
             gattsrv.onActivityResult(req, result, data);
         }

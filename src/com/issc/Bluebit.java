@@ -40,8 +40,12 @@ public final class Bluebit {
     public final static int RESULT_REMOTE_DISCONNECT = Activity.RESULT_FIRST_USER + 1;
 
     // Keys that be used by Intent, Bundle...etc.
-    /** To specify target activity to use */
-    public final static String EXTRA_TARGET= "which_target_to_use";
+    /** To specify target id to use */
+    public final static String EXTRA_ID = "which_id_to_use";
+    /** To specify target layout to use */
+    public final static String EXTRA_LAYOUT = "which_layout_to_use";
+    /** To specify target layout to use */
+    public final static String EXTRA_TARGET= "which_layout_to_use";
     /** The device has been choosen from another activity. */
     public final static String CHOSEN_DEVICE = "the_device_been_choosen";
     /** The path to choose a file for use. */

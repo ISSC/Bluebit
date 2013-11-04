@@ -36,6 +36,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -43,6 +44,8 @@ public class ActivityServerList extends ListActivity {
 
     private final static String sTitle = "title";
     private final static String sDesc  = "desc";
+    private final static String sFrag   = "fragment";
+    private final static String sLayout = "layout";
 
     private BluetoothDevice mDevice;
     private ArrayList<Map<String, Object>> mEntries;
@@ -73,7 +76,6 @@ public class ActivityServerList extends ListActivity {
                     to
                 );
 
-        //mAdapter.setViewBinder(new MyBinder());
         setListAdapter(mAdapter);
         addSupportedServers();
     }
@@ -82,20 +84,24 @@ public class ActivityServerList extends ListActivity {
         Map<String, Object> anp = new HashMap<String, Object>();
         anp.put(sTitle, "Alert Notification Server");
         anp.put(sDesc, "To send information to client");
+        anp.put(sFrag, new Integer(R.id.frag_gatt_server));
+        anp.put(sLayout, new Integer(R.layout.activity_gatt_server));
         mEntries.add(anp);
     }
 
-    class MyBinder implements SimpleAdapter.ViewBinder {
-        // By default, SimpleAdapter just invoke toString to fill content of TextView.
-        // However, the data might be spannable-string, so use setText instead of
-        // using toString to avoid information losing.
-        public boolean setViewValue(View view, Object data, String textRepresentation) {
-            if (view instanceof TextView) {
-                ((TextView)view).setText((CharSequence)data);
-            }
-            return true;
-        }
-    }
+    @Override
+    public void onListItemClick(ListView l, View view, int pos, long id) {
+        Map<String, Object> selected = mEntries.get(pos);
+        int frag = ((Integer)selected.get(sFrag)).intValue();
+        int layout = ((Integer)selected.get(sLayout)).intValue();
 
+        Intent handler = new Intent(this, ActivityGattServer.class);
+        handler.putExtra(Bluebit.EXTRA_ID, frag);
+        handler.putExtra(Bluebit.EXTRA_LAYOUT, layout);
+
+        Intent picker = new Intent(this, ActivityDevicesList.class);
+        picker.putExtra(Bluebit.EXTRA_TARGET, handler);
+        startActivity(picker);
+    }
 }
 

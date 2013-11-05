@@ -45,9 +45,10 @@ public class AospGattAdapter implements GattAdapter {
 
     private AospGatt mGattInterface;
     private BluetoothGatt mGatt;
-    private BluetoothGattCallback mCallback;
+    private BluetoothGattCallback mClientCb;
+    private BluetoothGattServerCallback mServerCb;
     private BluetoothDevice mDevice;
-    private Listener mListener;
+    private Listener mClientCbWrapper;
     private ScanCallback mScanCallback;
 
     private Object mLock;
@@ -55,19 +56,27 @@ public class AospGattAdapter implements GattAdapter {
     public AospGattAdapter(Context ctx, Listener listener) {
         mContext = ctx;
         mLock = new Object();
-        mCallback = new AospCallback();
+        mClientCb = new AospClientCallback();
+        mClientCbWrapper = listener;
         mScanCallback = new ScanCallback();
-        mListener = listener;
     }
 
     @Override
     public Gatt connectGatt(Context ctx, boolean autoConnect, Listener listener, BluetoothDevice dev) {
-        mListener = listener;
-        mGatt = dev.connectGatt(ctx, autoConnect, mCallback);
+        mClientCbWrapper = listener;
+        mGatt = dev.connectGatt(ctx, autoConnect, mClientCb);
         mGattInterface = new AospGatt(mGatt);
         return mGattInterface;
     }
 
+    @Override
+    public GattServer openGattServer(Context ctx, GattServer.Callback clbk) {
+        mServerCbWrapper = clbk;
+        BluetoothManager mgr = (BluetoothManager)ctx.getSystemService(Context.BLUETOOTH_SERVICE);
+        BluetoothGattServer srv = mgr.openGattServer(ctx, mServerCb);
+        mGattServerInterface = new AospGattServer(srv);
+        return mGattServerInterface;
+    }
 
     @Override
     public boolean startLeScan(GattAdapter.LeScanCallback callback) {
@@ -113,21 +122,21 @@ public class AospGattAdapter implements GattAdapter {
 
     /* This is the only one callback that register to GATT Profile. It dispatch each
      * of returen value to listeners. */
-    class AospCallback extends BluetoothGattCallback {
+    class AospClientCallback extends BluetoothGattCallback {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt Gatt, BluetoothGattCharacteristic chrc) {
             GattCharacteristic c = new AospGattCharacteristic(chrc);
-            mListener.onCharacteristicChanged(mGattInterface, c);
+            mClientCbWrapper.onCharacteristicChanged(mGattInterface, c);
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt Gatt, BluetoothGattCharacteristic chrc, int status) {
             GattCharacteristic c = new AospGattCharacteristic(chrc);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onCharacteristicRead(mGattInterface, c, Gatt.GATT_SUCCESS);
+                mClientCbWrapper.onCharacteristicRead(mGattInterface, c, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onCharacteristicRead(mGattInterface, c, status);
+                mClientCbWrapper.onCharacteristicRead(mGattInterface, c, status);
             }
         }
 
@@ -135,18 +144,18 @@ public class AospGattAdapter implements GattAdapter {
         public void onCharacteristicWrite(BluetoothGatt Gatt, BluetoothGattCharacteristic chrc, int status) {
             GattCharacteristic c = new AospGattCharacteristic(chrc);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onCharacteristicWrite(mGattInterface, c, Gatt.GATT_SUCCESS);
+                mClientCbWrapper.onCharacteristicWrite(mGattInterface, c, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onCharacteristicWrite(mGattInterface, c, status);
+                mClientCbWrapper.onCharacteristicWrite(mGattInterface, c, status);
             }
         }
 
         @Override
         public void onConnectionStateChange(BluetoothGatt Gatt, int status, int newState) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onConnectionStateChange(mGattInterface, Gatt.GATT_SUCCESS, newState);
+                mClientCbWrapper.onConnectionStateChange(mGattInterface, Gatt.GATT_SUCCESS, newState);
             } else {
-                mListener.onConnectionStateChange(mGattInterface, status, newState);
+                mClientCbWrapper.onConnectionStateChange(mGattInterface, status, newState);
             }
         }
 
@@ -154,9 +163,9 @@ public class AospGattAdapter implements GattAdapter {
         public void onDescriptorRead(BluetoothGatt Gatt, BluetoothGattDescriptor descriptor, int status) {
             GattDescriptor dsc = new AospGattDescriptor(descriptor);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onDescriptorRead(mGattInterface, dsc, Gatt.GATT_SUCCESS);
+                mClientCbWrapper.onDescriptorRead(mGattInterface, dsc, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onDescriptorRead(mGattInterface, dsc, status);
+                mClientCbWrapper.onDescriptorRead(mGattInterface, dsc, status);
             }
         }
 
@@ -164,27 +173,27 @@ public class AospGattAdapter implements GattAdapter {
         public void onDescriptorWrite(BluetoothGatt Gatt, BluetoothGattDescriptor descriptor, int status) {
             GattDescriptor dsc = new AospGattDescriptor(descriptor);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onDescriptorWrite(mGattInterface, dsc, Gatt.GATT_SUCCESS);
+                mClientCbWrapper.onDescriptorWrite(mGattInterface, dsc, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onDescriptorWrite(mGattInterface, dsc, status);
+                mClientCbWrapper.onDescriptorWrite(mGattInterface, dsc, status);
             }
         }
 
         @Override
         public void onReadRemoteRssi(BluetoothGatt Gatt, int rssi, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onReadRemoteRssi(mGattInterface, rssi, Gatt.GATT_SUCCESS);
+                mClientCbWrapper.onReadRemoteRssi(mGattInterface, rssi, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onReadRemoteRssi(mGattInterface, rssi, status);
+                mClientCbWrapper.onReadRemoteRssi(mGattInterface, rssi, status);
             }
         }
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mListener.onServicesDiscovered(mGattInterface, Gatt.GATT_SUCCESS);
+                mClientCbWrapper.onServicesDiscovered(mGattInterface, Gatt.GATT_SUCCESS);
             } else {
-                mListener.onServicesDiscovered(mGattInterface, status);
+                mClientCbWrapper.onServicesDiscovered(mGattInterface, status);
             }
         }
     }

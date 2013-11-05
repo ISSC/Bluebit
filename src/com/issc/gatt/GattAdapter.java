@@ -42,6 +42,8 @@ public interface GattAdapter {
      */
     public Gatt connectGatt(Context ctx, boolean autoConnect, Listener listener, BluetoothDevice dev);
 
+    public GattServer openGattServer(Context ctx, GattServer.Callback clbk);
+
     public boolean startLeScan(LeScanCallback clbk);
     public void stopLeScan(LeScanCallback clbk);
 

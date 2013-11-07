@@ -290,6 +290,8 @@ public class ActivityTransparent extends Activity implements
     }
 
     private void enableNotification() {
+        // XXX: we did not app this request to queue, so the system call might not work correctly
+        // if we send request to fast
         boolean set = mService.setCharacteristicNotification(mTransTx, true);
         Log.d("set notification:" + set);
         GattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
@@ -299,6 +301,8 @@ public class ActivityTransparent extends Activity implements
     }
 
     private void disableNotification() {
+        // XXX: we did not app this request to queue, so the system call might not work correctly
+        // if we send request to fast
         boolean set = mService.setCharacteristicNotification(mTransTx, false);
         Log.d("set notification:" + set);
         GattDescriptor dsc = mTransTx.getDescriptor(Bluebit.DES_CLIENT_CHR_CONFIG);
